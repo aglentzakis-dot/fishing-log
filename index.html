@@ -1621,7 +1621,7 @@ function renderStats(){
     byLocation[loc].trips++;
 
     let entryFish = 0;
-    Object.entries(e.fish||{}).forEach(([n,q])=>{ bySpecies[n] = (bySpecies[n]||0) + q; entryFish += q; });
+    Object.entries(e.fish||{}).forEach(([n,q])=>{ if(q>0){ bySpecies[n] = (bySpecies[n]||0) + q; entryFish += q; } });
     totalFish += entryFish;
     totalWeight += (e.weight || 0);
     byLocation[loc].fish += entryFish;
