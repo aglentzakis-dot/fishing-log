@@ -403,7 +403,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 4.0 · 30 Αυγ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 4.1 · 30 Αυγ 2026</p>
     </div>
 
     <div class="card" id="advanced-settings-card" style="display:none;">
@@ -673,7 +673,7 @@ const GR_TO_EN = {
   "📍 Τα καλύτερα σημεία μου":"📍 My best spots","Σημείο":"Spot","Κιλά":"kg","Δεν υπάρχουν ακόμα καταγεγραμμένες τοποθεσίες":"No locations recorded yet",
   "Καλύτερη ώρα:":"Best time:",
   "Πώς θα βαθμολογούσες την εφαρμογή;":"How would you rate the app?",
-  "Θερμοκρασία θάλασσας":"Sea temperature","Κατεύθυνση & περίοδος κύματος":"Wave direction & period","Πρόγνωση ανέμου (επόμενες ώρες)":"Wind forecast (next hours)",
+  "Θερμοκρασία θάλασσας":"Sea temperature","Κατεύθυνση κύματος":"Wave direction","Περίοδος κύματος":"Wave period","Πρόγνωση ανέμου (επόμενες ώρες)":"Wind forecast (next hours)",
   "Θερμοκρασία αέρα":"Air temperature","Τάση πίεσης":"Pressure trend","Ριπές ανέμου":"Wind gusts",
   "Ανατολή / Δύση ηλίου (εκτίμηση)":"Sunrise / Sunset (estimate)","Δύσκολες/επικίνδυνες συνθήκες θάλασσας — πρόσεχε.":"Difficult/hazardous sea conditions — be careful.",
   "Σειρά στοιχείων καιρού":"Weather item order","Χρησιμοποίησε τα βελάκια για να αλλάξεις τη σειρά εμφάνισης.":"Use the arrows to change the display order.",
@@ -1426,7 +1426,7 @@ function windGustsScore(bfBase, gustKmh){
   return 1;
 }
 
-const WEATHER_ITEM_DEFAULT_ORDER = ['weather','temp','seatemp','pressure','pressuretrend','wind','windgusts','wave','wavedirperiod','winddir','windtrend','moon','tide','sun'];
+const WEATHER_ITEM_DEFAULT_ORDER = ['weather','temp','seatemp','pressure','pressuretrend','wind','windgusts','wave','wavedir','waveperiod','winddir','windtrend','moon','tide','sun'];
 
 function buildWeatherItems(data, dateStr, prefix){
   const items = {};
@@ -1443,7 +1443,8 @@ function buildWeatherItems(data, dateStr, prefix){
   items.wave = { label:'Κύμα', value: data.wave != null ? formatWave(data.wave, data.waveEstimated) : '—', cls: scoreClass(waveScoreOf(data.wave)) };
   const wdText = data.waveDirDeg != null ? compassDir(data.waveDirDeg) : '—';
   const wpText = data.wavePeriod != null ? Math.round(data.wavePeriod*10)/10+' s' : '—';
-  items.wavedirperiod = { label:'Κατ./περίοδος κύματος', value: data.wavePeriod != null ? `${wdText} · ${wpText}` : '—', cls: scoreClass(wavePeriodScore(data.wavePeriod)) };
+  items.wavedir = { label:'Κατεύθυνση κύματος', value: wdText, cls: null };
+  items.waveperiod = { label:'Περίοδος κύματος', value: wpText, cls: scoreClass(wavePeriodScore(data.wavePeriod)) };
   const moonInfo = dateStr ? computeMoonInfo(dateStr) : null;
   items.moon = { label:'Σελήνη', value: moonInfo ? (currentLang==='en' ? `${moonInfo.emoji} ${moonInfo.label} (day ${moonInfo.lunarDay})` : `${moonInfo.emoji} ${moonInfo.label} (${moonInfo.lunarDay}η μέρα)`) : '—', cls: null, fullWidth:true };
   items.tide = { label:'Παλίρροια (εκτίμηση)', value: moonInfo ? (currentLang==='en'
@@ -2482,7 +2483,7 @@ document.getElementById('btn-export').addEventListener('click', async ()=>{
 
 const WEATHER_ITEM_LABELS_EL = { weather:'Καιρός', temp:'Θερμοκρασία αέρα', seatemp:'Θερμοκρασία θάλασσας', pressure:'Πίεση',
   pressuretrend:'Τάση πίεσης', wind:'Άνεμος (μποφόρ)', windgusts:'Ριπές ανέμου', winddir:'Κατεύθυνση ανέμου',
-  windtrend:'Πρόγνωση ανέμου (επόμενες ώρες)', wave:'Κύμα', wavedirperiod:'Κατεύθυνση & περίοδος κύματος',
+  windtrend:'Πρόγνωση ανέμου (επόμενες ώρες)', wave:'Κύμα', wavedir:'Κατεύθυνση κύματος', waveperiod:'Περίοδος κύματος',
   moon:'Σελήνη', tide:'Παλίρροια (εκτίμηση)', sun:'Ανατολή / Δύση ηλίου (εκτίμηση)' };
 function renderWeatherOrderList(){
   const order = getWeatherOrder();
@@ -2885,7 +2886,7 @@ function applyLanguage(lang){
   document.querySelectorAll('.wxg-label').forEach(el=>{
     const greekMap = { weather:'Καιρός', temp:'Θερμοκρασία', pressure:'Πίεση', wind:'Άνεμος (μποφόρ)',
       winddir:'Κατεύθυνση ανέμου', wave:'Κύμα', moon:'Σελήνη', tide:'Παλίρροια (εκτίμηση)',
-      seatemp:'Θερμοκρασία θάλασσας', wavedirperiod:'Κατεύθυνση & περίοδος κύματος', windtrend:'Πρόγνωση ανέμου (επόμενες ώρες)' };
+      seatemp:'Θερμοκρασία θάλασσας', wavedir:'Κατεύθυνση κύματος', waveperiod:'Περίοδος κύματος', windtrend:'Πρόγνωση ανέμου (επόμενες ώρες)' };
     const greek = greekMap[el.dataset.key];
     if(greek) el.textContent = lang === 'en' ? (GR_TO_EN[greek] || greek) : greek;
   });
