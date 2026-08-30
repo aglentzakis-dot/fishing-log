@@ -310,9 +310,13 @@
       <textarea id="f-notes" rows="2" placeholder="Προαιρετικά..."></textarea>
 
       <label id="i18n-photos-label">Φωτογραφίες (έως 3)</label>
-      <input type="file" id="f-photo-input" accept="image/*" multiple style="display:none">
+      <input type="file" id="f-photo-input-camera" accept="image/*" capture="environment" multiple style="display:none">
+      <input type="file" id="f-photo-input-gallery" accept="image/*" multiple style="display:none">
       <div class="photo-grid" id="f-photo-grid"></div>
-      <button type="button" class="photo-add-btn" id="f-photo-add-btn">📷 Προσθήκη φωτογραφιών</button>
+      <div style="display:flex; gap:8px;">
+        <button type="button" class="photo-add-btn" id="f-photo-add-btn-camera" style="flex:1;">📷 <span class="i18n-plain">Κάμερα</span></button>
+        <button type="button" class="photo-add-btn" id="f-photo-add-btn-gallery" style="flex:1;">🖼️ <span class="i18n-plain">Συλλογή</span></button>
+      </div>
 
       <button type="button" class="save-btn" id="btn-save">Αποθήκευση καταχώρησης</button>
     </div>
@@ -411,7 +415,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Ψάρεμα Τελικό · έκδοση 4.3 · 30 Αυγ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Ψάρεμα Τελικό · έκδοση 4.4 · 30 Αυγ 2026</p>
     </div>
 
     <div class="card" id="advanced-settings-card" style="display:none;">
@@ -515,9 +519,13 @@
     <textarea id="e-notes" rows="2"></textarea>
 
     <label id="i18n-e-photos-label">Φωτογραφίες (έως 3)</label>
-    <input type="file" id="e-photo-input" accept="image/*" multiple style="display:none">
+    <input type="file" id="e-photo-input-camera" accept="image/*" capture="environment" multiple style="display:none">
+    <input type="file" id="e-photo-input-gallery" accept="image/*" multiple style="display:none">
     <div class="photo-grid" id="e-photo-grid"></div>
-    <button type="button" class="photo-add-btn" id="e-photo-add-btn">📷 Προσθήκη φωτογραφιών</button>
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="photo-add-btn" id="e-photo-add-btn-camera" style="flex:1;">📷 <span class="i18n-plain">Κάμερα</span></button>
+      <button type="button" class="photo-add-btn" id="e-photo-add-btn-gallery" style="flex:1;">🖼️ <span class="i18n-plain">Συλλογή</span></button>
+    </div>
 
     <button type="button" class="save-btn" id="e-btn-save">Αποθήκευση αλλαγών</button>
     <button type="button" class="danger-btn" id="e-btn-delete">Διαγραφή καταχώρησης</button>
@@ -602,8 +610,12 @@
     </div>
     <div style="padding:0 16px 16px; overflow-y:auto;">
       <p class="hint" id="i18n-fishid-hint" style="margin-top:0;">Η αυτόματη αναγνώριση είδους μέσω AI δεν είναι ακόμα διαθέσιμη — θα προστεθεί σε επόμενη έκδοση. Προς το παρόν, η φωτογραφία αποθηκεύεται στο κινητό σου για να τη συγκρίνεις μόνος/η σου ή να τη χρησιμοποιήσεις αργότερα.</p>
-      <input type="file" id="fishid-photo-input" accept="image/*" capture="environment" style="display:none">
-      <button type="button" class="photo-add-btn" id="fishid-photo-add-btn">📷 <span class="i18n-plain">Τράβα ή επίλεξε φωτογραφία</span></button>
+      <input type="file" id="fishid-photo-input-camera" accept="image/*" capture="environment" style="display:none">
+      <input type="file" id="fishid-photo-input-gallery" accept="image/*" style="display:none">
+      <div style="display:flex; gap:8px;">
+        <button type="button" class="photo-add-btn" id="fishid-photo-add-btn-camera" style="flex:1;">📷 <span class="i18n-plain">Κάμερα</span></button>
+        <button type="button" class="photo-add-btn" id="fishid-photo-add-btn-gallery" style="flex:1;">🖼️ <span class="i18n-plain">Συλλογή</span></button>
+      </div>
       <div class="photo-grid" id="fishid-photo-grid" style="margin-top:12px;"></div>
     </div>
   </div>
@@ -896,10 +908,14 @@ function openPhotoViewer(dataUrl){
 }
 document.getElementById('pv-close').addEventListener('click', ()=>{ document.getElementById('photo-viewer').classList.remove('show'); });
 document.getElementById('photo-viewer').addEventListener('click', (ev)=>{ if(ev.target.id === 'photo-viewer') document.getElementById('photo-viewer').classList.remove('show'); });
-document.getElementById('f-photo-add-btn').addEventListener('click', ()=>document.getElementById('f-photo-input').click());
-document.getElementById('f-photo-input').addEventListener('change', (ev)=>{ addPhotosToGrid('f-photo-grid', ev.target.files, 3); ev.target.value = ''; });
-document.getElementById('e-photo-add-btn').addEventListener('click', ()=>document.getElementById('e-photo-input').click());
-document.getElementById('e-photo-input').addEventListener('change', (ev)=>{ addPhotosToGrid('e-photo-grid', ev.target.files, 3); ev.target.value = ''; });
+document.getElementById('f-photo-add-btn-camera').addEventListener('click', ()=>document.getElementById('f-photo-input-camera').click());
+document.getElementById('f-photo-add-btn-gallery').addEventListener('click', ()=>document.getElementById('f-photo-input-gallery').click());
+document.getElementById('f-photo-input-camera').addEventListener('change', (ev)=>{ addPhotosToGrid('f-photo-grid', ev.target.files, 3); ev.target.value = ''; });
+document.getElementById('f-photo-input-gallery').addEventListener('change', (ev)=>{ addPhotosToGrid('f-photo-grid', ev.target.files, 3); ev.target.value = ''; });
+document.getElementById('e-photo-add-btn-camera').addEventListener('click', ()=>document.getElementById('e-photo-input-camera').click());
+document.getElementById('e-photo-add-btn-gallery').addEventListener('click', ()=>document.getElementById('e-photo-input-gallery').click());
+document.getElementById('e-photo-input-camera').addEventListener('change', (ev)=>{ addPhotosToGrid('e-photo-grid', ev.target.files, 3); ev.target.value = ''; });
+document.getElementById('e-photo-input-gallery').addEventListener('change', (ev)=>{ addPhotosToGrid('e-photo-grid', ev.target.files, 3); ev.target.value = ''; });
 
 /* ---------- tabs ---------- */
 document.querySelectorAll('nav.tabs button').forEach(btn=>{
@@ -2731,10 +2747,13 @@ document.getElementById('fishid-modal-close').addEventListener('click', ()=>{
 document.getElementById('fishid-modal-overlay').addEventListener('click', (ev)=>{
   if(ev.target.id === 'fishid-modal-overlay') document.getElementById('fishid-modal-overlay').classList.remove('show');
 });
-document.getElementById('fishid-photo-add-btn').addEventListener('click', ()=>{
-  document.getElementById('fishid-photo-input').click();
+document.getElementById('fishid-photo-add-btn-camera').addEventListener('click', ()=>{
+  document.getElementById('fishid-photo-input-camera').click();
 });
-document.getElementById('fishid-photo-input').addEventListener('change', async (ev)=>{
+document.getElementById('fishid-photo-add-btn-gallery').addEventListener('click', ()=>{
+  document.getElementById('fishid-photo-input-gallery').click();
+});
+async function handleFishidPhotoSelect(ev){
   const files = ev.target.files;
   if(!files || !files.length) return;
   try{
@@ -2747,7 +2766,9 @@ document.getElementById('fishid-photo-input').addEventListener('change', async (
     toast('Η φωτογραφία αποθηκεύτηκε ✓');
   }catch(e){ console.error(e); toast('Αποτυχία αποθήκευσης φωτογραφίας'); }
   ev.target.value = '';
-});
+}
+document.getElementById('fishid-photo-input-camera').addEventListener('change', handleFishidPhotoSelect);
+document.getElementById('fishid-photo-input-gallery').addEventListener('change', handleFishidPhotoSelect);
 (function(){
   const picker = document.getElementById('contact-rating');
   const stars = picker.querySelectorAll('span');
