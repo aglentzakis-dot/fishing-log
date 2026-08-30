@@ -323,6 +323,9 @@
   <!-- STATS -->
   <div class="view" id="view-stats">
     <div class="card"><h2 id="i18n-stats-header">Στατιστικά</h2><div id="stats-content"></div></div>
+    <div class="card" style="text-align:center;">
+      <button type="button" class="species-cond-btn" id="btn-open-stats-explain">ℹ️ <span class="i18n-plain">Πώς υπολογίζονται τα στατιστικά</span></button>
+    </div>
   </div>
 
   <!-- PREDICTIONS -->
@@ -397,7 +400,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 3.3 · 28 Αυγ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 3.4 · 28 Αυγ 2026</p>
     </div>
 
     <div class="card" id="advanced-settings-card" style="display:none;">
@@ -521,6 +524,17 @@
 
 <div class="toast" id="toast"></div>
 <div class="photo-viewer" id="photo-viewer"><button type="button" class="pv-close" id="pv-close">✕</button><img id="pv-img" src=""></div>
+
+<div class="map-picker-overlay" id="stats-explain-overlay">
+  <div class="map-picker-sheet" style="max-width:460px;">
+    <div class="map-picker-head">
+      <h2 id="i18n-stats-explain-title">Πώς υπολογίζονται τα στατιστικά</h2>
+      <button type="button" class="modal-close" id="stats-explain-close">✕</button>
+    </div>
+    <div style="padding:0 16px 16px; overflow-y:auto;" id="i18n-stats-explain-body">
+    </div>
+  </div>
+</div>
 
 <div class="map-picker-overlay" id="contact-modal-overlay">
   <div class="map-picker-sheet" style="max-width:460px;">
@@ -1617,7 +1631,7 @@ function renderStats(){
 
   entries.forEach(e=>{
     const loc = e.locName || 'Άγνωστη τοποθεσία';
-    if(!byLocation[loc]) byLocation[loc] = {trips:0, fish:0, hours:0, weight:0};
+    if(!byLocation[loc]) byLocation[loc] = {trips:0, fish:0, hours:0, weight:0, tripsWithFish:0};
     byLocation[loc].trips++;
 
     let entryFish = 0;
@@ -1626,6 +1640,7 @@ function renderStats(){
     totalWeight += (e.weight || 0);
     byLocation[loc].fish += entryFish;
     byLocation[loc].weight += (e.weight || 0);
+    if(entryFish > 0) byLocation[loc].tripsWithFish++;
     entryTotals.push({ date: e.date, loc, fish: entryFish });
 
     if(e.timeIn && e.timeOut){
@@ -1712,6 +1727,17 @@ function renderStats(){
       <div class="bar-val" style="width:auto;">${t.fish} ${tr('ψάρια')}</div>
     </div>`).join('') : `<div class="hint">${tr('Δεν υπάρχουν ακόμα καταγεγραμμένα ψάρια')}</div>`;
 
+  function collapsibleList(itemsHtmlArray, idPrefix){
+    if(itemsHtmlArray.length <= 4) return itemsHtmlArray.join('');
+    const visible = itemsHtmlArray.slice(0, 4).join('');
+    const hidden = itemsHtmlArray.slice(4).join('');
+    const moreCount = itemsHtmlArray.length - 4;
+    const moreLabel = currentLang === 'en' ? `Show ${moreCount} more` : `Δες ${moreCount} ακόμα`;
+    return `${visible}<details class="picker" id="${idPrefix}-more" style="margin-top:6px;">
+      <summary>${moreLabel}</summary>
+      <div>${hidden}</div>
+    </details>`;
+  }
   function barBlock(title, obj, maxOverride, orderKeys){
     const max = maxOverride || Math.max(...Object.values(obj), 1);
     const entries = orderKeys ? orderKeys.filter(k=>obj[k]!=null).map(k=>[k,obj[k]]) : Object.entries(obj).sort((a,b)=>b[1]-a[1]);
@@ -1738,14 +1764,18 @@ function renderStats(){
     ? Object.entries(byBait).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<div class="bar-row"><div class="bar-label" style="width:auto; flex:1;">${tr(n)}</div><div class="bar-val" style="width:auto;">${v} ${tr('ψάρια')}</div></div>`).join('')
     : `<div class="hint">${tr('Δεν έχουν καταγραφεί δολώματα ακόμα')}</div>`;
 
-  const locRows = Object.entries(byLocation).sort((a,b)=>b[1].fish-a[1].fish).map(([n,d])=>{
+  const locRowsAll = Object.entries(byLocation).sort((a,b)=>b[1].fish-a[1].fish).map(([n,d])=>{
     const perHour = d.hours > 0 ? (d.fish/d.hours).toFixed(2)+' '+tr('ψάρια/ώρα') : '';
+    const successPct = d.trips > 0 ? Math.round((d.tripsWithFish / d.trips) * 100) : 0;
+    const pctStyle = successPct === 0 ? 'background:rgba(200,60,60,0.12); color:#a33;' : 'background:rgba(60,140,110,0.12); color:#2c7a5e;';
     return `<div class="bar-row" style="align-items:flex-start;">
       <div class="bar-label" style="width:auto; flex:1;">${n}<br><span style="font-weight:400; color:#7c8f95; font-size:0.75rem;">${d.trips} ${tr('εξορμήσεις')} · ${d.fish} ${tr('ψάρια')}${perHour ? ' · '+perHour : ''}</span></div>
+      <span style="font-size:0.78rem; font-weight:700; padding:3px 8px; border-radius:10px; white-space:nowrap; ${pctStyle}">${successPct}%</span>
     </div>`;
-  }).join('');
+  });
+  const locRows = collapsibleList(locRowsAll, 'loc-rows');
 
-  const locWeatherRows = Object.entries(byLocation)
+  const locWeatherRowsArr = Object.entries(byLocation)
     .filter(([,d])=>d.weatherCounts && Object.keys(d.weatherCounts).length)
     .sort((a,b)=>b[1].fish-a[1].fish)
     .map(([n,d])=>{
@@ -1754,19 +1784,36 @@ function renderStats(){
       return `<div class="bar-row" style="align-items:flex-start;">
         <div class="bar-label" style="width:auto; flex:1;">${n}<br><span style="font-weight:400; color:#7c8f95; font-size:0.75rem;">${tr(topWx[0])} · ${tr(topWind[0])} (${topWind[1]}/${d.trips})</span></div>
       </div>`;
-    }).join('');
-  const locWeatherHtml = locWeatherRows || `<div class="hint">${tr('Δεν υπάρχουν ακόμα αρκετά δεδομένα καιρού ανά τοποθεσία')}</div>`;
+    });
+  const locWeatherHtml = locWeatherRowsArr.length ? collapsibleList(locWeatherRowsArr, 'loc-weather') : `<div class="hint">${tr('Δεν υπάρχουν ακόμα αρκετά δεδομένα καιρού ανά τοποθεσία')}</div>`;
 
-  const bestSpotsRows = Object.entries(byLocation).sort((a,b)=>b[1].fish-a[1].fish).map(([n,d])=>{
+  const bestSpotsRowsArr = Object.entries(byLocation).sort((a,b)=>b[1].fish-a[1].fish).map(([n,d])=>{
     const kgStr = d.weight ? d.weight.toFixed(1).replace('.',',') + ' kg' : '—';
     return `<tr onclick="showLocationConditions('${n.replace(/'/g,"\\'")}')" style="cursor:pointer;">
       <td>${n}</td><td style="text-align:center;">${d.fish}</td><td style="text-align:right;">${kgStr}</td>
     </tr>`;
-  }).join('');
-  const bestSpotsHtml = bestSpotsRows
-    ? `<table class="best-spots-table"><thead><tr><th>${tr('Σημείο')}</th><th>${tr('Ψάρια')}</th><th>${tr('Κιλά')}</th></tr></thead><tbody>${bestSpotsRows}</tbody></table>
-       <div id="location-cond-result" style="margin-top:10px;"></div>`
-    : `<div class="hint">${tr('Δεν υπάρχουν ακόμα καταγεγραμμένες τοποθεσίες')}</div>`;
+  });
+  let bestSpotsHtml;
+  if(!bestSpotsRowsArr.length){
+    bestSpotsHtml = `<div class="hint">${tr('Δεν υπάρχουν ακόμα καταγεγραμμένες τοποθεσίες')}</div>`;
+  } else {
+    const head = `<thead><tr><th>${tr('Σημείο')}</th><th>${tr('Ψάρια')}</th><th>${tr('Κιλά')}</th></tr></thead>`;
+    if(bestSpotsRowsArr.length <= 4){
+      bestSpotsHtml = `<table class="best-spots-table">${head}<tbody>${bestSpotsRowsArr.join('')}</tbody></table>
+         <div id="location-cond-result" style="margin-top:10px;"></div>`;
+    } else {
+      const visible = bestSpotsRowsArr.slice(0,4).join('');
+      const hidden = bestSpotsRowsArr.slice(4).join('');
+      const moreCount = bestSpotsRowsArr.length - 4;
+      const moreLabel = currentLang === 'en' ? `Show ${moreCount} more` : `Δες ${moreCount} ακόμα`;
+      bestSpotsHtml = `<table class="best-spots-table">${head}<tbody>${visible}</tbody></table>
+         <details class="picker" id="best-spots-more" style="margin-top:6px;">
+           <summary>${moreLabel}</summary>
+           <table class="best-spots-table">${head}<tbody>${hidden}</tbody></table>
+         </details>
+         <div id="location-cond-result" style="margin-top:10px;"></div>`;
+    }
+  }
 
   const speciesButtons = Object.keys(bySpecies).length
     ? Object.keys(bySpecies).sort().map(n=>`<button type="button" class="species-cond-btn" onclick="showSpeciesConditions('${n.replace(/'/g,"\\'")}')">${tr(n)}</button>`).join('')
@@ -2284,6 +2331,15 @@ document.getElementById('btn-export').addEventListener('click', async ()=>{
   }catch(err){ console.error('Drive backup outer error:', err); }
 });
 
+document.getElementById('btn-open-stats-explain').addEventListener('click', ()=>{
+  document.getElementById('stats-explain-overlay').classList.add('show');
+});
+document.getElementById('stats-explain-close').addEventListener('click', ()=>{
+  document.getElementById('stats-explain-overlay').classList.remove('show');
+});
+document.getElementById('stats-explain-overlay').addEventListener('click', (ev)=>{
+  if(ev.target.id === 'stats-explain-overlay') document.getElementById('stats-explain-overlay').classList.remove('show');
+});
 document.getElementById('btn-open-contact').addEventListener('click', ()=>{
   document.getElementById('contact-modal-overlay').classList.add('show');
 });
@@ -2662,6 +2718,24 @@ function applyLanguage(lang){
          <p><strong>Συνθήκες για ημερομηνία:</strong> δείχνει απλά τα αναμενόμενα καιρικά/θαλάσσια στοιχεία για μια συγκεκριμένη μέρα, χωρίς βαθμολόγηση.</p>
          <p><strong>Αξιοπιστία πρόγνωσης:</strong> είναι μεγαλύτερη όσο πιο κοντά είναι η ημερομηνία στο σήμερα, και μειώνεται όσο απομακρύνεται (οι προγνώσεις καιρού γίνονται λιγότερο ακριβείς πέρα από 5-7 μέρες).</p>
          <p style="margin-bottom:0;">Καμία πρόβλεψη δεν εγγυάται αποτέλεσμα — είναι εκτιμήσεις για να σε βοηθήσουν να αποφασίσεις.</p>`;
+  }
+  const statsExplainTitle = document.getElementById('i18n-stats-explain-title');
+  if(statsExplainTitle) statsExplainTitle.textContent = lang === 'en' ? 'How statistics are calculated' : 'Πώς υπολογίζονται τα στατιστικά';
+  const statsExplainBody = document.getElementById('i18n-stats-explain-body');
+  if(statsExplainBody){
+    statsExplainBody.innerHTML = lang === 'en'
+      ? `<p><strong>Fish by species / month / moon phase / pressure / tide / hour / bait / wind / weather:</strong> each catch is counted under the category it matches (e.g. the moon phase or pressure at the time of that trip). Only fish with a quantity greater than 0 are counted.</p>
+         <p><strong>By location — success rate:</strong> the green/red percentage next to each location is the share of your trips there that resulted in at least one fish (trips with fish ÷ total trips). A faint red 0% means no fish have been recorded there yet.</p>
+         <p><strong>Locations by weather:</strong> for each location, shows the single most frequent weather condition and wind direction recorded there.</p>
+         <p><strong>My best spots:</strong> ranks your locations by total fish caught, with total weight; tap a row to see the typical conditions (weather, wind, best hour) recorded there.</p>
+         <p><strong>Best conditions by species:</strong> for a chosen species, shows the day of week, hour range, wind, wave and bait most associated with catching it in your history.</p>
+         <p style="margin-bottom:0;">All figures come only from your own recorded entries — nothing is estimated or predicted here (predictions live in their own tab).</p>`
+      : `<p><strong>Ψάρια ανά είδος / μήνα / φάση σελήνης / πίεση / παλίρροια / ώρα / δόλωμα / άνεμο / καιρό:</strong> κάθε ψάρι μετράει στην κατηγορία που ταιριάζει (π.χ. η φάση σελήνης ή η πίεση τη στιγμή εκείνης της εξόρμησης). Μετράνε μόνο τα ψάρια με ποσότητα μεγαλύτερη του 0.</p>
+         <p><strong>Ανά τοποθεσία — ποσοστό επιτυχίας:</strong> το πράσινο/κόκκινο ποσοστό δίπλα σε κάθε τοποθεσία είναι το ποσοστό των εξορμήσεών σου εκεί που έδωσαν τουλάχιστον ένα ψάρι (εξορμήσεις με ψάρια ÷ σύνολο εξορμήσεων). Αχνό κόκκινο 0% σημαίνει ότι δεν έχεις καταγράψει ακόμα ψάρι εκεί.</p>
+         <p><strong>Τοποθεσίες ανά καιρό:</strong> για κάθε τοποθεσία, δείχνει τον πιο συχνό καιρό και την πιο συχνή κατεύθυνση ανέμου που έχεις καταγράψει εκεί.</p>
+         <p><strong>Τα καλύτερα σημεία μου:</strong> κατατάσσει τις τοποθεσίες σου βάσει συνολικών ψαριών, με τα κιλά δίπλα· πάτα μια γραμμή για να δεις τις τυπικές συνθήκες (καιρός, άνεμος, καλύτερη ώρα) που έχεις καταγράψει εκεί.</p>
+         <p><strong>Καλύτερες συνθήκες ανά είδος:</strong> για ένα είδος που επιλέγεις, δείχνει τη μέρα της εβδομάδας, το εύρος ώρας, τον άνεμο, το κύμα και το δόλωμα που συνδέονται περισσότερο με την αλίευσή του στο ιστορικό σου.</p>
+         <p style="margin-bottom:0;">Όλα τα νούμερα προέρχονται μόνο από τις δικές σου καταχωρήσεις — τίποτα εδώ δεν είναι εκτίμηση ή πρόβλεψη (οι προβλέψεις έχουν τη δική τους καρτέλα).</p>`;
   }
   document.getElementById('lang-toggle').textContent = lang === 'en' ? '🇬🇧' : '🇬🇷';
   currentLang = lang;
