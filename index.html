@@ -107,12 +107,20 @@
     background: var(--teal); color:#fff; border:none; border-radius:8px; padding: 8px 12px;
     font-size:0.8rem; font-weight:600; cursor:pointer; margin-bottom:8px;
   }
-  .weather-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
-  .weather-grid div span{ display:block; font-weight:700; color: var(--deep); font-size:0.95rem; }
+  .weather-list{ display:flex; flex-direction:column; }
+  .wxg-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid rgba(0,0,0,0.06); }
+  .wxg-row.wxg-stacked{ flex-direction:column; align-items:flex-start; gap:3px; }
+  .wxg-row.wxg-stacked .wxg-value{ text-align:left; }
+  .wxg-row:last-child{ border-bottom:none; }
+  .wxg-label{ font-size:0.85rem; color:#5c6b6f; flex-shrink:0; }
+  .wxg-value{ font-weight:700; color: var(--deep); font-size:0.92rem; text-align:right; }
   .wxg-value.wxg-good{ color:#1f7a4a; }
   .wxg-value.wxg-ok{ color:#5a8f3a; }
   .wxg-value.wxg-poor{ color:#c0603a; }
   .wxg-value.wxg-invalid{ color:#b23a3a; }
+  .wxg-warning{ background:rgba(200,60,60,0.12); color:#a33; font-weight:700; font-size:0.85rem; padding:8px 10px; border-radius:8px; margin-bottom:6px; }
+  .wxg-order-btn{ background:var(--foam); border:1px solid var(--line); border-radius:6px; padding:4px 10px; margin-left:4px; cursor:pointer; font-size:0.85rem; }
+  .wxg-order-btn:disabled{ opacity:0.3; }
   .weather-status{ font-size:0.78rem; color:#7c8f95; margin-top:6px; }
   .save-btn{ width:100%; padding: 15px; background: var(--coral); color:#fff; border:none; border-radius: 12px; font-size: 1rem; font-weight:700; font-family:'Bitter',serif; cursor:pointer; margin-top: 6px; }
   .save-btn:active{ transform: scale(0.99); }
@@ -268,20 +276,8 @@
 
       <label id="i18n-weather-label">Καιρός & θάλασσα (αυτόματα)</label>
       <div class="weather-box" id="f-weather-box">
-        <button type="button" id="f-fetch-weather">🔄 <span class="i18n-plain">Λήψη καιρικών δεδομένων</span></button>
-        <div class="weather-grid" id="f-weather-grid">
-          <div><span class="wxg-label" data-key="weather">Καιρός</span><span class="wxg-value">—</span></div>
-          <div><span class="wxg-label" data-key="temp">Θερμοκρασία</span><span class="wxg-value">—</span></div>
-          <div><span class="wxg-label" data-key="pressure">Πίεση</span><span class="wxg-value">—</span></div>
-          <div><span class="wxg-label" data-key="wind">Άνεμος (μποφόρ)</span><span class="wxg-value">—</span></div>
-          <div><span class="wxg-label" data-key="winddir">Κατεύθυνση ανέμου</span><span class="wxg-value">—</span></div>
-          <div><span class="wxg-label" data-key="wave">Κύμα</span><span class="wxg-value">—</span></div>
-          <div><span class="wxg-label" data-key="moon">Σελήνη</span><span class="wxg-value">—</span></div>
-          <div style="grid-column: 1 / -1;"><span class="wxg-label" data-key="tide">Παλίρροια (εκτίμηση)</span><span class="wxg-value">—</span></div>
-          <div><span class="wxg-label" data-key="seatemp">Θερμοκρασία θάλασσας</span><span class="wxg-value">—</span></div>
-          <div><span class="wxg-label" data-key="wavedirperiod">Κατεύθυνση &amp; περίοδος κύματος</span><span class="wxg-value">—</span></div>
-          <div style="grid-column: 1 / -1;"><span class="wxg-label" data-key="windtrend">Πρόγνωση ανέμου (επόμενες ώρες)</span><span class="wxg-value">—</span></div>
-        </div>
+        <div style="display:flex; gap:8px; align-items:center;"><button type="button" id="f-fetch-weather" style="flex:1;">🔄 <span class="i18n-plain">Λήψη καιρικών δεδομένων</span></button><button type="button" id="btn-weather-order-open" title="Σειρά στοιχείων" style="flex:0 0 auto; padding:8px 12px;">✏️</button></div>
+        <div class="weather-list" id="f-weather-grid"></div>
         <div class="weather-status" id="f-weather-status" data-i18n-key="Συμπλήρωσε ημερομηνία και συντεταγμένες, μετά πάτα λήψη.">Συμπλήρωσε ημερομηνία και συντεταγμένες, μετά πάτα λήψη.</div>
       </div>
 
@@ -407,7 +403,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 3.5 · 28 Αυγ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 3.7 · 30 Αυγ 2026</p>
     </div>
 
     <div class="card" id="advanced-settings-card" style="display:none;">
@@ -481,19 +477,7 @@
     <label id="i18n-e-weather-label">Καιρός & θάλασσα (αυτόματα)</label>
     <div class="weather-box" id="e-weather-box">
       <button type="button" id="e-fetch-weather">🔄 <span class="i18n-plain">Ανανέωση καιρικών δεδομένων</span></button>
-      <div class="weather-grid" id="e-weather-grid">
-        <div><span class="wxg-label" data-key="weather">Καιρός</span><span class="wxg-value">—</span></div>
-          <div><span class="wxg-label" data-key="temp">Θερμοκρασία</span><span class="wxg-value">—</span></div>
-        <div><span class="wxg-label" data-key="pressure">Πίεση</span><span class="wxg-value">—</span></div>
-        <div><span class="wxg-label" data-key="wind">Άνεμος (μποφόρ)</span><span class="wxg-value">—</span></div>
-        <div><span class="wxg-label" data-key="winddir">Κατεύθυνση ανέμου</span><span class="wxg-value">—</span></div>
-        <div><span class="wxg-label" data-key="wave">Κύμα</span><span class="wxg-value">—</span></div>
-        <div><span class="wxg-label" data-key="moon">Σελήνη</span><span class="wxg-value">—</span></div>
-        <div style="grid-column: 1 / -1;"><span class="wxg-label" data-key="tide">Παλίρροια (εκτίμηση)</span><span class="wxg-value">—</span></div>
-          <div><span class="wxg-label" data-key="seatemp">Θερμοκρασία θάλασσας</span><span class="wxg-value">—</span></div>
-          <div><span class="wxg-label" data-key="wavedirperiod">Κατεύθυνση &amp; περίοδος κύματος</span><span class="wxg-value">—</span></div>
-          <div style="grid-column: 1 / -1;"><span class="wxg-label" data-key="windtrend">Πρόγνωση ανέμου (επόμενες ώρες)</span><span class="wxg-value">—</span></div>
-      </div>
+      <div class="weather-list" id="e-weather-grid"></div>
       <div class="weather-status" id="e-weather-status"></div>
     </div>
 
@@ -534,6 +518,22 @@
 
 <div class="toast" id="toast"></div>
 <div class="photo-viewer" id="photo-viewer"><button type="button" class="pv-close" id="pv-close">✕</button><img id="pv-img" src=""></div>
+
+<div class="map-picker-overlay" id="weather-order-overlay">
+  <div class="map-picker-sheet" style="max-width:460px;">
+    <div class="map-picker-head">
+      <h2 id="i18n-weather-order-title">Σειρά στοιχείων καιρού</h2>
+      <button type="button" class="modal-close" id="weather-order-close">✕</button>
+    </div>
+    <div style="padding:0 16px 16px; overflow-y:auto;">
+      <p class="hint" id="i18n-weather-order-hint">Χρησιμοποίησε τα βελάκια για να αλλάξεις τη σειρά εμφάνισης.</p>
+      <div id="weather-order-list"></div>
+      <div class="footer-tools">
+        <button type="button" id="btn-weather-order-reset"><span class="i18n-plain">Επαναφορά προεπιλογής</span></button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="map-picker-overlay" id="stats-explain-overlay">
   <div class="map-picker-sheet" style="max-width:460px;">
@@ -674,6 +674,10 @@ const GR_TO_EN = {
   "Καλύτερη ώρα:":"Best time:",
   "Πώς θα βαθμολογούσες την εφαρμογή;":"How would you rate the app?",
   "Θερμοκρασία θάλασσας":"Sea temperature","Κατεύθυνση & περίοδος κύματος":"Wave direction & period","Πρόγνωση ανέμου (επόμενες ώρες)":"Wind forecast (next hours)",
+  "Θερμοκρασία αέρα":"Air temperature","Τάση πίεσης":"Pressure trend","Ριπές ανέμου":"Wind gusts",
+  "Ανατολή / Δύση ηλίου (εκτίμηση)":"Sunrise / Sunset (estimate)","Δύσκολες/επικίνδυνες συνθήκες θάλασσας — πρόσεχε.":"Difficult/hazardous sea conditions — be careful.",
+  "Σειρά στοιχείων καιρού":"Weather item order","Χρησιμοποίησε τα βελάκια για να αλλάξεις τη σειρά εμφάνισης.":"Use the arrows to change the display order.",
+  "Επαναφορά προεπιλογής":"Reset to default",
   "Άνεμος (μποφόρ)":"Wind (Beaufort)","Παλίρροια (εκτίμηση)":"Tide (estimate)",
   "Καιρός":"Weather","Θερμοκρασία":"Temperature","Πίεση":"Pressure","Κύμα":"Wave","Σελήνη":"Moon",
   "Επίλεξε είδη":"Select species","Επίλεξε δολώματα":"Select bait",
@@ -1191,27 +1195,17 @@ function computeMoonInfo(dateStr){
   const lows = [low1, low2].sort((a,b)=>a-b);
   return { emoji, label, lunarDay, highs, lows };
 }
-function paintMoonCells(gridId, dateStr){
-  const grid = document.getElementById(gridId);
-  const cells = grid.children;
-  const moonCell = cells[6], tideCell = cells[7];
-  const info = computeMoonInfo(dateStr);
-  if(!info){
-    moonCell.querySelector('.wxg-value').textContent = '—';
-    tideCell.querySelector('.wxg-value').textContent = '—';
-    return;
-  }
-  moonCell.querySelector('.wxg-value').textContent = currentLang === 'en'
-    ? `${info.emoji} ${info.label} (day ${info.lunarDay})`
-    : `${info.emoji} ${info.label} (${info.lunarDay}η μέρα)`;
-  tideCell.querySelector('.wxg-value').innerHTML = currentLang === 'en'
-    ? `High tide: ${hoursToHHMM(info.highs[0])} & ${hoursToHHMM(info.highs[1])}<br>Low tide: ${hoursToHHMM(info.lows[0])} & ${hoursToHHMM(info.lows[1])}`
-    : `Πλημμυρίδα: ${hoursToHHMM(info.highs[0])} & ${hoursToHHMM(info.highs[1])}<br>Άμπωτη: ${hoursToHHMM(info.lows[0])} & ${hoursToHHMM(info.lows[1])}`;
+const lastWeatherData = {
+  f: {weatherText:'—', pressure:null, beaufort:null, windKmh:0, windDirText:'—', wave:null},
+  e: {weatherText:'—', pressure:null, beaufort:null, windKmh:0, windDirText:'—', wave:null}
+};
+function repaintWeatherGrid(prefix){
+  paintWeatherGrid(prefix+'-weather-grid', lastWeatherData[prefix], prefix);
 }
-document.getElementById('f-date').addEventListener('change', ()=>paintMoonCells('f-weather-grid', document.getElementById('f-date').value));
-document.getElementById('e-date').addEventListener('change', ()=>paintMoonCells('e-weather-grid', document.getElementById('e-date').value));
+document.getElementById('f-date').addEventListener('change', ()=>repaintWeatherGrid('f'));
+document.getElementById('e-date').addEventListener('change', ()=>repaintWeatherGrid('e'));
 document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
-paintMoonCells('f-weather-grid', document.getElementById('f-date').value);
+repaintWeatherGrid('f');
 
 /* ---------- automatic weather / pressure / wind / wave fetch ---------- */
 const WEATHER_CODES_EL = {
@@ -1307,7 +1301,7 @@ async function fetchWeatherAndWave(lat, lng, dateStr, timeStr){
   const base = diffDays > 90 ? 'https://archive-api.open-meteo.com/v1/archive' : 'https://api.open-meteo.com/v1/forecast';
   const hour = timeStr ? parseInt(timeStr.split(':')[0]) : 12;
 
-  const wxUrl = `${base}?latitude=${lat}&longitude=${lng}&hourly=pressure_msl,weathercode,windspeed_10m,winddirection_10m,temperature_2m&start_date=${dateStr}&end_date=${dateStr}&timezone=auto`;
+  const wxUrl = `${base}?latitude=${lat}&longitude=${lng}&hourly=pressure_msl,weathercode,windspeed_10m,windgusts_10m,winddirection_10m,temperature_2m&start_date=${dateStr}&end_date=${dateStr}&timezone=auto`;
   const wxRes = await fetch(wxUrl);
   if(!wxRes.ok) throw new Error('weather');
   const wx = await wxRes.json();
@@ -1318,6 +1312,7 @@ async function fetchWeatherAndWave(lat, lng, dateStr, timeStr){
     weathercode: wx.hourly.weathercode[idx],
     weatherText: WEATHER_CODES_MAP()[wx.hourly.weathercode[idx]] || (currentLang==='en'?'Unknown':'Άγνωστο'),
     windKmh: wx.hourly.windspeed_10m[idx],
+    windGustsKmh: wx.hourly.windgusts_10m ? wx.hourly.windgusts_10m[idx] : null,
     beaufort: beaufort(wx.hourly.windspeed_10m[idx]),
     windDirDeg: wx.hourly.winddirection_10m[idx],
     windDirText: compassDir(wx.hourly.winddirection_10m[idx]),
@@ -1327,6 +1322,15 @@ async function fetchWeatherAndWave(lat, lng, dateStr, timeStr){
     waveDirDeg: null,
     wavePeriod: null
   };
+
+  // Pressure trend: compare to ~3h earlier if available, else ~3h later
+  if(wx.hourly.pressure_msl[idx-3] != null){
+    result.pressureTrendVal = result.pressure - wx.hourly.pressure_msl[idx-3];
+  } else if(wx.hourly.pressure_msl[idx+3] != null){
+    result.pressureTrendVal = wx.hourly.pressure_msl[idx+3] - result.pressure;
+  } else {
+    result.pressureTrendVal = null;
+  }
 
   // Wind trend for the next ~12-24h, read from the same hourly arrays (no extra call)
   result.windTrend = [3, 6, 12, 24].map(h=>{
@@ -1360,7 +1364,35 @@ async function fetchWeatherAndWave(lat, lng, dateStr, timeStr){
     result.waveEstimated = true;
   }
 
+  const sun = sunriseSunset(dateStr, parseFloat(lat), parseFloat(lng));
+  result.sunrise = sun.sunrise;
+  result.sunset = sun.sunset;
+
   return result;
+}
+function sunriseSunset(dateStr, lat, lng){
+  // Approximate solar sunrise/sunset (ignores equation-of-time and exact timezone; ±15-30 min typical error)
+  const d = new Date(dateStr+'T00:00:00');
+  const start = new Date(d.getFullYear(),0,1);
+  const dayOfYear = Math.floor((d - start)/86400000) + 1;
+  const decl = 23.45 * Math.sin((360/365) * (284+dayOfYear) * Math.PI/180);
+  const latRad = lat * Math.PI/180;
+  const declRad = decl * Math.PI/180;
+  const cosH = -Math.tan(latRad) * Math.tan(declRad);
+  if(cosH > 1 || cosH < -1) return { sunrise:null, sunset:null }; // polar day/night
+  const H = Math.acos(cosH) * 180/Math.PI;
+  const sunriseUTC = 12 - H/15 - lng/15;
+  const sunsetUTC = 12 + H/15 - lng/15;
+  // Rough local-time correction: assume timezone ≈ round(lng/15) hours from UTC
+  const tzOffset = Math.round(lng/15);
+  const toLocal = h => ((h + tzOffset) % 24 + 24) % 24;
+  return { sunrise: toLocal(sunriseUTC), sunset: toLocal(sunsetUTC) };
+}
+function decHourToHHMM(h){
+  if(h == null) return null;
+  const hh = Math.floor(h);
+  const mm = Math.round((h-hh)*60);
+  return String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');
 }
 function windTrendText(trend){
   if(!trend || !trend.length) return null;
@@ -1383,31 +1415,81 @@ function waveScoreOf(w){ if(w==null) return null; return (w>=0.2 && w<=0.6) ? 5 
 function airTempScore(t){ if(t==null) return null; return (t>=15 && t<=28) ? 5 : ((t>=10 && t<15) || (t>28 && t<=32)) ? 4 : ((t>=5 && t<10) || (t>32 && t<=36)) ? 3 : ((t<5) || (t>36)) ? 1 : 2; }
 function seaTempScore(t){ if(t==null) return null; return (t>=18 && t<=25) ? 5 : ((t>=14 && t<18) || (t>25 && t<=28)) ? 4 : ((t>=10 && t<14) || (t>28)) ? 3 : 2; }
 function wavePeriodScore(p){ if(p==null) return null; return (p>=6 && p<=9) ? 5 : ((p>=4 && p<6) || (p>9 && p<=11)) ? 4 : (p<4 || p>11) ? 2 : 3; }
-function paintWeatherGrid(gridId, data){
+function pressureTrendScore(v){ if(v==null) return null; if(v <= -1) return 5; if(v < -0.3) return 4; if(v <= 0.3) return 3; if(v < 1) return 3; return 2; }
+function windGustsScore(bfBase, gustKmh){
+  if(gustKmh==null || bfBase==null) return null;
+  const baseKmh = [1,5.5,11,19,28,38,49,61,74,88,102,117][bfBase] || 0;
+  const diff = gustKmh - baseKmh;
+  if(diff <= 8) return 5;
+  if(diff <= 15) return 4;
+  if(diff <= 25) return 3;
+  return 1;
+}
+
+const WEATHER_ITEM_DEFAULT_ORDER = ['weather','temp','seatemp','pressure','pressuretrend','wind','windgusts','winddir','windtrend','wave','wavedirperiod','moon','tide','sun'];
+
+function buildWeatherItems(data, dateStr, prefix){
+  const items = {};
+  items.weather = { label:'Καιρός', value: getWeatherText(data), cls: scoreClass(weatherCodeScore(data.weathercode)) };
+  items.temp = { label:'Θερμοκρασία αέρα', value: data.temperature != null ? Math.round(data.temperature*10)/10+' °C' : '—', cls: scoreClass(airTempScore(data.temperature)) };
+  items.seatemp = { label:'Θερμοκρασία θάλασσας', value: data.seaTemp != null ? Math.round(data.seaTemp*10)/10+' °C' : '—', cls: scoreClass(seaTempScore(data.seaTemp)) };
+  items.pressure = { label:'Πίεση', value: data.pressure != null ? Math.round(data.pressure)+' hPa' : '—', cls: scoreClass(pressureScoreOf(data.pressure)) };
+  const trendArrow = data.pressureTrendVal == null ? '' : data.pressureTrendVal < -0.3 ? ' ↓' : data.pressureTrendVal > 0.3 ? ' ↑' : ' →';
+  items.pressuretrend = { label:'Τάση πίεσης', value: data.pressureTrendVal != null ? (data.pressureTrendVal>=0?'+':'')+data.pressureTrendVal.toFixed(1)+' hPa/3ω'+trendArrow : '—', cls: scoreClass(pressureTrendScore(data.pressureTrendVal)) };
+  items.wind = { label:'Άνεμος (μποφόρ)', value: data.beaufort != null ? data.beaufort+' bf ('+Math.round(data.windKmh)+' km/h)' : '—', cls: scoreClass(windBfScore(data.beaufort)) };
+  items.windgusts = { label:'Ριπές ανέμου', value: data.windGustsKmh != null ? Math.round(data.windGustsKmh)+' km/h' : '—', cls: scoreClass(windGustsScore(data.beaufort, data.windGustsKmh)) };
+  items.winddir = { label:'Κατεύθυνση ανέμου', value: getWindDirText(data), cls: null };
+  items.windtrend = { label:'Πρόγνωση ανέμου (επόμενες ώρες)', value: windTrendText(data.windTrend) || '—', cls: null, fullWidth:true };
+  items.wave = { label:'Κύμα', value: data.wave != null ? formatWave(data.wave, data.waveEstimated) : '—', cls: scoreClass(waveScoreOf(data.wave)) };
+  const wdText = data.waveDirDeg != null ? compassDir(data.waveDirDeg) : '—';
+  const wpText = data.wavePeriod != null ? Math.round(data.wavePeriod*10)/10+' s' : '—';
+  items.wavedirperiod = { label:'Κατεύθυνση & περίοδος κύματος', value: data.wavePeriod != null ? `${wdText} · ${wpText}` : '—', cls: scoreClass(wavePeriodScore(data.wavePeriod)) };
+  const moonInfo = dateStr ? computeMoonInfo(dateStr) : null;
+  items.moon = { label:'Σελήνη', value: moonInfo ? (currentLang==='en' ? `${moonInfo.emoji} ${moonInfo.label} (day ${moonInfo.lunarDay})` : `${moonInfo.emoji} ${moonInfo.label} (${moonInfo.lunarDay}η μέρα)`) : '—', cls: null };
+  items.tide = { label:'Παλίρροια (εκτίμηση)', value: moonInfo ? (currentLang==='en'
+      ? `High tide: ${hoursToHHMM(moonInfo.highs[0])} & ${hoursToHHMM(moonInfo.highs[1])} · Low tide: ${hoursToHHMM(moonInfo.lows[0])} & ${hoursToHHMM(moonInfo.lows[1])}`
+      : `Πλημμυρίδα: ${hoursToHHMM(moonInfo.highs[0])} & ${hoursToHHMM(moonInfo.highs[1])} · Άμπωτη: ${hoursToHHMM(moonInfo.lows[0])} & ${hoursToHHMM(moonInfo.lows[1])}`) : '—', cls:null, fullWidth:true };
+  let sunValue = '—', sunCls = null;
+  if(data.sunrise != null && data.sunset != null){
+    sunValue = `☀️ ${decHourToHHMM(data.sunrise)} — 🌇 ${decHourToHHMM(data.sunset)}`;
+    const timeInEl = prefix ? document.getElementById(prefix+'-timein') : null;
+    if(timeInEl && timeInEl.value){
+      const [hh,mm] = timeInEl.value.split(':').map(Number);
+      const entryH = hh + mm/60;
+      const nearSunrise = Math.abs(entryH - data.sunrise) <= 1;
+      const nearSunset = Math.abs(entryH - data.sunset) <= 1;
+      if(nearSunrise || nearSunset){ sunValue += currentLang==='en' ? ' — golden hour ✓' : ' — χρυσό διάστημα ✓'; sunCls = 'wxg-good'; }
+    }
+  }
+  items.sun = { label:'Ανατολή / Δύση ηλίου (εκτίμηση)', value: sunValue, cls: sunCls, fullWidth:true };
+  return items;
+}
+function getWeatherOrder(){
+  const saved = LS.get('psarema_weather_order', null);
+  if(saved && Array.isArray(saved)){
+    const merged = saved.filter(k=>WEATHER_ITEM_DEFAULT_ORDER.includes(k));
+    WEATHER_ITEM_DEFAULT_ORDER.forEach(k=>{ if(!merged.includes(k)) merged.push(k); });
+    return merged;
+  }
+  return WEATHER_ITEM_DEFAULT_ORDER.slice();
+}
+function paintWeatherGrid(gridId, data, prefix){
   const grid = document.getElementById(gridId);
-  const cells = grid.children;
-  function setCell(idx, text, cls){
-    const span = cells[idx].querySelector('.wxg-value');
-    span.textContent = text;
-    span.classList.remove('wxg-good','wxg-ok','wxg-poor','wxg-invalid');
-    if(cls) span.classList.add(cls);
+  const dateEl = prefix ? document.getElementById(prefix+'-date') : null;
+  const dateStr = dateEl ? dateEl.value : null;
+  const items = buildWeatherItems(data, dateStr, prefix);
+  const order = getWeatherOrder();
+  let warningHtml = '';
+  if((data.beaufort != null && data.beaufort >= 6) || (data.wave != null && data.wave >= 1.5)){
+    warningHtml = `<div class="wxg-warning">⚠️ ${tr('Δύσκολες/επικίνδυνες συνθήκες θάλασσας — πρόσεχε.')}</div>`;
   }
-  setCell(0, getWeatherText(data), scoreClass(weatherCodeScore(data.weathercode)));
-  setCell(1, data.temperature != null ? Math.round(data.temperature*10)/10+' °C' : '—', scoreClass(airTempScore(data.temperature)));
-  setCell(2, data.pressure != null ? Math.round(data.pressure)+' hPa' : '—', scoreClass(pressureScoreOf(data.pressure)));
-  setCell(3, data.beaufort != null ? data.beaufort+' bf ('+Math.round(data.windKmh)+' km/h)' : '—', scoreClass(windBfScore(data.beaufort)));
-  cells[4].querySelector('.wxg-value').textContent = getWindDirText(data);
-  setCell(5, data.wave != null ? formatWave(data.wave, data.waveEstimated) : '—', scoreClass(waveScoreOf(data.wave)));
-  if(cells[8]){ setCell(8, data.seaTemp != null ? Math.round(data.seaTemp*10)/10+' °C' : '—', scoreClass(seaTempScore(data.seaTemp))); }
-  if(cells[9]){
-    const wdText = data.waveDirDeg != null ? compassDir(data.waveDirDeg) : '—';
-    const wpText = data.wavePeriod != null ? Math.round(data.wavePeriod*10)/10+' s' : '—';
-    setCell(9, data.wavePeriod != null ? `${wdText} · ${wpText}` : '—', scoreClass(wavePeriodScore(data.wavePeriod)));
-  }
-  if(cells[10]){
-    const trendText = windTrendText(data.windTrend);
-    cells[10].querySelector('.wxg-value').textContent = trendText || '—';
-  }
+  grid.innerHTML = warningHtml + order.map(key=>{
+    const it = items[key];
+    if(!it) return '';
+    const rowClass = it.fullWidth ? 'wxg-row wxg-stacked' : 'wxg-row';
+    const clsAttr = it.cls ? ' '+it.cls : '';
+    return `<div class="${rowClass}"><span class="wxg-label" data-key="${key}">${tr(it.label)}</span><span class="wxg-value${clsAttr}">${it.value}</span></div>`;
+  }).join('');
 }
 async function runFetchWeather(prefix){
   const dateEl = document.getElementById(prefix+'-date');
@@ -1423,7 +1505,8 @@ async function runFetchWeather(prefix){
   statusEl.textContent = 'Λήψη δεδομένων...';
   try{
     const data = await fetchWeatherAndWave(parsed.lat, parsed.lng, dateEl.value, timeEl.value);
-    paintWeatherGrid(gridId, data);
+    lastWeatherData[prefix] = data;
+    paintWeatherGrid(gridId, data, prefix);
     statusEl.textContent = 'Ενημερώθηκε ✓';
     if(prefix === 'f') fWeatherData = data; else eWeatherData = data;
   }catch(e){
@@ -1486,14 +1569,14 @@ function resetForm(){
   document.getElementById('f-notes').value = '';
   document.getElementById('f-weight').value = '';
   document.getElementById('f-weather-status').textContent = tr('Συμπλήρωσε ημερομηνία και συντεταγμένες, μετά πάτα λήψη.');
-  paintWeatherGrid('f-weather-grid', {weatherText:'—', pressure:null, beaufort:null, windKmh:0, windDirText:'—', wave:null});
+  lastWeatherData.f = {weatherText:'—', pressure:null, beaufort:null, windKmh:0, windDirText:'—', wave:null};
   fWeatherData = null;
   selFish.clear(); selBait.clear();
   selEquip = new Set(LS.get('psarema_last_equip', []));
   refreshPickers(); renderFishQty();
   photoState['f-photo-grid'] = [];
   renderPhotoGrid('f-photo-grid');
-  paintMoonCells('f-weather-grid', document.getElementById('f-date').value);
+  repaintWeatherGrid('f');
 }
 
 /* ---------- entries list, grouped by month ---------- */
@@ -1559,10 +1642,12 @@ async function openDetail(id){
 
   eWeatherData = e.weather || null;
   if(eWeatherData){
-    paintWeatherGrid('e-weather-grid', eWeatherData);
+    lastWeatherData.e = eWeatherData;
+    paintWeatherGrid('e-weather-grid', eWeatherData, 'e');
     document.getElementById('e-weather-status').textContent = 'Δεδομένα από την καταχώρηση.';
   } else {
-    paintWeatherGrid('e-weather-grid', {weatherText:'—', pressure:null, beaufort:null, windKmh:0, windDirText:'—', wave:null});
+    lastWeatherData.e = {weatherText:'—', pressure:null, beaufort:null, windKmh:0, windDirText:'—', wave:null};
+    paintWeatherGrid('e-weather-grid', lastWeatherData.e, 'e');
     document.getElementById('e-weather-status').textContent = 'Δεν υπάρχουν καιρικά δεδομένα — πάτα ανανέωση.';
   }
 
@@ -1583,7 +1668,6 @@ async function openDetail(id){
   bindDeletableWithLine('e-equip-chip-list', equips, eSelEquip, 'e-equip-count-sum', ()=>updatePickerSummaryText('e-equip-count-sum', eSelEquip, 'Επίλεξε τεχνική'), 'psarema_equip', 'Επίλεξε τεχνική');
   renderEditFishQty(e.fish);
 
-  paintMoonCells('e-weather-grid', e.date);
   const parsed = parseCoords(e.coords);
   document.getElementById('e-coord-preview').innerHTML = parsed ? `<a href="https://www.google.com/maps?q=${parsed.lat},${parsed.lng}" target="_blank">📍 Άνοιγμα στο Google Maps (${parsed.lat}, ${parsed.lng})</a>` : '';
 
@@ -2396,6 +2480,52 @@ document.getElementById('btn-export').addEventListener('click', async ()=>{
   }catch(err){ console.error('Drive backup outer error:', err); }
 });
 
+const WEATHER_ITEM_LABELS_EL = { weather:'Καιρός', temp:'Θερμοκρασία αέρα', seatemp:'Θερμοκρασία θάλασσας', pressure:'Πίεση',
+  pressuretrend:'Τάση πίεσης', wind:'Άνεμος (μποφόρ)', windgusts:'Ριπές ανέμου', winddir:'Κατεύθυνση ανέμου',
+  windtrend:'Πρόγνωση ανέμου (επόμενες ώρες)', wave:'Κύμα', wavedirperiod:'Κατεύθυνση & περίοδος κύματος',
+  moon:'Σελήνη', tide:'Παλίρροια (εκτίμηση)', sun:'Ανατολή / Δύση ηλίου (εκτίμηση)' };
+function renderWeatherOrderList(){
+  const order = getWeatherOrder();
+  const container = document.getElementById('weather-order-list');
+  container.innerHTML = order.map((key,i)=>{
+    const label = WEATHER_ITEM_LABELS_EL[key] || key;
+    return `<div class="bar-row" style="align-items:center;">
+      <div class="bar-label" style="width:auto; flex:1;">${tr(label)}</div>
+      <button type="button" class="wxg-order-btn" data-dir="up" data-idx="${i}" ${i===0?'disabled':''}>▲</button>
+      <button type="button" class="wxg-order-btn" data-dir="down" data-idx="${i}" ${i===order.length-1?'disabled':''}>▼</button>
+    </div>`;
+  }).join('');
+  container.querySelectorAll('.wxg-order-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const i = parseInt(btn.dataset.idx);
+      const dir = btn.dataset.dir;
+      const newOrder = getWeatherOrder();
+      const swapWith = dir === 'up' ? i-1 : i+1;
+      if(swapWith < 0 || swapWith >= newOrder.length) return;
+      [newOrder[i], newOrder[swapWith]] = [newOrder[swapWith], newOrder[i]];
+      LS.set('psarema_weather_order', newOrder);
+      renderWeatherOrderList();
+      repaintWeatherGrid('f');
+      repaintWeatherGrid('e');
+    });
+  });
+}
+document.getElementById('btn-weather-order-open').addEventListener('click', ()=>{
+  renderWeatherOrderList();
+  document.getElementById('weather-order-overlay').classList.add('show');
+});
+document.getElementById('weather-order-close').addEventListener('click', ()=>{
+  document.getElementById('weather-order-overlay').classList.remove('show');
+});
+document.getElementById('weather-order-overlay').addEventListener('click', (ev)=>{
+  if(ev.target.id === 'weather-order-overlay') document.getElementById('weather-order-overlay').classList.remove('show');
+});
+document.getElementById('btn-weather-order-reset').addEventListener('click', ()=>{
+  LS.set('psarema_weather_order', WEATHER_ITEM_DEFAULT_ORDER.slice());
+  renderWeatherOrderList();
+  repaintWeatherGrid('f');
+  repaintWeatherGrid('e');
+});
 document.getElementById('btn-open-stats-explain').addEventListener('click', ()=>{
   document.getElementById('stats-explain-overlay').classList.add('show');
 });
@@ -2663,6 +2793,7 @@ const I18N = {
     'i18n-contact-name-label': 'Name (optional)', 'i18n-contact-email-label': 'Email (optional, for a reply)', 'i18n-contact-message-label': 'Message',
     'i18n-today-header': '🎣 Today',
     'i18n-contact-rating-label': 'How would you rate the app?',
+    'i18n-weather-order-title': 'Weather item order', 'i18n-weather-order-hint': 'Use the arrows to change the display order.',
     'i18n-data-header': 'Data', 'i18n-modal-title': 'Entry details',
     'btn-save': 'Save entry', 'btn-geo': '📍 Current location', 'btn-map-f': '🗺️ Pick on map',
     'btn-export': '⬇ Export JSON', 'btn-import': '⬆ Import JSON', 'btn-clear': '🗑 Delete all data',
@@ -2685,7 +2816,8 @@ function applyLanguage(lang){
     'i18n-locname-label','i18n-weather-label','i18n-species-label','i18n-weight-label','i18n-bait-label','i18n-technique-label',
     'i18n-notes-label','i18n-photos-label','i18n-entries-header','i18n-stats-header','i18n-pred1-header','i18n-pred2-header',
     'i18n-pred3-header','i18n-data-header','i18n-modal-title','i18n-pred1-hint','i18n-pred2-hint','i18n-pred3-hint',
-    'i18n-contact-header','i18n-contact-hint','i18n-contact-name-label','i18n-contact-email-label','i18n-contact-message-label','i18n-today-header','i18n-contact-rating-label'];
+    'i18n-contact-header','i18n-contact-hint','i18n-contact-name-label','i18n-contact-email-label','i18n-contact-message-label','i18n-today-header','i18n-contact-rating-label',
+    'i18n-weather-order-title','i18n-weather-order-hint'];
   idKeys.forEach(key=>{
     const el = document.getElementById(key);
     if(!el) return;
@@ -2813,6 +2945,7 @@ function applyLanguage(lang){
   if(typeof renderFishQty === 'function') renderFishQty();
   if(typeof renderEntries === 'function') renderEntries();
   if(typeof renderStats === 'function') renderStats();
+  if(typeof repaintWeatherGrid === 'function'){ repaintWeatherGrid('f'); repaintWeatherGrid('e'); }
   ['prediction-result','pred-coords-result','pred-date-result','today-score-result','species-cond-result','location-cond-result'].forEach(id=>{
     const el = document.getElementById(id);
     if(el) el.innerHTML = '';
