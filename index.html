@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Ψάρεμα Τελικό</title>
+<title>Fish IQ</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -234,7 +234,7 @@
 <header id="app-header">
   <a href="https://miserlis-fishing.gr/" target="_blank" rel="noopener" class="equip-link" id="equip-link">e-shop</a>
   <button type="button" id="lang-toggle" class="lang-toggle-btn" aria-label="Language">🇬🇷</button>
-  <h1 id="app-title">Ψάρεμα Τελικό</h1>
+  <h1 id="app-title">Fish IQ</h1>
 </header>
 
 <nav class="tabs">
@@ -428,7 +428,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Ψάρεμα Τελικό · έκδοση 4.9 · 30 Αυγ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.1 · 30 Αυγ 2026</p>
     </div>
 
     <div class="card" id="advanced-settings-card" style="display:none;">
@@ -440,7 +440,7 @@
       <button type="button" class="ghost-btn-sm" id="btn-reset-colors">↺ Επαναφορά προεπιλογών</button>
 
       <label style="margin-top:18px;">Τίτλος εφαρμογής</label>
-      <input type="text" id="header-title-input" placeholder="Ψάρεμα Τελικό">
+      <input type="text" id="header-title-input" placeholder="Fish IQ">
 
       <label style="margin-top:14px;">Φωτογραφία κεφαλίδας</label>
       <input type="file" id="header-photo-input" accept="image/*" style="display:none">
@@ -2649,9 +2649,9 @@ document.getElementById('btn-export').addEventListener('click', async ()=>{
 });
 
 /* ---------- per-user automatic email backup (EmailJS) ---------- */
-const EMAILJS_PUBLIC_KEY = 'ΒΑΛΕ_ΕΔΩ_ΤΟ_PUBLIC_KEY';
-const EMAILJS_SERVICE_ID = 'ΒΑΛΕ_ΕΔΩ_ΤΟ_SERVICE_ID';
-const EMAILJS_TEMPLATE_ID = 'ΒΑΛΕ_ΕΔΩ_ΤΟ_TEMPLATE_ID';
+const EMAILJS_PUBLIC_KEY = 'aB0sXXauN9UuXGH69';
+const EMAILJS_SERVICE_ID = 'service_08bxfzr';
+const EMAILJS_TEMPLATE_ID = 'template_aqxdzqc';
 if(window.emailjs && EMAILJS_PUBLIC_KEY.indexOf('ΒΑΛΕ') === -1){
   emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 }
@@ -2894,7 +2894,7 @@ document.getElementById('btn-contact-send').addEventListener('click', ()=>{
     body: JSON.stringify({
       access_key: WEB3FORMS_ACCESS_KEY,
       subject: 'Fish IQ - Μήνυμα από χρήστη' + (name ? (' - ' + name) : ''),
-      from_name: name || 'Χρήστης Ψάρεμα Τελικό',
+      from_name: name || 'Χρήστης Fish IQ',
       name: name || '(δεν δόθηκε)',
       email: email || '(δεν δόθηκε)',
       rating: stars,
@@ -2991,7 +2991,7 @@ document.getElementById('btn-reset-colors').addEventListener('click', ()=>{
 /* ---------- header title & photo customization ---------- */
 function applyHeaderTitle(){
   const customTitle = LS.get('psarema_header_title', null);
-  const defaultTitle = 'Ψάρεμα Τελικό';
+  const defaultTitle = 'Fish IQ';
   const title = customTitle || defaultTitle;
   document.getElementById('app-title').textContent = title;
   document.getElementById('header-title-input').value = customTitle || '';
@@ -2999,7 +2999,7 @@ function applyHeaderTitle(){
 }
 document.getElementById('header-title-input').addEventListener('input', ()=>{
   const raw = document.getElementById('header-title-input').value.trim();
-  const defaultTitle = 'Ψάρεμα Τελικό';
+  const defaultTitle = 'Fish IQ';
   LS.set('psarema_header_title', raw);
   document.getElementById('app-title').textContent = raw || defaultTitle;
 });
