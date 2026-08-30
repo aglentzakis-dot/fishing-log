@@ -276,7 +276,7 @@
 
       <label id="i18n-weather-label">Καιρός & θάλασσα (αυτόματα)</label>
       <div class="weather-box" id="f-weather-box">
-        <div style="display:flex; justify-content:flex-end;"><button type="button" id="btn-weather-order-open" title="Σειρά στοιχείων" style="padding:8px 12px;">✏️ <span class="i18n-plain">Σειρά στοιχείων</span></button></div>
+        <div style="display:flex; justify-content:flex-end;"><button type="button" id="btn-weather-order-open" title="Σειρά στοιχείων" style="padding:4px 8px; opacity:0.55; background:transparent; border:none; font-size:0.95rem;">✏️</button></div>
         <div class="weather-list" id="f-weather-grid"></div>
         <div class="weather-status" id="f-weather-status" data-i18n-key="Συμπλήρωσε ημερομηνία και συντεταγμένες — ενημερώνεται αυτόματα.">Συμπλήρωσε ημερομηνία και συντεταγμένες — ενημερώνεται αυτόματα.</div>
       </div>
@@ -403,7 +403,11 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Ψάρεμα Τελικό · έκδοση 4.1 · 30 Αυγ 2026</p>
+      <button type="button" class="species-cond-btn" id="btn-open-legal">⚖️ <span class="i18n-plain">Νομικό πλαίσιο ερασιτεχνικής αλιείας</span></button>
+    </div>
+
+    <div class="card" style="text-align:center;">
+      <p class="hint" style="margin:0; color:#a3b0b5;">Ψάρεμα Τελικό · έκδοση 4.2 · 30 Αυγ 2026</p>
     </div>
 
     <div class="card" id="advanced-settings-card" style="display:none;">
@@ -571,6 +575,21 @@
   </div>
 </div>
 
+<!-- LEGAL_CONTENT_REVIEW: Το παρακάτω περιεχόμενο (ελάχιστα μεγέθη, ημερήσια όρια) ΔΕΝ ανανεώνεται αυτόματα -
+     δεν υπάρχει αξιόπιστο δωρεάν API για ελληνική αλιευτική νομοθεσία. Να επανελέγχεται από τον Claude σε ΚΑΘΕ
+     μεγάλη αναβάθμιση της εφαρμογής (τουλάχιστον 1 φορά/έτος), με αναζήτηση web_search για τυχόν αλλαγές στο
+     ΠΔ 373/1985, ΦΕΚ 1012Β'/1995 και μεταγενέστερες τροποποιήσεις. Πηγές ελέγχου: alieia.hcg.gr, alieia.minagric.gr.
+     Τελευταίος έλεγχος: 30 Αυγ 2026. Μετά από κάθε έλεγχο, ενημέρωσε και την ημερομηνία "Ενημερώθηκε" μέσα στο modal. -->
+<div class="map-picker-overlay" id="legal-modal-overlay">
+  <div class="map-picker-sheet" style="max-width:460px;">
+    <div class="map-picker-head">
+      <h2 id="i18n-legal-header">Νομικό πλαίσιο ερασιτεχνικής αλιείας</h2>
+      <button type="button" class="modal-close" id="legal-modal-close">✕</button>
+    </div>
+    <div style="padding:0 16px 16px; overflow-y:auto;" id="i18n-legal-body"></div>
+  </div>
+</div>
+
 <div id="admin-trigger-bl" style="position:fixed; bottom:0; left:0; width:56px; height:56px; z-index:2000;"></div>
 <div id="admin-trigger-br" style="position:fixed; bottom:0; right:0; width:56px; height:56px; z-index:2000;"></div>
 
@@ -670,6 +689,7 @@ const GR_TO_EN = {
   "Ενημέρωση":"Refresh","Χρειάζεται τουλάχιστον μία καταχώρηση με έγκυρες συντεταγμένες για να υπολογιστεί το σκορ της ημέρας.":"You need at least one entry with valid coordinates to calculate today's score.",
   "Δεν βρέθηκαν έγκυρες συντεταγμένες.":"No valid coordinates found.","Αποτυχία λήψης δεδομένων καιρού.":"Failed to fetch weather data.",
   "Σελήνη":"Moon","Άνεμος":"Wind","Καιρός":"Weather","Πίεση":"Pressure","Θάλασσα":"Sea","🎣 Σήμερα":"🎣 Today",
+  "Καλύτερες ώρες (σελήνη)":"Best hours (moon)","Νομικό πλαίσιο ερασιτεχνικής αλιείας":"Legal framework — recreational fishing",
   "📍 Τα καλύτερα σημεία μου":"📍 My best spots","Σημείο":"Spot","Κιλά":"kg","Δεν υπάρχουν ακόμα καταγεγραμμένες τοποθεσίες":"No locations recorded yet",
   "Καλύτερη ώρα:":"Best time:",
   "Πώς θα βαθμολογούσες την εφαρμογή;":"How would you rate the app?",
@@ -1197,6 +1217,27 @@ function computeMoonInfo(dateStr){
   const lows = [low1, low2].sort((a,b)=>a-b);
   return { emoji, label, lunarDay, highs, lows };
 }
+function windowText(center, halfWidthH){
+  const start = (center - halfWidthH + 24) % 24;
+  const end = (center + halfWidthH) % 24;
+  return hoursToHHMM(start) + '–' + hoursToHHMM(end);
+}
+function computeSolunarPeriods(dateStr){
+  const info = computeMoonInfo(dateStr);
+  if(!info) return null;
+  // Major periods (~2h window): moon overhead/underfoot (transit times) — best activity
+  const majors = info.highs.map(h => ({ center:h, start:(h-1+24)%24, end:(h+1)%24 }));
+  // Minor periods (~1h window): approx moonrise/moonset — good activity
+  const minors = info.lows.map(h => ({ center:h, start:(h-0.5+24)%24, end:(h+0.5)%24 }));
+  return { majors, minors };
+}
+function isWithinSolunarWindow(timeHH, periods){
+  if(!periods || timeHH == null) return null;
+  const inWindow = (w, t) => { if(w.start <= w.end) return t >= w.start && t <= w.end; return t >= w.start || t <= w.end; };
+  if(periods.majors.some(w => inWindow(w, timeHH))) return 'major';
+  if(periods.minors.some(w => inWindow(w, timeHH))) return 'minor';
+  return null;
+}
 const lastWeatherData = {
   f: {weatherText:'—', pressure:null, beaufort:null, windKmh:0, windDirText:'—', wave:null},
   e: {weatherText:'—', pressure:null, beaufort:null, windKmh:0, windDirText:'—', wave:null}
@@ -1428,7 +1469,26 @@ function windGustsScore(bfBase, gustKmh){
   return 1;
 }
 
-const WEATHER_ITEM_DEFAULT_ORDER = ['weather','temp','seatemp','pressure','pressuretrend','wind','windgusts','winddir','windtrend','wave','wavedir','waveperiod','moon','tide','sun','fishscore'];
+const WEATHER_ITEM_DEFAULT_ORDER = ['weather','temp','seatemp','pressure','pressuretrend','wind','windgusts','winddir','windtrend','wave','wavedir','waveperiod','moon','tide','solunar','sun','fishscore'];
+
+function computePersonalization(scores){
+  const withWeather = (typeof entries !== 'undefined' ? entries : []).filter(e => e.weather && e.weather.beaufort != null);
+  if(withWeather.length < 5) return null;
+  let allSuccess = 0, matchSum = 0, matchCount = 0;
+  withWeather.forEach(e=>{
+    const eScores = scoreComponents(e.weather, e.date);
+    const hasFish = e.fish && Object.values(e.fish).some(q=>q>0);
+    if(hasFish) allSuccess++;
+    const dist = Math.abs(eScores.moonScore-scores.moonScore) + Math.abs(eScores.windScore-scores.windScore)
+      + Math.abs(eScores.waveScore-scores.waveScore) + Math.abs(eScores.pressureScore-scores.pressureScore);
+    if(dist <= 3){ matchCount++; if(hasFish) matchSum++; }
+  });
+  if(matchCount < 3) return null;
+  const matchRate = matchSum / matchCount;
+  const baseRate = allSuccess / withWeather.length;
+  const confidence = Math.min(1, matchCount / 8);
+  return { matchRate, baseRate, matchCount, sampleSize: withWeather.length, confidence };
+}
 
 function buildWeatherItems(data, dateStr, prefix){
   const items = {};
@@ -1452,6 +1512,28 @@ function buildWeatherItems(data, dateStr, prefix){
   items.tide = { label:'Παλίρροια (εκτίμηση)', value: moonInfo ? (currentLang==='en'
       ? `High tide: ${hoursToHHMM(moonInfo.highs[0])} & ${hoursToHHMM(moonInfo.highs[1])}<br>Low tide: ${hoursToHHMM(moonInfo.lows[0])} & ${hoursToHHMM(moonInfo.lows[1])}`
       : `Πλημμυρίδα: ${hoursToHHMM(moonInfo.highs[0])} & ${hoursToHHMM(moonInfo.highs[1])}<br>Άμπωτη: ${hoursToHHMM(moonInfo.lows[0])} & ${hoursToHHMM(moonInfo.lows[1])}`) : '—', cls:null, fullWidth:true, isHtml:true };
+  const solunar = dateStr ? computeSolunarPeriods(dateStr) : null;
+  let solunarMatch = null;
+  const timeInEl2 = prefix ? document.getElementById(prefix+'-timein') : null;
+  let entryHour = null;
+  if(timeInEl2 && timeInEl2.value){
+    const [hh2,mm2] = timeInEl2.value.split(':').map(Number);
+    entryHour = hh2 + mm2/60;
+    solunarMatch = isWithinSolunarWindow(entryHour, solunar);
+  }
+  if(solunar){
+    const majTxt = solunar.majors.map(w=>windowText(w.center,1)).join(' & ');
+    const minTxt = solunar.minors.map(w=>windowText(w.center,0.5)).join(' & ');
+    let solVal = currentLang==='en'
+      ? `🎯 Major: ${majTxt}<br>Minor: ${minTxt}`
+      : `🎯 Κύριες: ${majTxt}<br>Δευτερεύουσες: ${minTxt}`;
+    let solCls = null;
+    if(solunarMatch === 'major'){ solVal += currentLang==='en' ? ' — arrival in major window ✓' : ' — άφιξη σε κύρια περίοδο ✓'; solCls = 'wxg-good'; }
+    else if(solunarMatch === 'minor'){ solVal += currentLang==='en' ? ' — arrival in minor window ✓' : ' — άφιξη σε δευτερεύουσα περίοδο ✓'; solCls = 'wxg-ok'; }
+    items.solunar = { label:'Καλύτερες ώρες (σελήνη)', value: solVal, cls: solCls, fullWidth:true, isHtml:true };
+  } else {
+    items.solunar = { label:'Καλύτερες ώρες (σελήνη)', value:'—', cls:null, fullWidth:true };
+  }
   let sunValue = '—', sunCls = null;
   if(data.sunrise != null && data.sunset != null){
     sunValue = `☀️ ${decHourToHHMM(data.sunrise)} — 🌇 ${decHourToHHMM(data.sunset)}`;
@@ -1466,9 +1548,22 @@ function buildWeatherItems(data, dateStr, prefix){
   }
   items.sun = { label:'Ανατολή / Δύση ηλίου (εκτίμηση)', value: sunValue, cls: sunCls, fullWidth:true };
   const fsScores = scoreComponents(data, dateStr);
-  const fsOverall = overallFromScores(fsScores);
-  const fsCls = fsOverall.overall >= 70 ? 'wxg-good' : fsOverall.overall >= 40 ? 'wxg-ok' : 'wxg-poor';
-  items.fishscore = { label:'Συνθήκες ψαρέματος', value: `${starRating(fsOverall.avg)} ${fsOverall.overall}% · ${fsOverall.label}`, cls: fsCls, fullWidth:true };
+  let fsOverallBase = overallFromScores(fsScores);
+  let fsOverallNum = fsOverallBase.overall;
+  let fsExtra = '';
+  if(solunarMatch === 'major'){ fsOverallNum = Math.min(100, fsOverallNum + 8); fsExtra += currentLang==='en' ? ' · 🎯 major period' : ' · 🎯 κύρια περίοδος'; }
+  else if(solunarMatch === 'minor'){ fsOverallNum = Math.min(100, fsOverallNum + 4); fsExtra += currentLang==='en' ? ' · 🎯 minor period' : ' · 🎯 δευτ. περίοδος'; }
+  const personalized = computePersonalization(fsScores);
+  if(personalized){
+    const deltaPct = Math.round((personalized.matchRate - personalized.baseRate) * 40 * personalized.confidence);
+    fsOverallNum = Math.max(0, Math.min(100, fsOverallNum + deltaPct));
+    fsExtra += currentLang==='en'
+      ? ` · 📊 ${Math.round(personalized.matchRate*100)}% success in ${personalized.matchCount} similar past trips`
+      : ` · 📊 ${Math.round(personalized.matchRate*100)}% επιτυχία σε ${personalized.matchCount} παρόμοιες παλιές εξορμήσεις σου`;
+  }
+  const fsCls = fsOverallNum >= 70 ? 'wxg-good' : fsOverallNum >= 40 ? 'wxg-ok' : 'wxg-poor';
+  const fsAvgStars = fsOverallNum / 20;
+  items.fishscore = { label:'Συνθήκες ψαρέματος', value: `${starRating(fsAvgStars)} ${fsOverallNum}% · ${fsOverallBase.label}${fsExtra}`, cls: fsCls, fullWidth:true };
   return items;
 }
 function getWeatherOrder(){
@@ -2238,14 +2333,35 @@ function computeTodayScore(){
 
   const todayStr = new Date().toISOString().slice(0,10);
   const nowH = new Date().getHours();
+  const nowMin = new Date().getMinutes();
   const nowTime = String(nowH).padStart(2,'0') + ':00';
+  const nowHourDec = nowH + nowMin/60;
 
   fetchWeatherAndWave(parsed.lat, parsed.lng, todayStr, nowTime).then(data=>{
     const scores = scoreComponents(data, todayStr);
-    const overallInfo = overallFromScores(scores);
+    let overallInfo = overallFromScores(scores);
     const moonInfo = computeMoonInfo(todayStr);
     const locName = Object.keys(locCounts).find(k=>locCounts[k]===best) || '';
-    const extra = `<div class="condition-line" style="opacity:0.75; font-size:0.8rem;">📍 ${locName}</div>`;
+    let extra = `<div class="condition-line" style="opacity:0.75; font-size:0.8rem;">📍 ${locName}</div>`;
+
+    const solunar = computeSolunarPeriods(todayStr);
+    const solunarMatch = isWithinSolunarWindow(nowHourDec, solunar);
+    let overallNum = overallInfo.overall;
+    if(solunarMatch === 'major') overallNum = Math.min(100, overallNum + 8);
+    else if(solunarMatch === 'minor') overallNum = Math.min(100, overallNum + 4);
+    if(solunar){
+      const majTxt = solunar.majors.map(w=>windowText(w.center,1)).join(' & ');
+      const minTxt = solunar.minors.map(w=>windowText(w.center,0.5)).join(' & ');
+      const matchNote = solunarMatch === 'major' ? ' — 🎯 τώρα είναι κύρια περίοδος!' : solunarMatch === 'minor' ? ' — 🎯 τώρα είναι δευτ. περίοδος' : '';
+      extra += `<div class="condition-line" style="opacity:0.85; font-size:0.8rem;">🎯 Κύριες ώρες: ${majTxt} · Δευτ.: ${minTxt}${matchNote}</div>`;
+    }
+    const personalized = computePersonalization(scores);
+    if(personalized){
+      const deltaPct = Math.round((personalized.matchRate - personalized.baseRate) * 40 * personalized.confidence);
+      overallNum = Math.max(0, Math.min(100, overallNum + deltaPct));
+      extra += `<div class="condition-line" style="opacity:0.85; font-size:0.8rem;">📊 ${Math.round(personalized.matchRate*100)}% επιτυχία σε ${personalized.matchCount} παρόμοιες παλιές εξορμήσεις σου (μ.ό. ${Math.round(personalized.baseRate*100)}%)</div>`;
+    }
+    overallInfo = { avg: overallNum/20, overall: overallNum, label: overallInfo.label };
     resultEl.innerHTML = buildScoreCardHtml(scores, overallInfo, moonInfo, data, extra);
   }).catch(()=>{
     resultEl.innerHTML = `<div class="hint">${tr('Αποτυχία λήψης δεδομένων καιρού.')}</div>`;
@@ -2549,6 +2665,15 @@ document.getElementById('contact-modal-close').addEventListener('click', ()=>{
 });
 document.getElementById('contact-modal-overlay').addEventListener('click', (ev)=>{
   if(ev.target.id === 'contact-modal-overlay') document.getElementById('contact-modal-overlay').classList.remove('show');
+});
+document.getElementById('btn-open-legal').addEventListener('click', ()=>{
+  document.getElementById('legal-modal-overlay').classList.add('show');
+});
+document.getElementById('legal-modal-close').addEventListener('click', ()=>{
+  document.getElementById('legal-modal-overlay').classList.remove('show');
+});
+document.getElementById('legal-modal-overlay').addEventListener('click', (ev)=>{
+  if(ev.target.id === 'legal-modal-overlay') document.getElementById('legal-modal-overlay').classList.remove('show');
 });
 (function(){
   const picker = document.getElementById('contact-rating');
@@ -2942,6 +3067,58 @@ function applyLanguage(lang){
          <p style="margin-bottom:0;">Όλα τα νούμερα προέρχονται μόνο από τις δικές σου καταχωρήσεις — τίποτα εδώ δεν είναι εκτίμηση ή πρόβλεψη (οι προβλέψεις έχουν τη δική τους καρτέλα).</p>`;
   }
   document.getElementById('lang-toggle').textContent = lang === 'en' ? '🇬🇧' : '🇬🇷';
+  const legalTitle = document.getElementById('i18n-legal-header');
+  if(legalTitle) legalTitle.textContent = lang === 'en' ? 'Legal framework — recreational fishing' : 'Νομικό πλαίσιο ερασιτεχνικής αλιείας';
+  const legalBody = document.getElementById('i18n-legal-body');
+  if(legalBody){
+    legalBody.innerHTML = lang === 'en'
+      ? `<p class="hint" style="margin-top:0;">Reference only, based on Greek legislation (Greece-specific, applies to Greek waters). This is not legal advice — always confirm with the Hellenic Coast Guard / official sources before relying on it.</p>
+         <p><strong>Daily catch limit:</strong> up to 5 kg of fish/cephalopods per 24h (10 kg if fishing with a longline/παραγάδι) — except when a single fish alone weighs more.</p>
+         <p><strong>Grouper (Epinephelus/ροφός-σφυρίδα):</strong> max 1 individual over 45 cm per angler.</p>
+         <p><strong>Sea urchins:</strong> up to 20/day per angler, 30/day per boat total.</p>
+         <p><strong>Minimum legal sizes (indicative, common species):</strong></p>
+         <ul style="margin:4px 0 10px; padding-left:20px; line-height:1.6;">
+           <li>Sea bream (τσιπούρα) — 20 cm</li>
+           <li>Sea bass (λαβράκι) — 25 cm</li>
+           <li>Bogue (γόπα) — 10 cm</li>
+           <li>Red mullet (μπαρμπούνι) — 11 cm</li>
+           <li>White seabream (σαργός) — 23 cm</li>
+           <li>Mullet (κέφαλος) — 16 cm</li>
+           <li>Common pandora (λυθρίνι) — 15 cm</li>
+           <li>Common seabream (φαγκρί) — 18 cm</li>
+           <li>Horse mackerel (σαφρίδι) — 15 cm</li>
+           <li>Mackerel/chub mackerel (σκουμπρί/κολιός) — 18 cm</li>
+           <li>Anchovy (γαύρος) — 9 cm</li>
+           <li>Sardine (σαρδέλα) — 11 cm</li>
+           <li>Sole (γλώσσα) — 20 cm</li>
+           <li>Hake/cod-like (μπακαλιάρος) — 20 cm</li>
+         </ul>
+         <p><strong>Also prohibited:</strong> selling any catch from recreational fishing; nets in recreational fishing; fishing at declared underwater archaeological sites; fishing with artificial light sources (except a hand spear with diffuse light up to 500 candela).</p>
+         <p class="hint" style="margin-bottom:0;">Sources: Presidential Decree 373/1985 and amendments, Government Gazette 1012Β'/1995. Fishing legislation is occasionally updated — updated: 30 Aug 2026.</p>`
+      : `<p class="hint" style="margin-top:0;">Ενδεικτικές πληροφορίες βάσει ελληνικής νομοθεσίας — όχι νομική συμβουλή. Πάντα να επιβεβαιώνεις με το Λιμενικό Σώμα / επίσημες πηγές πριν βασιστείς σε αυτές.</p>
+         <p><strong>Ημερήσιο όριο βάρους:</strong> έως 5 κιλά ψάρια/κεφαλόποδα ανά 24ωρο (10 κιλά αν ψαρεύεις με παραγάδι) — εκτός αν ένα μόνο ψάρι ζυγίζει παραπάνω.</p>
+         <p><strong>Ροφός/Σφυρίδα (Epinephelus):</strong> μέχρι 1 άτομο άνω των 45 cm ανά αλιέα.</p>
+         <p><strong>Αχινοί:</strong> έως 20/ημέρα ανά αλιέα, 30/ημέρα συνολικά ανά σκάφος.</p>
+         <p><strong>Ελάχιστα επιτρεπόμενα μεγέθη (ενδεικτικά, δημοφιλή είδη):</strong></p>
+         <ul style="margin:4px 0 10px; padding-left:20px; line-height:1.6;">
+           <li>Τσιπούρα — 20 cm</li>
+           <li>Λαβράκι — 25 cm</li>
+           <li>Γόπα — 10 cm</li>
+           <li>Μπαρμπούνι — 11 cm</li>
+           <li>Σαργός — 23 cm</li>
+           <li>Κέφαλος — 16 cm</li>
+           <li>Λυθρίνι — 15 cm</li>
+           <li>Φαγκρί — 18 cm</li>
+           <li>Σαφρίδι — 15 cm</li>
+           <li>Σκουμπρί / Κολιός — 18 cm</li>
+           <li>Γαύρος — 9 cm</li>
+           <li>Σαρδέλα — 11 cm</li>
+           <li>Γλώσσα — 20 cm</li>
+           <li>Μπακαλιάρος — 20 cm</li>
+         </ul>
+         <p><strong>Απαγορεύονται επίσης:</strong> πώληση αλιευμάτων ερασιτεχνικής αλιείας, χρήση διχτυών σε ερασιτεχνική αλιεία, αλιεία σε κηρυγμένους ενάλιους αρχαιολογικούς χώρους, αλιεία με τη βοήθεια φωτεινών πηγών (εξαιρείται καμάκι χεριού με διάχυτο φως έως 500 κεριά).</p>
+         <p class="hint" style="margin-bottom:0;">Πηγές: ΠΔ 373/1985 και τροποποιήσεις, ΦΕΚ 1012Β'/1995. Η νομοθεσία αλιείας ενημερώνεται κατά καιρούς — ενημερώθηκε: 30 Αυγ 2026.</p>`;
+  }
   currentLang = lang;
   LS.set('psarema_lang', lang);
 
