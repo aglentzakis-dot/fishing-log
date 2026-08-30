@@ -417,7 +417,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Ψάρεμα Τελικό · έκδοση 4.6 · 30 Αυγ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Ψάρεμα Τελικό · έκδοση 4.7 · 30 Αυγ 2026</p>
     </div>
 
     <div class="card" id="advanced-settings-card" style="display:none;">
@@ -752,6 +752,7 @@ const GR_TO_EN = {
   "Επικοινωνία με διαχειριστή":"Contact the developer","Έχεις ιδέα, βελτίωση ή παράπονο για την εφαρμογή; Γράψε το εδώ.":"Have an idea, improvement, or complaint about the app? Write it here.",
   "Όνομα (προαιρετικό)":"Name (optional)","Email (προαιρετικό, για απάντηση)":"Email (optional, for a reply)","Μήνυμα":"Message",
   "Γράψε ένα μήνυμα πριν την αποστολή":"Write a message before sending","Το μήνυμα στάλθηκε ✓":"Message sent ✓",
+  "Αποτυχία αποστολής — δοκίμασε ξανά":"Failed to send — try again","Αποτυχία αποστολής — έλεγξε τη σύνδεσή σου":"Failed to send — check your connection",
   "άνεμος":"wind","κύμα":"wave","δόλωμα:":"bait:",
   "Πιθανή καλύτερη στιγμή":"Likely best time","Πιθανό είδος:":"Likely species:",
   "Εκτίμηση βάσει του δικού σου ιστορικού και της πρόγνωσης καιρού — όχι εγγύηση.":"Estimate based on your own history and the weather forecast — not a guarantee.",
@@ -2839,6 +2840,7 @@ document.getElementById('fishid-photo-input-gallery').addEventListener('change',
     });
   });
 })();
+const WEB3FORMS_ACCESS_KEY = '4359504f-28ca-4adc-b87b-e89d9e35b66a';
 document.getElementById('btn-contact-send').addEventListener('click', ()=>{
   const name = document.getElementById('contact-name').value.trim();
   const email = document.getElementById('contact-email').value.trim();
@@ -2847,21 +2849,37 @@ document.getElementById('btn-contact-send').addEventListener('click', ()=>{
   if(!message){ toast(tr('Γράψε ένα μήνυμα πριν την αποστολή')); return; }
   const btn = document.getElementById('btn-contact-send');
   btn.disabled = true;
-  fetch(DRIVE_BACKUP_URL, {
+  const stars = rating && Number(rating) > 0 ? '★'.repeat(Number(rating)) + '☆'.repeat(5-Number(rating)) + ' (' + rating + '/5)' : '(δεν δόθηκε)';
+  fetch('https://api.web3forms.com/submit', {
     method: 'POST',
-    mode: 'no-cors',
-    keepalive: true,
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ type: 'contact', name, email, message, rating })
-  }).finally(()=>{
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({
+      access_key: WEB3FORMS_ACCESS_KEY,
+      subject: 'Fish IQ - Μήνυμα από χρήστη' + (name ? (' - ' + name) : ''),
+      from_name: name || 'Χρήστης Ψάρεμα Τελικό',
+      name: name || '(δεν δόθηκε)',
+      email: email || '(δεν δόθηκε)',
+      rating: stars,
+      message: message
+    })
+  }).then(res => res.json()).then(result => {
     btn.disabled = false;
-    document.getElementById('contact-name').value = '';
-    document.getElementById('contact-email').value = '';
-    document.getElementById('contact-message').value = '';
-    document.getElementById('contact-rating').dataset.value = '0';
-    document.querySelectorAll('#contact-rating span').forEach(s=>{ s.textContent='☆'; s.classList.remove('filled'); });
-    toast(tr('Το μήνυμα στάλθηκε ✓'));
-    document.getElementById('contact-modal-overlay').classList.remove('show');
+    if(result.success){
+      document.getElementById('contact-name').value = '';
+      document.getElementById('contact-email').value = '';
+      document.getElementById('contact-message').value = '';
+      document.getElementById('contact-rating').dataset.value = '0';
+      document.querySelectorAll('#contact-rating span').forEach(s=>{ s.textContent='☆'; s.classList.remove('filled'); });
+      toast(tr('Το μήνυμα στάλθηκε ✓'));
+      document.getElementById('contact-modal-overlay').classList.remove('show');
+    } else {
+      toast(tr('Αποτυχία αποστολής — δοκίμασε ξανά'));
+      console.error('Web3Forms error:', result);
+    }
+  }).catch(err => {
+    btn.disabled = false;
+    toast(tr('Αποτυχία αποστολής — έλεγξε τη σύνδεσή σου'));
+    console.error('Web3Forms fetch error:', err);
   });
 });
 document.getElementById('btn-import').addEventListener('click', ()=>{
