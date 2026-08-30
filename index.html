@@ -108,12 +108,12 @@
     font-size:0.8rem; font-weight:600; cursor:pointer; margin-bottom:8px;
   }
   .weather-list{ display:flex; flex-direction:column; }
-  .wxg-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid rgba(0,0,0,0.06); }
-  .wxg-row.wxg-stacked{ flex-direction:column; align-items:flex-start; gap:3px; }
+  .wxg-row{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:5px 0; border-bottom:1px solid rgba(0,0,0,0.06); line-height:1.25; }
+  .wxg-row.wxg-stacked{ flex-direction:column; align-items:flex-start; gap:1px; }
   .wxg-row.wxg-stacked .wxg-value{ text-align:left; }
   .wxg-row:last-child{ border-bottom:none; }
-  .wxg-label{ font-size:0.85rem; color:#5c6b6f; flex-shrink:0; }
-  .wxg-value{ font-weight:700; color: var(--deep); font-size:0.92rem; text-align:right; }
+  .wxg-label{ font-size:0.78rem; color:#5c6b6f; flex-shrink:0; }
+  .wxg-value{ font-weight:700; color: var(--deep); font-size:0.85rem; text-align:right; }
   .wxg-value.wxg-good{ color:#1f7a4a; }
   .wxg-value.wxg-ok{ color:#5a8f3a; }
   .wxg-value.wxg-poor{ color:#c0603a; }
@@ -403,7 +403,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 3.8 · 30 Αυγ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 3.9 · 30 Αυγ 2026</p>
     </div>
 
     <div class="card" id="advanced-settings-card" style="display:none;">
@@ -1363,14 +1363,16 @@ async function fetchWeatherAndWave(lat, lng, dateStr, timeStr){
     result.waveEstimated = true;
   }
 
-  const sun = sunriseSunset(dateStr, parseFloat(lat), parseFloat(lng));
+  const tzOffsetHours = wx.utc_offset_seconds != null ? wx.utc_offset_seconds / 3600 : null;
+  const sun = sunriseSunset(dateStr, parseFloat(lat), parseFloat(lng), tzOffsetHours);
   result.sunrise = sun.sunrise;
   result.sunset = sun.sunset;
 
   return result;
 }
-function sunriseSunset(dateStr, lat, lng){
-  // Approximate solar sunrise/sunset (ignores equation-of-time and exact timezone; ±15-30 min typical error)
+function sunriseSunset(dateStr, lat, lng, tzOffsetHours){
+  // Approximate solar sunrise/sunset (ignores equation-of-time, ~±10-15 min typical error).
+  // Real UTC offset (incl. DST) is passed in from the weather API response, not guessed from longitude.
   const d = new Date(dateStr+'T00:00:00');
   const start = new Date(d.getFullYear(),0,1);
   const dayOfYear = Math.floor((d - start)/86400000) + 1;
@@ -1382,8 +1384,7 @@ function sunriseSunset(dateStr, lat, lng){
   const H = Math.acos(cosH) * 180/Math.PI;
   const sunriseUTC = 12 - H/15 - lng/15;
   const sunsetUTC = 12 + H/15 - lng/15;
-  // Rough local-time correction: assume timezone ≈ round(lng/15) hours from UTC
-  const tzOffset = Math.round(lng/15);
+  const tzOffset = tzOffsetHours != null ? tzOffsetHours : Math.round(lng/15);
   const toLocal = h => ((h + tzOffset) % 24 + 24) % 24;
   return { sunrise: toLocal(sunriseUTC), sunset: toLocal(sunsetUTC) };
 }
@@ -1444,7 +1445,7 @@ function buildWeatherItems(data, dateStr, prefix){
   const wpText = data.wavePeriod != null ? Math.round(data.wavePeriod*10)/10+' s' : '—';
   items.wavedirperiod = { label:'Κατεύθυνση & περίοδος κύματος', value: data.wavePeriod != null ? `${wdText} · ${wpText}` : '—', cls: scoreClass(wavePeriodScore(data.wavePeriod)) };
   const moonInfo = dateStr ? computeMoonInfo(dateStr) : null;
-  items.moon = { label:'Σελήνη', value: moonInfo ? (currentLang==='en' ? `${moonInfo.emoji} ${moonInfo.label} (day ${moonInfo.lunarDay})` : `${moonInfo.emoji} ${moonInfo.label} (${moonInfo.lunarDay}η μέρα)`) : '—', cls: null };
+  items.moon = { label:'Σελήνη', value: moonInfo ? (currentLang==='en' ? `${moonInfo.emoji} ${moonInfo.label} (day ${moonInfo.lunarDay})` : `${moonInfo.emoji} ${moonInfo.label} (${moonInfo.lunarDay}η μέρα)`) : '—', cls: null, fullWidth:true };
   items.tide = { label:'Παλίρροια (εκτίμηση)', value: moonInfo ? (currentLang==='en'
       ? `High tide: ${hoursToHHMM(moonInfo.highs[0])} & ${hoursToHHMM(moonInfo.highs[1])} · Low tide: ${hoursToHHMM(moonInfo.lows[0])} & ${hoursToHHMM(moonInfo.lows[1])}`
       : `Πλημμυρίδα: ${hoursToHHMM(moonInfo.highs[0])} & ${hoursToHHMM(moonInfo.highs[1])} · Άμπωτη: ${hoursToHHMM(moonInfo.lows[0])} & ${hoursToHHMM(moonInfo.lows[1])}`) : '—', cls:null, fullWidth:true };
