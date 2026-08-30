@@ -110,10 +110,10 @@
   .weather-list{ display:flex; flex-direction:column; }
   .wxg-row{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:5px 0; border-bottom:1px solid rgba(0,0,0,0.06); line-height:1.25; }
   .wxg-row.wxg-stacked{ flex-direction:column; align-items:flex-start; gap:1px; }
-  .wxg-row.wxg-stacked .wxg-value{ text-align:left; }
+  .wxg-row.wxg-stacked .wxg-value{ text-align:left; white-space:normal; overflow:visible; text-overflow:clip; }
   .wxg-row:last-child{ border-bottom:none; }
-  .wxg-label{ font-size:0.78rem; color:#5c6b6f; flex-shrink:0; }
-  .wxg-value{ font-weight:700; color: var(--deep); font-size:0.85rem; text-align:right; }
+  .wxg-label{ font-size:0.78rem; color:#5c6b6f; flex-shrink:0; white-space:nowrap; }
+  .wxg-value{ font-weight:700; color: var(--deep); font-size:0.85rem; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .wxg-value.wxg-good{ color:#1f7a4a; }
   .wxg-value.wxg-ok{ color:#5a8f3a; }
   .wxg-value.wxg-poor{ color:#c0603a; }
@@ -403,7 +403,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 3.9 · 30 Αυγ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 4.0 · 30 Αυγ 2026</p>
     </div>
 
     <div class="card" id="advanced-settings-card" style="display:none;">
@@ -1426,7 +1426,7 @@ function windGustsScore(bfBase, gustKmh){
   return 1;
 }
 
-const WEATHER_ITEM_DEFAULT_ORDER = ['weather','temp','seatemp','pressure','pressuretrend','wind','windgusts','winddir','windtrend','wave','wavedirperiod','moon','tide','sun'];
+const WEATHER_ITEM_DEFAULT_ORDER = ['weather','temp','seatemp','pressure','pressuretrend','wind','windgusts','wave','wavedirperiod','winddir','windtrend','moon','tide','sun'];
 
 function buildWeatherItems(data, dateStr, prefix){
   const items = {};
@@ -1443,12 +1443,12 @@ function buildWeatherItems(data, dateStr, prefix){
   items.wave = { label:'Κύμα', value: data.wave != null ? formatWave(data.wave, data.waveEstimated) : '—', cls: scoreClass(waveScoreOf(data.wave)) };
   const wdText = data.waveDirDeg != null ? compassDir(data.waveDirDeg) : '—';
   const wpText = data.wavePeriod != null ? Math.round(data.wavePeriod*10)/10+' s' : '—';
-  items.wavedirperiod = { label:'Κατεύθυνση & περίοδος κύματος', value: data.wavePeriod != null ? `${wdText} · ${wpText}` : '—', cls: scoreClass(wavePeriodScore(data.wavePeriod)) };
+  items.wavedirperiod = { label:'Κατ./περίοδος κύματος', value: data.wavePeriod != null ? `${wdText} · ${wpText}` : '—', cls: scoreClass(wavePeriodScore(data.wavePeriod)) };
   const moonInfo = dateStr ? computeMoonInfo(dateStr) : null;
   items.moon = { label:'Σελήνη', value: moonInfo ? (currentLang==='en' ? `${moonInfo.emoji} ${moonInfo.label} (day ${moonInfo.lunarDay})` : `${moonInfo.emoji} ${moonInfo.label} (${moonInfo.lunarDay}η μέρα)`) : '—', cls: null, fullWidth:true };
   items.tide = { label:'Παλίρροια (εκτίμηση)', value: moonInfo ? (currentLang==='en'
-      ? `High tide: ${hoursToHHMM(moonInfo.highs[0])} & ${hoursToHHMM(moonInfo.highs[1])} · Low tide: ${hoursToHHMM(moonInfo.lows[0])} & ${hoursToHHMM(moonInfo.lows[1])}`
-      : `Πλημμυρίδα: ${hoursToHHMM(moonInfo.highs[0])} & ${hoursToHHMM(moonInfo.highs[1])} · Άμπωτη: ${hoursToHHMM(moonInfo.lows[0])} & ${hoursToHHMM(moonInfo.lows[1])}`) : '—', cls:null, fullWidth:true };
+      ? `High tide: ${hoursToHHMM(moonInfo.highs[0])} & ${hoursToHHMM(moonInfo.highs[1])}<br>Low tide: ${hoursToHHMM(moonInfo.lows[0])} & ${hoursToHHMM(moonInfo.lows[1])}`
+      : `Πλημμυρίδα: ${hoursToHHMM(moonInfo.highs[0])} & ${hoursToHHMM(moonInfo.highs[1])}<br>Άμπωτη: ${hoursToHHMM(moonInfo.lows[0])} & ${hoursToHHMM(moonInfo.lows[1])}`) : '—', cls:null, fullWidth:true, isHtml:true };
   let sunValue = '—', sunCls = null;
   if(data.sunrise != null && data.sunset != null){
     sunValue = `☀️ ${decHourToHHMM(data.sunrise)} — 🌇 ${decHourToHHMM(data.sunset)}`;
