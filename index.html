@@ -13,6 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bitter:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
   :root{
     --deep: #0B3B4C; --teal: #1C7A85; --foam: #F2ECDD; --sand: #E4D5B7;
@@ -390,7 +391,17 @@
     <div class="card">
       <h2 id="i18n-data-header">Δεδομένα</h2>
       <p class="hint" id="i18n-beta-notice" style="background:#fdf1ec; border:1px solid #f0c8b4; border-radius:8px; padding:8px 10px;"><strong>Δοκιμαστική έκδοση (beta)</strong> — προσθέτουμε συνεχώς νέα στοιχεία και τη βελτιώνουμε.</p>
-      <p class="hint" id="i18n-retention-text">Τα αρχεία (χωρίς τις φωτογραφίες) φυλάσσονται για 3 μήνες μετά το backup, από τον προγραμματιστή της εφαρμογής.</p>
+      <p class="hint" id="i18n-retention-text">Αν δηλώσεις email παρακάτω, η εφαρμογή σου στέλνει αυτόματα αντίγραφο ασφαλείας (backup) στο δικό σου email — δεν κρατάμε κανένα αντίγραφο των δεδομένων σου εμείς.</p>
+      <label id="i18n-backup-email-label" style="margin-top:14px;">Email για αυτόματο backup (προαιρετικό)</label>
+      <input type="email" id="backup-email-input" placeholder="π.χ. onoma@gmail.com">
+      <label id="i18n-backup-freq-label" style="margin-top:10px;">Στείλε backup κάθε</label>
+      <select id="backup-freq-select">
+        <option value="1" data-i18n-key="1 καταχώρηση">1 καταχώρηση</option>
+        <option value="2" data-i18n-key="2 καταχωρήσεις">2 καταχωρήσεις</option>
+        <option value="3" data-i18n-key="3 καταχωρήσεις">3 καταχωρήσεις</option>
+        <option value="5" selected data-i18n-key="5 καταχωρήσεις">5 καταχωρήσεις</option>
+        <option value="10" data-i18n-key="10 καταχωρήσεις">10 καταχωρήσεις</option>
+      </select>
       <p class="hint" id="i18n-disclaimer-text" style="margin-top:8px;">Η εφαρμογή παρέχεται όπως είναι (χωρίς εγγύηση), χωρίς καμία ευθύνη για τυχόν απώλεια δεδομένων, από οποιαδήποτε αιτία (διαγραφή browser, βλάβη συσκευής, τεχνικό πρόβλημα κ.ά.). Συνιστάται τακτική εξαγωγή/αποθήκευση από τον ίδιο τον χρήστη.</p>
       <p class="hint" id="i18n-chrome-tip" style="margin-top:8px;">💡 Αν κάποια λειτουργία δεν φορτώνει σωστά (π.χ. καιρός, χάρτης, τοποθεσία), δοκίμασε να ανοίξεις την εφαρμογή σε άλλο browser (π.χ. <strong>Chrome</strong>) — μερικοί browsers περιορίζουν αυτού του τύπου τις λειτουργίες.</p>
       <div class="footer-tools">
@@ -417,7 +428,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Ψάρεμα Τελικό · έκδοση 4.8 · 30 Αυγ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Ψάρεμα Τελικό · έκδοση 4.9 · 30 Αυγ 2026</p>
     </div>
 
     <div class="card" id="advanced-settings-card" style="display:none;">
@@ -752,6 +763,9 @@ const GR_TO_EN = {
   "Επικοινωνία με διαχειριστή":"Contact the developer","Προτείνετε αλλαγές, βελτιώσεις ή ό,τι σας δυσκόλεψε στην εφαρμογή — γράψτε το εδώ.":"Suggest changes, improvements, or anything that gave you trouble in the app — write it here.",
   "Όνομα (προαιρετικό)":"Name (optional)","Email (προαιρετικό, για απάντηση)":"Email (optional, for a reply)","Μήνυμα":"Message",
   "Γράψε ένα μήνυμα πριν την αποστολή":"Write a message before sending","Το μήνυμα στάλθηκε ✓":"Message sent ✓",
+  "Αν δηλώσεις email παρακάτω, η εφαρμογή σου στέλνει αυτόματα αντίγραφο ασφαλείας (backup) στο δικό σου email — δεν κρατάμε κανένα αντίγραφο των δεδομένων σου εμείς.":"If you enter your email below, the app automatically sends a backup copy to your own email — we don't keep any copy of your data ourselves.",
+  "Email για αυτόματο backup (προαιρετικό)":"Email for automatic backup (optional)","Στείλε backup κάθε":"Send backup every",
+  "1 καταχώρηση":"1 entry","2 καταχωρήσεις":"2 entries","3 καταχωρήσεις":"3 entries","5 καταχωρήσεις":"5 entries","10 καταχωρήσεις":"10 entries",
   "Αποτυχία αποστολής — δοκίμασε ξανά":"Failed to send — try again","Αποτυχία αποστολής — έλεγξε τη σύνδεσή σου":"Failed to send — check your connection",
   "άνεμος":"wind","κύμα":"wave","δόλωμα:":"bait:",
   "Πιθανή καλύτερη στιγμή":"Likely best time","Πιθανό είδος:":"Likely species:",
@@ -1697,6 +1711,7 @@ document.getElementById('btn-save').addEventListener('click', async ()=>{
   LS.set('psarema_last_equip', entry.equip);
   LS.set('psarema_entries', entries);
   toast('Η καταχώρηση αποθηκεύτηκε ✓');
+  maybeSendAutoBackup();
   resetForm();
 });
 function resetForm(){
@@ -2618,7 +2633,6 @@ window.showLocationConditions = function(locName){
 };
 
 /* ---------- export / import / clear ---------- */
-const DRIVE_BACKUP_URL = 'https://script.google.com/macros/s/AKfycbxQMc7OA5QuMMPhG8gWDsdyr4EW2dzq92XYJxhqiZBVOqINZIe-ioeu9YkUb4bprynO/exec';
 document.getElementById('btn-export').addEventListener('click', async ()=>{
   const photos = {};
   for(const e of entries){
@@ -2632,19 +2646,43 @@ document.getElementById('btn-export').addEventListener('click', async ()=>{
   const a = document.createElement('a');
   a.href = url; a.download = 'psarema-backup-' + new Date().toISOString().slice(0,10) + '.json';
   a.click(); URL.revokeObjectURL(url);
-  try{
-    const driveData = { entries, species, baits, equips, anglers, exportedAt: data.exportedAt };
-    toast('Στέλνεται αντίγραφο στο Drive...');
-    fetch(DRIVE_BACKUP_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      keepalive: true,
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(driveData)
-    }).then(()=>{ console.log('Drive backup fetch completed (no-cors, opaque response)'); })
-      .catch((err)=>{ console.error('Drive backup fetch error:', err); });
-  }catch(err){ console.error('Drive backup outer error:', err); }
 });
+
+/* ---------- per-user automatic email backup (EmailJS) ---------- */
+const EMAILJS_PUBLIC_KEY = 'ΒΑΛΕ_ΕΔΩ_ΤΟ_PUBLIC_KEY';
+const EMAILJS_SERVICE_ID = 'ΒΑΛΕ_ΕΔΩ_ΤΟ_SERVICE_ID';
+const EMAILJS_TEMPLATE_ID = 'ΒΑΛΕ_ΕΔΩ_ΤΟ_TEMPLATE_ID';
+if(window.emailjs && EMAILJS_PUBLIC_KEY.indexOf('ΒΑΛΕ') === -1){
+  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+}
+document.getElementById('backup-email-input').value = LS.get('psarema_backup_email', '');
+document.getElementById('backup-freq-select').value = String(LS.get('psarema_backup_freq', 5));
+document.getElementById('backup-email-input').addEventListener('change', (ev)=>{
+  LS.set('psarema_backup_email', ev.target.value.trim());
+});
+document.getElementById('backup-freq-select').addEventListener('change', (ev)=>{
+  LS.set('psarema_backup_freq', parseInt(ev.target.value));
+});
+async function maybeSendAutoBackup(){
+  const email = LS.get('psarema_backup_email', '').trim();
+  if(!email) return;
+  const freq = LS.get('psarema_backup_freq', 5);
+  const lastCount = LS.get('psarema_backup_last_count', 0);
+  if(entries.length - lastCount < freq) return;
+  if(!window.emailjs || EMAILJS_PUBLIC_KEY.indexOf('ΒΑΛΕ') !== -1){
+    console.warn('EmailJS δεν έχει ρυθμιστεί ακόμα — backup παραλείπεται.');
+    return;
+  }
+  const data = { entries, species, baits, equips, anglers, exportedAt: new Date().toISOString() };
+  try{
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      user_email: email,
+      entry_count: entries.length,
+      backup_data: JSON.stringify(data)
+    });
+    LS.set('psarema_backup_last_count', entries.length);
+  }catch(err){ console.error('Auto backup email failed:', err); }
+}
 
 const WEATHER_ITEM_LABELS_EL = { weather:'Καιρός', temp:'Θερμοκρασία αέρα', seatemp:'Θερμοκρασία θάλασσας', pressure:'Πίεση',
   pressuretrend:'Τάση πίεσης', wind:'Άνεμος (μποφόρ)', windgusts:'Ριπές ανέμου', winddir:'Κατεύθυνση ανέμου',
@@ -3163,7 +3201,11 @@ function applyLanguage(lang){
       : `<strong>Δοκιμαστική έκδοση (beta)</strong> — προσθέτουμε συνεχώς νέα στοιχεία και τη βελτιώνουμε.`;
   }
   const retentionEl = document.getElementById('i18n-retention-text');
-  if(retentionEl) retentionEl.textContent = tr('Τα αρχεία (χωρίς τις φωτογραφίες) φυλάσσονται για 3 μήνες μετά το backup, από τον προγραμματιστή της εφαρμογής.');
+  if(retentionEl) retentionEl.textContent = tr('Αν δηλώσεις email παρακάτω, η εφαρμογή σου στέλνει αυτόματα αντίγραφο ασφαλείας (backup) στο δικό σου email — δεν κρατάμε κανένα αντίγραφο των δεδομένων σου εμείς.');
+  const backupEmailLabelEl = document.getElementById('i18n-backup-email-label');
+  if(backupEmailLabelEl) backupEmailLabelEl.textContent = tr('Email για αυτόματο backup (προαιρετικό)');
+  const backupFreqLabelEl = document.getElementById('i18n-backup-freq-label');
+  if(backupFreqLabelEl) backupFreqLabelEl.textContent = tr('Στείλε backup κάθε');
   const disclaimerEl = document.getElementById('i18n-disclaimer-text');
   if(disclaimerEl) disclaimerEl.textContent = tr('Η εφαρμογή παρέχεται όπως είναι (χωρίς εγγύηση), χωρίς καμία ευθύνη για τυχόν απώλεια δεδομένων, από οποιαδήποτε αιτία (διαγραφή browser, βλάβη συσκευής, τεχνικό πρόβλημα κ.ά.). Συνιστάται τακτική εξαγωγή/αποθήκευση από τον ίδιο τον χρήστη.');
   const chromeEl = document.getElementById('i18n-chrome-tip');
