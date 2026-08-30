@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fish IQ</title>
+<title>Ψάρεμα Τελικό</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -231,7 +231,7 @@
 <header id="app-header">
   <a href="https://miserlis-fishing.gr/" target="_blank" rel="noopener" class="equip-link" id="equip-link">e-shop</a>
   <button type="button" id="lang-toggle" class="lang-toggle-btn" aria-label="Language">🇬🇷</button>
-  <h1 id="app-title">Fish IQ</h1>
+  <h1 id="app-title">Ψάρεμα Τελικό</h1>
 </header>
 
 <nav class="tabs">
@@ -276,9 +276,9 @@
 
       <label id="i18n-weather-label">Καιρός & θάλασσα (αυτόματα)</label>
       <div class="weather-box" id="f-weather-box">
-        <div style="display:flex; gap:8px; align-items:center;"><button type="button" id="f-fetch-weather" style="flex:1;">🔄 <span class="i18n-plain">Λήψη καιρικών δεδομένων</span></button><button type="button" id="btn-weather-order-open" title="Σειρά στοιχείων" style="flex:0 0 auto; padding:8px 12px;">✏️</button></div>
+        <div style="display:flex; justify-content:flex-end;"><button type="button" id="btn-weather-order-open" title="Σειρά στοιχείων" style="padding:8px 12px;">✏️ <span class="i18n-plain">Σειρά στοιχείων</span></button></div>
         <div class="weather-list" id="f-weather-grid"></div>
-        <div class="weather-status" id="f-weather-status" data-i18n-key="Συμπλήρωσε ημερομηνία και συντεταγμένες, μετά πάτα λήψη.">Συμπλήρωσε ημερομηνία και συντεταγμένες, μετά πάτα λήψη.</div>
+        <div class="weather-status" id="f-weather-status" data-i18n-key="Συμπλήρωσε ημερομηνία και συντεταγμένες — ενημερώνεται αυτόματα.">Συμπλήρωσε ημερομηνία και συντεταγμένες — ενημερώνεται αυτόματα.</div>
       </div>
 
       <label id="i18n-species-label">Είδη ψαριών</label>
@@ -403,7 +403,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 4.1 · 30 Αυγ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Ψάρεμα Τελικό · έκδοση 4.1 · 30 Αυγ 2026</p>
     </div>
 
     <div class="card" id="advanced-settings-card" style="display:none;">
@@ -415,7 +415,7 @@
       <button type="button" class="ghost-btn-sm" id="btn-reset-colors">↺ Επαναφορά προεπιλογών</button>
 
       <label style="margin-top:18px;">Τίτλος εφαρμογής</label>
-      <input type="text" id="header-title-input" placeholder="Fish IQ">
+      <input type="text" id="header-title-input" placeholder="Ψάρεμα Τελικό">
 
       <label style="margin-top:14px;">Φωτογραφία κεφαλίδας</label>
       <input type="file" id="header-photo-input" accept="image/*" style="display:none">
@@ -681,7 +681,9 @@ const GR_TO_EN = {
   "Άνεμος (μποφόρ)":"Wind (Beaufort)","Παλίρροια (εκτίμηση)":"Tide (estimate)",
   "Καιρός":"Weather","Θερμοκρασία":"Temperature","Πίεση":"Pressure","Κύμα":"Wave","Σελήνη":"Moon",
   "Επίλεξε είδη":"Select species","Επίλεξε δολώματα":"Select bait",
-  "Συμπλήρωσε ημερομηνία και συντεταγμένες, μετά πάτα λήψη.":"Fill in a date and coordinates, then press fetch.",
+  "Συμπλήρωσε ημερομηνία και συντεταγμένες — ενημερώνεται αυτόματα.":"Fill in a date and coordinates — updates automatically.",
+  "Σειρά στοιχείων":"Item order",
+  "Συνθήκες ψαρέματος":"Fishing conditions",
   "Δοκιμαστική έκδοση (beta)":"Beta version","η εφαρμογή βρίσκεται σε δοκιμαστικό στάδιο και μπορεί να αλλάξει.":"the app is in a testing stage and may change.",
   "Τα αρχεία (χωρίς τις φωτογραφίες) φυλάσσονται για 3 μήνες μετά το backup, από τον προγραμματιστή της εφαρμογής.":"Files (excluding photos) are kept for 3 months after backup, by the app's developer.",
   "Η εφαρμογή παρέχεται όπως είναι (χωρίς εγγύηση), χωρίς καμία ευθύνη για τυχόν απώλεια δεδομένων, από οποιαδήποτε αιτία (διαγραφή browser, βλάβη συσκευής, τεχνικό πρόβλημα κ.ά.). Συνιστάται τακτική εξαγωγή/αποθήκευση από τον ίδιο τον χρήστη.":"The app is provided as-is (no warranty), with no liability for any data loss, from any cause (browser data clearing, device failure, technical issue, etc.). Regular export/backup by the user is recommended.",
@@ -1426,7 +1428,7 @@ function windGustsScore(bfBase, gustKmh){
   return 1;
 }
 
-const WEATHER_ITEM_DEFAULT_ORDER = ['weather','temp','seatemp','pressure','pressuretrend','wind','windgusts','wave','wavedir','waveperiod','winddir','windtrend','moon','tide','sun'];
+const WEATHER_ITEM_DEFAULT_ORDER = ['weather','temp','seatemp','pressure','pressuretrend','wind','windgusts','winddir','windtrend','wave','wavedir','waveperiod','moon','tide','sun','fishscore'];
 
 function buildWeatherItems(data, dateStr, prefix){
   const items = {};
@@ -1463,6 +1465,10 @@ function buildWeatherItems(data, dateStr, prefix){
     }
   }
   items.sun = { label:'Ανατολή / Δύση ηλίου (εκτίμηση)', value: sunValue, cls: sunCls, fullWidth:true };
+  const fsScores = scoreComponents(data, dateStr);
+  const fsOverall = overallFromScores(fsScores);
+  const fsCls = fsOverall.overall >= 70 ? 'wxg-good' : fsOverall.overall >= 40 ? 'wxg-ok' : 'wxg-poor';
+  items.fishscore = { label:'Συνθήκες ψαρέματος', value: `${starRating(fsOverall.avg)} ${fsOverall.overall}% · ${fsOverall.label}`, cls: fsCls, fullWidth:true };
   return items;
 }
 function getWeatherOrder(){
@@ -1515,7 +1521,6 @@ async function runFetchWeather(prefix){
     statusEl.textContent = 'Αποτυχία λήψης: ' + e.message + ' — βεβαιώσου ότι το αρχείο άνοιξε μέσα από Chrome (όχι προεπισκόπηση αρχείων) και ότι έχεις ίντερνετ.';
   }
 }
-document.getElementById('f-fetch-weather').addEventListener('click', ()=>runFetchWeather('f'));
 document.getElementById('e-fetch-weather').addEventListener('click', ()=>runFetchWeather('e'));
 
 /* ---------- save new entry ---------- */
@@ -1569,7 +1574,7 @@ function resetForm(){
   document.getElementById('coord-preview').innerHTML = '';
   document.getElementById('f-notes').value = '';
   document.getElementById('f-weight').value = '';
-  document.getElementById('f-weather-status').textContent = tr('Συμπλήρωσε ημερομηνία και συντεταγμένες, μετά πάτα λήψη.');
+  document.getElementById('f-weather-status').textContent = tr('Συμπλήρωσε ημερομηνία και συντεταγμένες — ενημερώνεται αυτόματα.');
   lastWeatherData.f = {weatherText:'—', pressure:null, beaufort:null, windKmh:0, windDirText:'—', wave:null};
   fWeatherData = null;
   selFish.clear(); selBait.clear();
@@ -2659,7 +2664,7 @@ document.getElementById('btn-reset-colors').addEventListener('click', ()=>{
 /* ---------- header title & photo customization ---------- */
 function applyHeaderTitle(){
   const customTitle = LS.get('psarema_header_title', null);
-  const defaultTitle = 'Fish IQ';
+  const defaultTitle = 'Ψάρεμα Τελικό';
   const title = customTitle || defaultTitle;
   document.getElementById('app-title').textContent = title;
   document.getElementById('header-title-input').value = customTitle || '';
@@ -2667,7 +2672,7 @@ function applyHeaderTitle(){
 }
 document.getElementById('header-title-input').addEventListener('input', ()=>{
   const raw = document.getElementById('header-title-input').value.trim();
-  const defaultTitle = 'Fish IQ';
+  const defaultTitle = 'Ψάρεμα Τελικό';
   LS.set('psarema_header_title', raw);
   document.getElementById('app-title').textContent = raw || defaultTitle;
 });
