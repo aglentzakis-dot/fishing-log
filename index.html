@@ -403,7 +403,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 3.7 · 30 Αυγ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 3.8 · 30 Αυγ 2026</p>
     </div>
 
     <div class="card" id="advanced-settings-card" style="display:none;">
@@ -1205,7 +1205,6 @@ function repaintWeatherGrid(prefix){
 document.getElementById('f-date').addEventListener('change', ()=>repaintWeatherGrid('f'));
 document.getElementById('e-date').addEventListener('change', ()=>repaintWeatherGrid('e'));
 document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
-repaintWeatherGrid('f');
 
 /* ---------- automatic weather / pressure / wind / wave fetch ---------- */
 const WEATHER_CODES_EL = {
@@ -2986,6 +2985,7 @@ function promptAdminUnlock(){
   br.addEventListener('mousedown', ()=>{ brPressed = true; checkBoth(); });
   br.addEventListener('mouseup', ()=>{ brPressed = false; clearHold(); });
 })();
+repaintWeatherGrid('f');
 refreshPickers();
 renderFishQty();
 renderEntries();
