@@ -276,9 +276,9 @@
 
       <label id="i18n-weather-label">Καιρός & θάλασσα (αυτόματα)</label>
       <div class="weather-box" id="f-weather-box">
-        <div style="display:flex; justify-content:flex-end;"><button type="button" id="btn-weather-order-open" title="Σειρά στοιχείων" style="padding:4px 8px; opacity:0.55; background:transparent; border:none; font-size:0.95rem;">✏️</button></div>
         <div class="weather-list" id="f-weather-grid"></div>
         <div class="weather-status" id="f-weather-status" data-i18n-key="Συμπλήρωσε ημερομηνία και συντεταγμένες — ενημερώνεται αυτόματα.">Συμπλήρωσε ημερομηνία και συντεταγμένες — ενημερώνεται αυτόματα.</div>
+        <div style="display:flex; justify-content:flex-end; margin-top:2px;"><button type="button" id="btn-weather-order-open" title="Σειρά στοιχείων" style="padding:4px 8px; opacity:0.55; background:transparent; border:none; font-size:0.95rem;">✏️</button></div>
       </div>
 
       <label id="i18n-species-label">Είδη ψαριών</label>
@@ -326,8 +326,8 @@
   <!-- STATS -->
   <div class="view" id="view-stats">
     <div class="card"><h2 id="i18n-stats-header">Στατιστικά</h2><div id="stats-content"></div></div>
-    <div class="card" style="text-align:center;">
-      <button type="button" class="species-cond-btn" id="btn-open-stats-explain">ℹ️ <span class="i18n-plain">Πώς υπολογίζονται τα στατιστικά</span></button>
+    <div style="text-align:right; margin:2px 4px 0;">
+      <button type="button" id="btn-open-stats-explain" title="Πώς υπολογίζονται τα στατιστικά" style="padding:4px 8px; opacity:0.55; background:transparent; border:none; font-size:0.95rem;">ℹ️</button>
     </div>
   </div>
 
@@ -383,7 +383,7 @@
   <div class="view" id="view-settings">
     <div class="card">
       <h2 id="i18n-data-header">Δεδομένα</h2>
-      <p class="hint" id="i18n-beta-notice" style="background:#fdf1ec; border:1px solid #f0c8b4; border-radius:8px; padding:8px 10px;"><strong>Δοκιμαστική έκδοση (beta)</strong> — η εφαρμογή βρίσκεται σε δοκιμαστικό στάδιο και μπορεί να αλλάξει.</p>
+      <p class="hint" id="i18n-beta-notice" style="background:#fdf1ec; border:1px solid #f0c8b4; border-radius:8px; padding:8px 10px;"><strong>Δοκιμαστική έκδοση (beta)</strong> — προσθέτουμε συνεχώς νέα στοιχεία και τη βελτιώνουμε.</p>
       <p class="hint" id="i18n-retention-text">Τα αρχεία (χωρίς τις φωτογραφίες) φυλάσσονται για 3 μήνες μετά το backup, από τον προγραμματιστή της εφαρμογής.</p>
       <p class="hint" id="i18n-disclaimer-text" style="margin-top:8px;">Η εφαρμογή παρέχεται όπως είναι (χωρίς εγγύηση), χωρίς καμία ευθύνη για τυχόν απώλεια δεδομένων, από οποιαδήποτε αιτία (διαγραφή browser, βλάβη συσκευής, τεχνικό πρόβλημα κ.ά.). Συνιστάται τακτική εξαγωγή/αποθήκευση από τον ίδιο τον χρήστη.</p>
       <p class="hint" id="i18n-chrome-tip" style="margin-top:8px;">💡 Αν κάποια λειτουργία δεν φορτώνει σωστά (π.χ. καιρός, χάρτης, τοποθεσία), δοκίμασε να ανοίξεις την εφαρμογή σε άλλο browser (π.χ. <strong>Chrome</strong>) — μερικοί browsers περιορίζουν αυτού του τύπου τις λειτουργίες.</p>
@@ -407,7 +407,11 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Ψάρεμα Τελικό · έκδοση 4.2 · 30 Αυγ 2026</p>
+      <button type="button" class="species-cond-btn" id="btn-open-fishid">📷 <span class="i18n-plain">Αναγνώριση ψαριού από φωτογραφία</span></button>
+    </div>
+
+    <div class="card" style="text-align:center;">
+      <p class="hint" style="margin:0; color:#a3b0b5;">Ψάρεμα Τελικό · έκδοση 4.3 · 30 Αυγ 2026</p>
     </div>
 
     <div class="card" id="advanced-settings-card" style="display:none;">
@@ -590,6 +594,21 @@
   </div>
 </div>
 
+<div class="map-picker-overlay" id="fishid-modal-overlay">
+  <div class="map-picker-sheet" style="max-width:460px;">
+    <div class="map-picker-head">
+      <h2 id="i18n-fishid-header">Αναγνώριση ψαριού από φωτογραφία</h2>
+      <button type="button" class="modal-close" id="fishid-modal-close">✕</button>
+    </div>
+    <div style="padding:0 16px 16px; overflow-y:auto;">
+      <p class="hint" id="i18n-fishid-hint" style="margin-top:0;">Η αυτόματη αναγνώριση είδους μέσω AI δεν είναι ακόμα διαθέσιμη — θα προστεθεί σε επόμενη έκδοση. Προς το παρόν, η φωτογραφία αποθηκεύεται στο κινητό σου για να τη συγκρίνεις μόνος/η σου ή να τη χρησιμοποιήσεις αργότερα.</p>
+      <input type="file" id="fishid-photo-input" accept="image/*" capture="environment" style="display:none">
+      <button type="button" class="photo-add-btn" id="fishid-photo-add-btn">📷 <span class="i18n-plain">Τράβα ή επίλεξε φωτογραφία</span></button>
+      <div class="photo-grid" id="fishid-photo-grid" style="margin-top:12px;"></div>
+    </div>
+  </div>
+</div>
+
 <div id="admin-trigger-bl" style="position:fixed; bottom:0; left:0; width:56px; height:56px; z-index:2000;"></div>
 <div id="admin-trigger-br" style="position:fixed; bottom:0; right:0; width:56px; height:56px; z-index:2000;"></div>
 
@@ -690,6 +709,7 @@ const GR_TO_EN = {
   "Δεν βρέθηκαν έγκυρες συντεταγμένες.":"No valid coordinates found.","Αποτυχία λήψης δεδομένων καιρού.":"Failed to fetch weather data.",
   "Σελήνη":"Moon","Άνεμος":"Wind","Καιρός":"Weather","Πίεση":"Pressure","Θάλασσα":"Sea","🎣 Σήμερα":"🎣 Today",
   "Καλύτερες ώρες (σελήνη)":"Best hours (moon)","Νομικό πλαίσιο ερασιτεχνικής αλιείας":"Legal framework — recreational fishing",
+  "Αναγνώριση ψαριού από φωτογραφία":"Fish identification from photo","Τράβα ή επίλεξε φωτογραφία":"Take or choose a photo",
   "📍 Τα καλύτερα σημεία μου":"📍 My best spots","Σημείο":"Spot","Κιλά":"kg","Δεν υπάρχουν ακόμα καταγεγραμμένες τοποθεσίες":"No locations recorded yet",
   "Καλύτερη ώρα:":"Best time:",
   "Πώς θα βαθμολογούσες την εφαρμογή;":"How would you rate the app?",
@@ -704,7 +724,7 @@ const GR_TO_EN = {
   "Συμπλήρωσε ημερομηνία και συντεταγμένες — ενημερώνεται αυτόματα.":"Fill in a date and coordinates — updates automatically.",
   "Σειρά στοιχείων":"Item order",
   "Συνθήκες ψαρέματος":"Fishing conditions",
-  "Δοκιμαστική έκδοση (beta)":"Beta version","η εφαρμογή βρίσκεται σε δοκιμαστικό στάδιο και μπορεί να αλλάξει.":"the app is in a testing stage and may change.",
+  "Δοκιμαστική έκδοση (beta)":"Beta version","προσθέτουμε συνεχώς νέα στοιχεία και τη βελτιώνουμε.":"we're continuously adding new features and improving it.",
   "Τα αρχεία (χωρίς τις φωτογραφίες) φυλάσσονται για 3 μήνες μετά το backup, από τον προγραμματιστή της εφαρμογής.":"Files (excluding photos) are kept for 3 months after backup, by the app's developer.",
   "Η εφαρμογή παρέχεται όπως είναι (χωρίς εγγύηση), χωρίς καμία ευθύνη για τυχόν απώλεια δεδομένων, από οποιαδήποτε αιτία (διαγραφή browser, βλάβη συσκευής, τεχνικό πρόβλημα κ.ά.). Συνιστάται τακτική εξαγωγή/αποθήκευση από τον ίδιο τον χρήστη.":"The app is provided as-is (no warranty), with no liability for any data loss, from any cause (browser data clearing, device failure, technical issue, etc.). Regular export/backup by the user is recommended.",
   "Αν κάποια λειτουργία δεν φορτώνει σωστά (π.χ. καιρός, χάρτης, τοποθεσία), δοκίμασε να ανοίξεις την εφαρμογή σε άλλο browser (π.χ.":"If a feature doesn't load correctly (e.g. weather, map, location), try opening the app in a different browser (e.g.","— μερικοί browsers περιορίζουν αυτού του τύπου τις λειτουργίες.":"— some browsers restrict this type of functionality.",
@@ -2675,6 +2695,59 @@ document.getElementById('legal-modal-close').addEventListener('click', ()=>{
 document.getElementById('legal-modal-overlay').addEventListener('click', (ev)=>{
   if(ev.target.id === 'legal-modal-overlay') document.getElementById('legal-modal-overlay').classList.remove('show');
 });
+
+/* ---------- fish-ID photo tool (local storage only, no AI yet) ---------- */
+let fishidPhotos = [];
+async function loadFishidPhotos(){
+  const keys = LS.get('psarema_fishid_keys', []);
+  fishidPhotos = [];
+  for(const key of keys){
+    try{ const dataUrl = await idbGet(key); if(dataUrl) fishidPhotos.push({key, dataUrl}); }catch(e){}
+  }
+  renderFishidGrid();
+}
+function renderFishidGrid(){
+  const grid = document.getElementById('fishid-photo-grid');
+  grid.innerHTML = fishidPhotos.map((p,i)=>`<div class="photo-thumb" data-idx="${i}"><img src="${p.dataUrl}"><button type="button" class="rm" data-idx="${i}">✕</button></div>`).join('');
+  grid.querySelectorAll('img').forEach((img,i)=>{ img.addEventListener('click', ()=>openPhotoViewer(fishidPhotos[i].dataUrl)); });
+  grid.querySelectorAll('.rm').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const idx = parseInt(btn.dataset.idx);
+      const photo = fishidPhotos[idx];
+      try{ await idbDelete(photo.key); }catch(e){}
+      fishidPhotos.splice(idx,1);
+      LS.set('psarema_fishid_keys', fishidPhotos.map(p=>p.key));
+      renderFishidGrid();
+    });
+  });
+}
+document.getElementById('btn-open-fishid').addEventListener('click', async ()=>{
+  await loadFishidPhotos();
+  document.getElementById('fishid-modal-overlay').classList.add('show');
+});
+document.getElementById('fishid-modal-close').addEventListener('click', ()=>{
+  document.getElementById('fishid-modal-overlay').classList.remove('show');
+});
+document.getElementById('fishid-modal-overlay').addEventListener('click', (ev)=>{
+  if(ev.target.id === 'fishid-modal-overlay') document.getElementById('fishid-modal-overlay').classList.remove('show');
+});
+document.getElementById('fishid-photo-add-btn').addEventListener('click', ()=>{
+  document.getElementById('fishid-photo-input').click();
+});
+document.getElementById('fishid-photo-input').addEventListener('change', async (ev)=>{
+  const files = ev.target.files;
+  if(!files || !files.length) return;
+  try{
+    const dataUrl = await resizeImageFile(files[0]);
+    const key = 'fishid_' + Date.now();
+    await idbPut(key, dataUrl);
+    fishidPhotos.push({key, dataUrl});
+    LS.set('psarema_fishid_keys', fishidPhotos.map(p=>p.key));
+    renderFishidGrid();
+    toast('Η φωτογραφία αποθηκεύτηκε ✓');
+  }catch(e){ console.error(e); toast('Αποτυχία αποθήκευσης φωτογραφίας'); }
+  ev.target.value = '';
+});
 (function(){
   const picker = document.getElementById('contact-rating');
   const stars = picker.querySelectorAll('span');
@@ -2995,8 +3068,8 @@ function applyLanguage(lang){
   const betaEl = document.getElementById('i18n-beta-notice');
   if(betaEl){
     betaEl.innerHTML = lang === 'en'
-      ? `<strong>${tr('Δοκιμαστική έκδοση (beta)')}</strong> — ${tr('η εφαρμογή βρίσκεται σε δοκιμαστικό στάδιο και μπορεί να αλλάξει.')}`
-      : `<strong>Δοκιμαστική έκδοση (beta)</strong> — η εφαρμογή βρίσκεται σε δοκιμαστικό στάδιο και μπορεί να αλλάξει.`;
+      ? `<strong>${tr('Δοκιμαστική έκδοση (beta)')}</strong> — ${tr('προσθέτουμε συνεχώς νέα στοιχεία και τη βελτιώνουμε.')}`
+      : `<strong>Δοκιμαστική έκδοση (beta)</strong> — προσθέτουμε συνεχώς νέα στοιχεία και τη βελτιώνουμε.`;
   }
   const retentionEl = document.getElementById('i18n-retention-text');
   if(retentionEl) retentionEl.textContent = tr('Τα αρχεία (χωρίς τις φωτογραφίες) φυλάσσονται για 3 μήνες μετά το backup, από τον προγραμματιστή της εφαρμογής.');
@@ -3069,6 +3142,12 @@ function applyLanguage(lang){
   document.getElementById('lang-toggle').textContent = lang === 'en' ? '🇬🇧' : '🇬🇷';
   const legalTitle = document.getElementById('i18n-legal-header');
   if(legalTitle) legalTitle.textContent = lang === 'en' ? 'Legal framework — recreational fishing' : 'Νομικό πλαίσιο ερασιτεχνικής αλιείας';
+  const fishidTitle = document.getElementById('i18n-fishid-header');
+  if(fishidTitle) fishidTitle.textContent = lang === 'en' ? 'Fish identification from photo' : 'Αναγνώριση ψαριού από φωτογραφία';
+  const fishidHint = document.getElementById('i18n-fishid-hint');
+  if(fishidHint) fishidHint.textContent = lang === 'en'
+    ? 'Automatic AI species recognition is not available yet — it will be added in a future version. For now, the photo is saved on your phone so you can compare it yourself or use it later.'
+    : 'Η αυτόματη αναγνώριση είδους μέσω AI δεν είναι ακόμα διαθέσιμη — θα προστεθεί σε επόμενη έκδοση. Προς το παρόν, η φωτογραφία αποθηκεύεται στο κινητό σου για να τη συγκρίνεις μόνος/η σου ή να τη χρησιμοποιήσεις αργότερα.';
   const legalBody = document.getElementById('i18n-legal-body');
   if(legalBody){
     legalBody.innerHTML = lang === 'en'
