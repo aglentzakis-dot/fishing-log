@@ -31,7 +31,7 @@
   }
   header.pos-middle{ justify-content:center; }
   header.pos-bottom{ justify-content:flex-end; }
-  header.has-photo{ background-image: linear-gradient(160deg, rgba(11,59,76,0.72), rgba(15,79,97,0.6) 65%, rgba(28,122,133,0.55)), var(--header-photo); }
+  header.has-photo{ background-image: var(--header-gradient, linear-gradient(160deg, rgba(11,59,76,0.72), rgba(15,79,97,0.6) 65%, rgba(28,122,133,0.55))), var(--header-photo); }
   header::after{ content:""; position:absolute; right:-30px; bottom:-40px; width:160px; height:160px; border-radius:50%; background: rgba(255,255,255,0.06); }
   header h1{ font-size: 1.5rem; letter-spacing: 0.3px; margin: 0; text-shadow: 0 1px 4px rgba(0,0,0,0.35); }
   header h1 a.brand-link{ color: inherit; text-decoration: none; display:inline-flex; align-items:center; }
@@ -166,6 +166,8 @@
   .swatch{ width:38px; height:38px; border-radius:50%; border:2.5px solid rgba(0,0,0,0.08); cursor:pointer; position:relative; }
   .swatch.sel::after{ content:"✓"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; text-shadow:0 1px 2px rgba(0,0,0,0.4); }
   .ghost-btn-sm{ margin-top:14px; background:var(--white); border:1.5px solid var(--line); color:var(--deep); border-radius:9px; padding:9px 14px; font-size:0.82rem; font-weight:600; cursor:pointer; }
+  .visibility-dot{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-left:6px; background:#c9c2b0; vertical-align:middle; }
+  .visibility-dot.on{ background:#3fa34d; }
   .species-cond-list{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
   .species-cond-btn{ background: var(--foam); border:1.5px solid var(--line); color:var(--deep); border-radius:20px; padding:8px 14px; font-size:0.85rem; font-weight:600; cursor:pointer; }
   .species-cond-btn:active{ background: var(--teal); color:#fff; }
@@ -437,7 +439,11 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.2 · 30 Αυγ 2026</p>
+      <button type="button" class="species-cond-btn" id="btn-toggle-appearance">🎨 <span class="i18n-plain">Εμφάνιση εφαρμογής</span></button>
+    </div>
+
+    <div class="card" style="text-align:center;">
+      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.3 · 30 Αυγ 2026</p>
     </div>
 
     <div class="card" id="advanced-settings-card" style="display:none;">
@@ -461,6 +467,10 @@
       <input type="range" id="header-quality-slider" min="50" max="100" step="5" value="88" style="width:100%;">
       <p class="hint" style="margin-top:4px;">Μεγαλύτερη ποιότητα = πιο καθαρή φωτογραφία, αλλά μεγαλύτερο αρχείο. Ισχύει στην επόμενη φωτογραφία που θα ανεβάσεις.</p>
 
+      <label style="margin-top:14px;">Ένταση σκίασης φωτογραφίας: <span id="header-overlay-value">100%</span></label>
+      <input type="range" id="header-overlay-slider" min="0" max="100" step="5" value="100" style="width:100%;">
+      <p class="hint" style="margin-top:4px;">Ελέγχει πόσο σκούρο είναι το φόντο πίσω από τον τίτλο — χαμηλότερη τιμή = πιο διάφανο/φωτεινό, υψηλότερη = πιο σκούρο και ευανάγνωστο κείμενο.</p>
+
       <label style="margin-top:14px;">Θέση τίτλου</label>
       <div class="color-swatches" id="title-pos-options">
         <div class="chip" data-pos="top">Πάνω</div>
@@ -470,7 +480,7 @@
 
       <label style="margin-top:18px;">Κουμπί πάνω-δεξιά</label>
       <div class="footer-tools">
-        <button type="button" class="ghost-btn-sm" id="btn-toggle-equip" style="margin-top:0;">👁️ Απόκρυψη/Εμφάνιση</button>
+        <button type="button" class="ghost-btn-sm" id="btn-toggle-equip" style="margin-top:0;">👁️ Απόκρυψη/Εμφάνιση <span class="visibility-dot" id="equip-visibility-dot"></span></button>
       </div>
       <input type="text" id="equip-btn-text-input" placeholder="Κείμενο κουμπιού (π.χ. Εξοπλισμός)" style="margin-top:8px;">
       <input type="text" id="equip-btn-url-input" placeholder="Σύνδεσμος (π.χ. https://miserlis-fishing.gr/)" style="margin-top:8px;">
@@ -647,8 +657,7 @@
   </div>
 </div>
 
-<div id="admin-trigger-bl" style="position:fixed; bottom:0; left:0; width:56px; height:56px; z-index:2000;"></div>
-<div id="admin-trigger-br" style="position:fixed; bottom:0; right:0; width:56px; height:56px; z-index:2000;"></div>
+
 
 <div class="map-picker-overlay" id="map-picker-overlay">
   <div class="map-picker-sheet">
@@ -748,6 +757,7 @@ const GR_TO_EN = {
   "Σελήνη":"Moon","Άνεμος":"Wind","Καιρός":"Weather","Πίεση":"Pressure","Θάλασσα":"Sea","🎣 Σήμερα":"🎣 Today",
   "Καλύτερες ώρες (σελήνη)":"Best hours (moon)","Νομικό πλαίσιο ερασιτεχνικής αλιείας":"Legal framework — recreational fishing",
   "Αναγνώριση ψαριού από φωτογραφία":"Fish identification from photo","Τράβα ή επίλεξε φωτογραφία":"Take or choose a photo",
+  "Εμφάνιση εφαρμογής":"App appearance",
   "Η κοινοποίηση φωτογραφιών δεν υποστηρίζεται εδώ — άνοιξε το ChatGPT ή το Claude και ανέβασε τη φωτογραφία χειροκίνητα.":"Sharing photos isn't supported here — open ChatGPT or Claude and upload the photo manually.",
   "Η κοινοποίηση δεν υποστηρίζεται σε αυτόν τον browser. Δοκίμασε από την εφαρμογή στο κινητό σου.":"Sharing isn't supported in this browser. Try from the app on your phone.",
   "Κάτι πήγε στραβά με την κοινοποίηση":"Something went wrong while sharing",
@@ -3092,6 +3102,30 @@ document.getElementById('header-quality-slider').addEventListener('input', (ev)=
   LS.set('psarema_header_photo_quality', val);
   document.getElementById('header-quality-value').textContent = val + '%';
 });
+
+const HEADER_OVERLAY_BASE = [[11,59,76,0.72], [15,79,97,0.6], [28,122,133,0.55]];
+function computeHeaderGradient(strength){
+  const f = Math.max(0, Math.min(100, strength)) / 100;
+  const stops = HEADER_OVERLAY_BASE.map(([r,g,b,a], i)=>{
+    const alpha = Math.round(a * f * 100) / 100;
+    const pos = i === 1 ? ' 65%' : '';
+    return `rgba(${r},${g},${b},${alpha})${pos}`;
+  });
+  return `linear-gradient(160deg, ${stops.join(', ')})`;
+}
+function applyHeaderOverlaySlider(){
+  const val = LS.get('psarema_header_overlay', 100);
+  document.getElementById('header-overlay-slider').value = val;
+  document.getElementById('header-overlay-value').textContent = val + '%';
+  document.documentElement.style.setProperty('--header-gradient', computeHeaderGradient(val));
+}
+document.getElementById('header-overlay-slider').addEventListener('input', (ev)=>{
+  const val = parseInt(ev.target.value);
+  LS.set('psarema_header_overlay', val);
+  document.getElementById('header-overlay-value').textContent = val + '%';
+  document.documentElement.style.setProperty('--header-gradient', computeHeaderGradient(val));
+});
+applyHeaderOverlaySlider();
 applyHeaderQualitySlider();
 
 /* ---------- header title position ---------- */
@@ -3122,6 +3156,8 @@ function applyEquipButton(){
   link.href = url;
   document.getElementById('equip-btn-text-input').value = text;
   document.getElementById('equip-btn-url-input').value = url;
+  const dot = document.getElementById('equip-visibility-dot');
+  if(dot) dot.classList.toggle('on', !hidden);
 }
 document.getElementById('btn-toggle-equip').addEventListener('click', ()=>{
   const hidden = LS.get('psarema_equip_btn_hidden', false);
@@ -3389,36 +3425,10 @@ document.getElementById('lang-toggle').addEventListener('click', ()=>{
 });
 applyLanguage(currentLang);
 
-function promptAdminUnlock(){
-  const code = prompt('Κωδικός πρόσβασης:');
-  if(code === null) return;
-  if(code === '2926'){
-    document.getElementById('advanced-settings-card').style.display = '';
-  } else {
-    alert(tr('Λάθος κωδικός'));
-  }
-}
-(function(){
-  let blPressed = false, brPressed = false, holdTimer = null;
-  function checkBoth(){
-    if(blPressed && brPressed && !holdTimer){
-      holdTimer = setTimeout(()=>{ promptAdminUnlock(); holdTimer = null; }, 5000);
-    }
-  }
-  function clearHold(){
-    if(holdTimer){ clearTimeout(holdTimer); holdTimer = null; }
-  }
-  const bl = document.getElementById('admin-trigger-bl');
-  const br = document.getElementById('admin-trigger-br');
-  bl.addEventListener('touchstart', ()=>{ blPressed = true; checkBoth(); }, {passive:true});
-  bl.addEventListener('touchend', ()=>{ blPressed = false; clearHold(); }, {passive:true});
-  bl.addEventListener('mousedown', ()=>{ blPressed = true; checkBoth(); });
-  bl.addEventListener('mouseup', ()=>{ blPressed = false; clearHold(); });
-  br.addEventListener('touchstart', ()=>{ brPressed = true; checkBoth(); }, {passive:true});
-  br.addEventListener('touchend', ()=>{ brPressed = false; clearHold(); }, {passive:true});
-  br.addEventListener('mousedown', ()=>{ brPressed = true; checkBoth(); });
-  br.addEventListener('mouseup', ()=>{ brPressed = false; clearHold(); });
-})();
+document.getElementById('btn-toggle-appearance').addEventListener('click', ()=>{
+  const card = document.getElementById('advanced-settings-card');
+  card.style.display = (card.style.display === 'none') ? '' : 'none';
+});
 repaintWeatherGrid('f');
 refreshPickers();
 renderFishQty();
