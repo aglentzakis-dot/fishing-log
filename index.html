@@ -62,7 +62,7 @@
   .card h2{ font-size: 1.05rem; color: var(--deep); margin-bottom: 12px; }
   label{ display:block; font-size: 0.78rem; font-weight: 600; color: #4d6169; margin: 12px 0 5px; text-transform: uppercase; letter-spacing: 0.3px; }
   label:first-of-type{ margin-top:0; }
-  input[type=text], input[type=date], input[type=time], input[type=number], select, textarea{
+  input[type=text], input[type=email], input[type=date], input[type=time], input[type=number], select, textarea{
     width: 100%; padding: 11px 12px; border: 1.5px solid var(--line); border-radius: 9px;
     font-size: 0.95rem; font-family:'Inter',sans-serif; background: var(--foam); color: var(--ink); resize: vertical;
   }
@@ -91,6 +91,11 @@
   .addrow button{ background: var(--deep); color:#fff; border:none; border-radius:8px; padding: 0 14px; font-weight:600; cursor:pointer; }
   .qty-list{ margin-top:10px; display:flex; flex-direction:column; gap:8px; }
   .qty-item{ display:flex; align-items:center; justify-content:space-between; background: var(--foam); border:1px solid var(--line); border-radius:9px; padding: 8px 12px; }
+  .stepper{ display:flex; align-items:center; gap:6px; }
+  .stepper-btn{ width:30px; height:30px; border-radius:8px; border:1.5px solid var(--line); background:var(--white); color:var(--deep); font-size:1.1rem; font-weight:700; cursor:pointer; padding:0; line-height:1; display:flex; align-items:center; justify-content:center; }
+  .stepper-btn:active{ background: var(--teal); color:#fff; border-color:var(--teal); }
+  .weight-stepper{ display:flex; align-items:center; gap:8px; }
+  .weight-stepper input{ flex:1; }
   .qty-item span{ font-weight:600; font-size:0.9rem; }
   .qty-item input{ width: 70px; padding: 6px 8px; text-align:center; }
   .geo-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 6px; }
@@ -293,7 +298,11 @@
       <div class="qty-list" id="fish-qty-list"></div>
 
       <label id="i18n-weight-label">Συνολικά κιλά ψαριάς</label>
-      <input type="number" id="f-weight" min="0" step="0.1" placeholder="π.χ. 2.5">
+      <div class="weight-stepper">
+        <button type="button" class="stepper-btn" data-weight-target="f-weight" data-dir="-1">−</button>
+        <input type="number" id="f-weight" min="0" step="0.1" placeholder="π.χ. 2.5">
+        <button type="button" class="stepper-btn" data-weight-target="f-weight" data-dir="1">+</button>
+      </div>
 
       <label id="i18n-bait-label">Δολώματα</label>
       <details class="picker" id="bait-picker">
@@ -428,7 +437,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.1 · 30 Αυγ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.2 · 30 Αυγ 2026</p>
     </div>
 
     <div class="card" id="advanced-settings-card" style="display:none;">
@@ -514,7 +523,11 @@
     <div class="qty-list" id="e-fish-qty-list"></div>
 
     <label id="i18n-e-weight-label">Συνολικά κιλά ψαριάς</label>
-    <input type="number" id="e-weight" min="0" step="0.1">
+    <div class="weight-stepper">
+      <button type="button" class="stepper-btn" data-weight-target="e-weight" data-dir="-1">−</button>
+      <input type="number" id="e-weight" min="0" step="0.1">
+      <button type="button" class="stepper-btn" data-weight-target="e-weight" data-dir="1">+</button>
+    </div>
 
     <label id="i18n-e-bait-label">Δολώματα</label>
     <details class="picker" id="e-bait-picker">
@@ -1016,10 +1029,23 @@ function renderFishQty(){
   [...selFish].forEach(name=>{
     const row = document.createElement('div');
     row.className = 'qty-item'; row.dataset.name = name;
-    row.innerHTML = `<span>${name}</span><input type="number" min="0" value="${prev[name] || 1}">`;
+    row.innerHTML = `<span>${name}</span><div class="stepper"><button type="button" class="stepper-btn" data-dir="-1">−</button><input type="number" min="0" value="${prev[name] || 1}"><button type="button" class="stepper-btn" data-dir="1">+</button></div>`;
     wrap.appendChild(row);
   });
+  wireQtySteppers(wrap, 'f');
   updateFishFollowups('f');
+}
+function wireQtySteppers(wrap, prefix){
+  wrap.querySelectorAll('.stepper-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const input = btn.parentElement.querySelector('input');
+      const dir = parseInt(btn.dataset.dir);
+      const current = parseInt(input.value) || 0;
+      input.value = Math.max(0, current + dir);
+      input.dispatchEvent(new Event('input', {bubbles:true}));
+      updateFishFollowups(prefix);
+    });
+  });
 }
 function updateFishFollowups(prefix){
   const qtyListId = prefix === 'f' ? 'fish-qty-list' : 'e-fish-qty-list';
@@ -1222,6 +1248,17 @@ let eTimeOutIsAuto = false;
 document.getElementById('fish-qty-list').addEventListener('input', ()=>updateFishFollowups('f'));
 document.getElementById('e-fish-qty-list').addEventListener('input', ()=>updateFishFollowups('e'));
 document.getElementById('f-weight').addEventListener('input', ()=>updateFishFollowups('f'));
+document.querySelectorAll('.stepper-btn[data-weight-target]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const input = document.getElementById(btn.dataset.weightTarget);
+    const dir = parseInt(btn.dataset.dir);
+    const current = parseFloat(input.value) || 0;
+    let next = Math.round((current + dir*0.1) * 10) / 10;
+    if(next < 0) next = 0;
+    input.value = next;
+    input.dispatchEvent(new Event('input', {bubbles:true}));
+  });
+});
 document.getElementById('e-weight').addEventListener('input', ()=>updateFishFollowups('e'));
 document.getElementById('f-timein').addEventListener('input', ()=>updateTimeoutHighlight('f'));
 document.getElementById('f-timeout').addEventListener('input', ()=>updateTimeoutHighlight('f'));
@@ -1851,9 +1888,10 @@ function renderEditFishQty(existingFish){
     const val = prev[name] !== undefined ? prev[name] : ((existingFish && existingFish[name]) || 1);
     const row = document.createElement('div');
     row.className = 'qty-item'; row.dataset.name = name;
-    row.innerHTML = `<span>${name}</span><input type="number" min="0" value="${val}">`;
+    row.innerHTML = `<span>${name}</span><div class="stepper"><button type="button" class="stepper-btn" data-dir="-1">−</button><input type="number" min="0" value="${val}"><button type="button" class="stepper-btn" data-dir="1">+</button></div>`;
     wrap.appendChild(row);
   });
+  wireQtySteppers(wrap, 'e');
   updateFishFollowups('e');
 }
 document.getElementById('modal-close').addEventListener('click', closeModal);
