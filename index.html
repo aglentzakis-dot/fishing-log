@@ -443,44 +443,53 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.3 · 30 Αυγ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.4 · 30 Αυγ 2026</p>
     </div>
 
     <div class="card" id="advanced-settings-card" style="display:none;">
-      <h2>Εμφάνιση</h2>
-      <label>Χρώμα φόντου</label>
+      <h2 id="i18n-appearance-header" class="i18n-plain">Εμφάνιση</h2>
+      <label id="i18n-bg-color-label" class="i18n-plain">Χρώμα φόντου</label>
       <div class="color-swatches" id="bg-swatches"></div>
-      <label style="margin-top:14px;">Χρώμα κεφαλίδας</label>
+      <label style="margin-top:14px;" id="i18n-header-color-label" class="i18n-plain">Χρώμα κεφαλίδας</label>
       <div class="color-swatches" id="header-swatches"></div>
-      <button type="button" class="ghost-btn-sm" id="btn-reset-colors">↺ Επαναφορά προεπιλογών</button>
+      <button type="button" class="ghost-btn-sm" id="btn-reset-colors">↺ <span id="i18n-reset-colors-text" class="i18n-plain">Επαναφορά προεπιλογών</span></button>
 
-      <label style="margin-top:18px;">Τίτλος εφαρμογής</label>
+      <label style="margin-top:18px;" id="i18n-title-label" class="i18n-plain">Τίτλος εφαρμογής</label>
       <input type="text" id="header-title-input" placeholder="Fish IQ">
 
-      <label style="margin-top:14px;">Φωτογραφία κεφαλίδας</label>
+      <label style="margin-top:14px;" id="i18n-header-presets-label" class="i18n-plain">Έτοιμες φωτογραφίες</label>
+      <div class="photo-grid" id="header-preset-grid" style="gap:8px;">
+        <img src="header-presets/preset-1.jpg" class="header-preset-thumb" data-preset="header-presets/preset-1.jpg" style="width:76px; height:56px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid transparent;">
+        <img src="header-presets/preset-2.jpg" class="header-preset-thumb" data-preset="header-presets/preset-2.jpg" style="width:76px; height:56px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid transparent;">
+        <img src="header-presets/preset-3.jpg" class="header-preset-thumb" data-preset="header-presets/preset-3.jpg" style="width:76px; height:56px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid transparent;">
+        <img src="header-presets/preset-4.jpg" class="header-preset-thumb" data-preset="header-presets/preset-4.jpg" style="width:76px; height:56px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid transparent;">
+      </div>
+      <p class="hint i18n-plain" id="i18n-header-presets-hint" style="margin-top:4px;">Πάτα μια έτοιμη φωτογραφία για να την ορίσεις κατευθείαν, ή ανέβασε τη δική σου παρακάτω.</p>
+
+      <label style="margin-top:14px;" id="i18n-header-photo-label" class="i18n-plain">Δική σου φωτογραφία</label>
       <input type="file" id="header-photo-input" accept="image/*" style="display:none">
       <div class="footer-tools">
-        <button type="button" id="btn-header-photo">🖼️ Επιλογή φωτογραφίας</button>
-        <button type="button" id="btn-header-photo-clear">✕ Αφαίρεση</button>
+        <button type="button" id="btn-header-photo">🖼️ <span id="i18n-header-photo-btn-text" class="i18n-plain">Επιλογή φωτογραφίας</span></button>
+        <button type="button" id="btn-header-photo-clear">✕ <span id="i18n-header-photo-clear-text" class="i18n-plain">Αφαίρεση</span></button>
       </div>
-      <label style="margin-top:10px;">Ποιότητα φωτογραφίας: <span id="header-quality-value">88%</span></label>
+      <label style="margin-top:10px;"><span id="i18n-quality-label" class="i18n-plain">Ποιότητα φωτογραφίας</span>: <span id="header-quality-value">88%</span></label>
       <input type="range" id="header-quality-slider" min="50" max="100" step="5" value="88" style="width:100%;">
-      <p class="hint" style="margin-top:4px;">Μεγαλύτερη ποιότητα = πιο καθαρή φωτογραφία, αλλά μεγαλύτερο αρχείο. Ισχύει στην επόμενη φωτογραφία που θα ανεβάσεις.</p>
+      <p class="hint i18n-plain" id="i18n-quality-hint" style="margin-top:4px;">Μεγαλύτερη ποιότητα = πιο καθαρή φωτογραφία, αλλά μεγαλύτερο αρχείο. Ισχύει στην επόμενη φωτογραφία που θα ανεβάσεις.</p>
 
-      <label style="margin-top:14px;">Ένταση σκίασης φωτογραφίας: <span id="header-overlay-value">100%</span></label>
+      <label style="margin-top:14px;"><span id="i18n-overlay-label" class="i18n-plain">Ένταση σκίασης φωτογραφίας</span>: <span id="header-overlay-value">100%</span></label>
       <input type="range" id="header-overlay-slider" min="0" max="100" step="5" value="100" style="width:100%;">
-      <p class="hint" style="margin-top:4px;">Ελέγχει πόσο σκούρο είναι το φόντο πίσω από τον τίτλο — χαμηλότερη τιμή = πιο διάφανο/φωτεινό, υψηλότερη = πιο σκούρο και ευανάγνωστο κείμενο.</p>
+      <p class="hint i18n-plain" id="i18n-overlay-hint" style="margin-top:4px;">Ελέγχει πόσο σκούρο είναι το φόντο πίσω από τον τίτλο — χαμηλότερη τιμή = πιο διάφανο/φωτεινό, υψηλότερη = πιο σκούρο και ευανάγνωστο κείμενο.</p>
 
-      <label style="margin-top:14px;">Θέση τίτλου</label>
+      <label style="margin-top:14px;" id="i18n-title-pos-label" class="i18n-plain">Θέση τίτλου</label>
       <div class="color-swatches" id="title-pos-options">
-        <div class="chip" data-pos="top">Πάνω</div>
-        <div class="chip" data-pos="middle">Μέση</div>
-        <div class="chip" data-pos="bottom">Κάτω</div>
+        <div class="chip i18n-plain" data-pos="top" id="i18n-pos-top">Πάνω</div>
+        <div class="chip i18n-plain" data-pos="middle" id="i18n-pos-middle">Μέση</div>
+        <div class="chip i18n-plain" data-pos="bottom" id="i18n-pos-bottom">Κάτω</div>
       </div>
 
-      <label style="margin-top:18px;">Κουμπί πάνω-δεξιά</label>
+      <label style="margin-top:18px;" id="i18n-equip-btn-label" class="i18n-plain">Κουμπί πάνω-δεξιά</label>
       <div class="footer-tools">
-        <button type="button" class="ghost-btn-sm" id="btn-toggle-equip" style="margin-top:0;">👁️ Απόκρυψη/Εμφάνιση <span class="visibility-dot" id="equip-visibility-dot"></span></button>
+        <button type="button" class="ghost-btn-sm" id="btn-toggle-equip" style="margin-top:0;">👁️ <span id="i18n-equip-toggle-text" class="i18n-plain">Απόκρυψη/Εμφάνιση</span> <span class="visibility-dot" id="equip-visibility-dot"></span></button>
       </div>
       <input type="text" id="equip-btn-text-input" placeholder="Κείμενο κουμπιού (π.χ. Εξοπλισμός)" style="margin-top:8px;">
       <input type="text" id="equip-btn-url-input" placeholder="Σύνδεσμος (π.χ. https://miserlis-fishing.gr/)" style="margin-top:8px;">
@@ -758,6 +767,16 @@ const GR_TO_EN = {
   "Καλύτερες ώρες (σελήνη)":"Best hours (moon)","Νομικό πλαίσιο ερασιτεχνικής αλιείας":"Legal framework — recreational fishing",
   "Αναγνώριση ψαριού από φωτογραφία":"Fish identification from photo","Τράβα ή επίλεξε φωτογραφία":"Take or choose a photo",
   "Εμφάνιση εφαρμογής":"App appearance",
+  "Εμφάνιση":"Appearance","Χρώμα φόντου":"Background color","Χρώμα κεφαλίδας":"Header color","Επαναφορά προεπιλογών":"Reset to defaults",
+  "Τίτλος εφαρμογής":"App title","Έτοιμες φωτογραφίες":"Preset photos",
+  "Πάτα μια έτοιμη φωτογραφία για να την ορίσεις κατευθείαν, ή ανέβασε τη δική σου παρακάτω.":"Tap a preset photo to set it directly, or upload your own below.",
+  "Δική σου φωτογραφία":"Your own photo","Επιλογή φωτογραφίας":"Choose photo","Αφαίρεση":"Remove",
+  "Ποιότητα φωτογραφίας":"Photo quality",
+  "Μεγαλύτερη ποιότητα = πιο καθαρή φωτογραφία, αλλά μεγαλύτερο αρχείο. Ισχύει στην επόμενη φωτογραφία που θα ανεβάσεις.":"Higher quality = a sharper photo, but a bigger file. Applies to the next photo you upload.",
+  "Ένταση σκίασης φωτογραφίας":"Photo overlay darkness",
+  "Ελέγχει πόσο σκούρο είναι το φόντο πίσω από τον τίτλο — χαμηλότερη τιμή = πιο διάφανο/φωτεινό, υψηλότερη = πιο σκούρο και ευανάγνωστο κείμενο.":"Controls how dark the background is behind the title — lower = more transparent/bright, higher = darker with more readable text.",
+  "Θέση τίτλου":"Title position","Πάνω":"Top","Μέση":"Middle","Κάτω":"Bottom",
+  "Κουμπί πάνω-δεξιά":"Top-right button","Απόκρυψη/Εμφάνιση":"Hide/Show",
   "Η κοινοποίηση φωτογραφιών δεν υποστηρίζεται εδώ — άνοιξε το ChatGPT ή το Claude και ανέβασε τη φωτογραφία χειροκίνητα.":"Sharing photos isn't supported here — open ChatGPT or Claude and upload the photo manually.",
   "Η κοινοποίηση δεν υποστηρίζεται σε αυτόν τον browser. Δοκίμασε από την εφαρμογή στο κινητό σου.":"Sharing isn't supported in this browser. Try from the app on your phone.",
   "Κάτι πήγε στραβά με την κοινοποίηση":"Something went wrong while sharing",
@@ -3063,6 +3082,7 @@ async function applyHeaderPhoto(){
       header.classList.add('has-photo');
     }
   }catch(e){ console.error('header photo load failed', e); }
+  highlightSelectedPreset();
 }
 async function saveHeaderPhoto(file){
   try{
@@ -3081,13 +3101,40 @@ async function saveHeaderPhoto(file){
 async function clearHeaderPhoto(){
   try{ await idbDelete('header-photo'); }catch(e){}
   LS.set('psarema_has_header_photo', false);
+  LS.set('psarema_header_preset', '');
   document.getElementById('app-header').classList.remove('has-photo');
+  highlightSelectedPreset();
   toast('Η φωτογραφία κεφαλίδας αφαιρέθηκε');
 }
+function highlightSelectedPreset(){
+  const active = LS.get('psarema_header_preset', '');
+  document.querySelectorAll('.header-preset-thumb').forEach(img=>{
+    img.style.borderColor = (img.dataset.preset === active) ? 'var(--teal)' : 'transparent';
+  });
+}
+async function applyHeaderPreset(path){
+  try{
+    const res = await fetch(path);
+    const blob = await res.blob();
+    const file = new File([blob], 'preset.jpg', {type: blob.type || 'image/jpeg'});
+    await saveHeaderPhoto(file);
+    LS.set('psarema_header_preset', path);
+    highlightSelectedPreset();
+  }catch(e){
+    console.error('preset photo load failed', e);
+    toast('Αποτυχία φόρτωσης φωτογραφίας');
+  }
+}
+document.querySelectorAll('.header-preset-thumb').forEach(img=>{
+  img.addEventListener('click', ()=>applyHeaderPreset(img.dataset.preset));
+});
 document.getElementById('btn-header-photo').addEventListener('click', ()=>document.getElementById('header-photo-input').click());
 document.getElementById('header-photo-input').addEventListener('change', (ev)=>{
   const file = ev.target.files[0];
-  if(file) saveHeaderPhoto(file);
+  if(file){
+    LS.set('psarema_header_preset', '');
+    saveHeaderPhoto(file).then(highlightSelectedPreset);
+  }
   ev.target.value = '';
 });
 document.getElementById('btn-header-photo-clear').addEventListener('click', clearHeaderPhoto);
