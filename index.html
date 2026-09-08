@@ -490,12 +490,14 @@
         <div class="chip i18n-plain" data-pos="bottom" id="i18n-pos-bottom">Κάτω</div>
       </div>
 
+      <div id="equip-btn-settings">
       <label style="margin-top:18px;" id="i18n-equip-btn-label" class="i18n-plain">Κουμπί πάνω-δεξιά</label>
       <div class="footer-tools">
         <button type="button" class="ghost-btn-sm" id="btn-toggle-equip" style="margin-top:0;">👁️ <span id="i18n-equip-toggle-text" class="i18n-plain">Απόκρυψη/Εμφάνιση</span> <span class="visibility-dot" id="equip-visibility-dot"></span></button>
       </div>
       <input type="text" id="equip-btn-text-input" placeholder="Κείμενο κουμπιού (π.χ. Εξοπλισμός)" style="margin-top:8px;">
       <input type="text" id="equip-btn-url-input" placeholder="Σύνδεσμος (π.χ. https://miserlis-fishing.gr/)" style="margin-top:8px;">
+      </div>
     </div>
 
     <div class="card" style="text-align:center;">
@@ -3256,6 +3258,9 @@ function applyEquipButton(){
   if(partnerRemote){
     if(partnerRemote.hidden){ hidden = true; }
     else { text = partnerRemote.text; url = partnerRemote.url; hidden = false; }
+    // Η θέση είναι δεσμευμένη: κρύβουμε τα χειριστήρια από τον χρήστη
+    const box = document.getElementById('equip-btn-settings');
+    if(box) box.style.display = 'none';
   }
   link.style.display = hidden ? 'none' : '';
   link.textContent = text;
