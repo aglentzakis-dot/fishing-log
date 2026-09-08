@@ -1,15 +1,43 @@
 {
+  "id": "/fishing-log/",
   "name": "Fish IQ",
   "short_name": "Fish IQ",
-  "start_url": "./index.html",
+  "description": "Ημερολόγιο ψαρέματος με στατιστικά, καιρό, παλίρροια, σελήνη και προβλέψεις.",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#F2ECDD",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "portrait",
+  "background_color": "#0B3B4C",
   "theme_color": "#0B3B4C",
+  "lang": "el",
+  "dir": "ltr",
+  "categories": ["sports", "lifestyle", "utilities"],
+  "prefer_related_applications": false,
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
