@@ -82,6 +82,9 @@ self.addEventListener('fetch', event => {
   // Ζωντανά δεδομένα: καθαρό δίκτυο, καμία παρέμβαση
   if (NEVER_CACHE.some(host => url.hostname.endsWith(host))) return;
 
+  // Η ρύθμιση συνεργάτη πρέπει να είναι πάντα φρέσκια
+  if (url.pathname.endsWith('partner.json')) return;
+
   // Άνοιγμα της εφαρμογής: δίκτυο πρώτα
   if (req.mode === 'navigate') {
     event.respondWith(

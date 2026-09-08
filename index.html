@@ -20,6 +20,13 @@
     --coral: #E2653F; --ink: #12262B; --line: #C9D8D4; --white: #FFFFFF; --danger: #B23A2E;
   }
   *{box-sizing:border-box;}
+  .pred-reliability{
+    font-size:0.78rem; line-height:1.35; border-radius:10px;
+    padding:7px 10px; margin:6px 0 10px; border:1px solid;
+  }
+  .pred-rel-low{ background:rgba(226,101,63,0.12); border-color:rgba(226,101,63,0.45); }
+  .pred-rel-mid{ background:rgba(28,122,133,0.12); border-color:rgba(28,122,133,0.45); }
+  .pred-rel-good{ background:rgba(46,139,87,0.12); border-color:rgba(46,139,87,0.45); }
   html,body{margin:0;padding:0; max-width:100%; overflow-x:hidden;}
   body{ background: var(--foam); color: var(--ink); font-family: 'Inter', sans-serif; padding-bottom: 90px; -webkit-tap-highlight-color: transparent; }
   h1,h2,h3{ font-family: 'Bitter', serif; margin: 0; }
@@ -1597,7 +1604,7 @@ const WEATHER_ITEM_DEFAULT_ORDER = ['weather','temp','seatemp','pressure','press
 
 function computePersonalization(scores){
   const withWeather = (typeof entries !== 'undefined' ? entries : []).filter(e => e.weather && e.weather.beaufort != null);
-  if(withWeather.length < 5) return null;
+  if(withWeather.length < 3) return null;
   let allSuccess = 0, matchSum = 0, matchCount = 0;
   withWeather.forEach(e=>{
     const eScores = scoreComponents(e.weather, e.date);
@@ -1607,7 +1614,7 @@ function computePersonalization(scores){
       + Math.abs(eScores.waveScore-scores.waveScore) + Math.abs(eScores.pressureScore-scores.pressureScore);
     if(dist <= 3){ matchCount++; if(hasFish) matchSum++; }
   });
-  if(matchCount < 3) return null;
+  if(matchCount < 2) return null;
   const matchRate = matchSum / matchCount;
   const baseRate = allSuccess / withWeather.length;
   const confidence = Math.min(1, matchCount / 8);
@@ -2251,10 +2258,38 @@ async function predictBestTime(){
   resultEl.innerHTML = `<div class="hint">${tr('Υπολογισμός...')}</div>`;
 
   const successEntries = entries.filter(e => e.fish && Object.values(e.fish).some(q=>q>0) && parseCoords(e.coords));
-  if(successEntries.length < 5){
-    resultEl.innerHTML = `<div class="hint">${currentLang==='en' ? `You need at least 5 entries with fish and valid coordinates for a reliable prediction (you currently have ${successEntries.length}).` : `Χρειάζονται τουλάχιστον 5 καταχωρήσεις με ψάρια και έγκυρες συντεταγμένες για αξιόπιστη πρόβλεψη (έχεις προς το παρόν ${successEntries.length}).`}</div>`;
+  if(successEntries.length < 1){
+    resultEl.innerHTML = `<div class="hint">${currentLang==='en' ? 'You need at least one entry with fish and valid coordinates to get a prediction.' : 'Χρειάζεται τουλάχιστον μία καταχώρηση με ψάρια και έγκυρες συντεταγμένες για να βγει πρόβλεψη.'}</div>`;
     return;
   }
+
+  // Δείκτης αξιοπιστίας: όσο περισσότερες εξορμήσεις, τόσο καλύτερη η πρόβλεψη
+  const sampleN = successEntries.length;
+  const reliability = (()=>{
+    const en = currentLang === 'en';
+    if(sampleN < 5) return {
+      cls: 'low',
+      icon: '⚠️',
+      text: en
+        ? `Low reliability — based on only ${sampleN} ${sampleN===1?'trip':'trips'} with fish. The more trips you log, the sharper the prediction.`
+        : `Χαμηλή αξιοπιστία — στηρίζεται σε ${sampleN} ${sampleN===1?'εξόρμηση':'εξορμήσεις'} με ψάρια. Όσο περισσότερες εξορμήσεις καταγράφεις, τόσο πιο ακριβής γίνεται.`
+    };
+    if(sampleN < 10) return {
+      cls: 'mid',
+      icon: '📊',
+      text: en
+        ? `Moderate reliability — ${sampleN} trips with fish. From 10 trips and up it improves noticeably.`
+        : `Μέτρια αξιοπιστία — ${sampleN} εξορμήσεις με ψάρια. Από 10 εξορμήσεις και πάνω βελτιώνεται αισθητά.`
+    };
+    return {
+      cls: 'good',
+      icon: '✅',
+      text: en
+        ? `Good data base — ${sampleN} trips with fish. Keep logging to make it even better.`
+        : `Καλή βάση δεδομένων — ${sampleN} εξορμήσεις με ψάρια. Συνέχισε να καταγράφεις για ακόμα καλύτερα αποτελέσματα.`
+    };
+  })();
+  const reliabilityHtml = `<div class="pred-reliability pred-rel-${reliability.cls}">${reliability.icon} ${reliability.text}</div>`;
 
   const weekdayCounts = new Array(7).fill(0);
   const hourBuckets = new Array(8).fill(0);
@@ -2350,6 +2385,7 @@ async function predictBestTime(){
     const moonLine = bestDtMoonPh !== null ? (()=>{ const [em,lb] = moonLabel(bestDtMoonPh); return `<div class="condition-line">${em} ${lb}</div>`; })() : '';
     resultEl.innerHTML = `<div class="condition-card">
       <div class="condition-title">🔮 ${tr('Πιθανή καλύτερη στιγμή')}</div>
+      ${reliabilityHtml}
       <div class="condition-line">${dayName}, ${dateStr} ${currentLang==='en' ? 'around' : 'γύρω στις'} ${hourStr}</div>
       <div class="condition-line">📍 ${bestLocName}</div>
       ${bestSpecies ? `<div class="condition-line">🐟 ${tr('Πιθανό είδος:')} ${tr(bestSpecies[0])}</div>` : ''}
@@ -3193,11 +3229,34 @@ document.querySelectorAll('#title-pos-options .chip').forEach(chip=>{
 });
 
 /* ---------- equip button: hide / rename / relink ---------- */
+let partnerRemote = null;
+
+/* Απομακρυσμένη ρύθμιση συνεργαζόμενου καταστήματος.
+   Διαβάζεται από το partner.json δίπλα στο index.html - αλλάζεις εκεί όνομα/σύνδεσμο
+   και το βλέπουν όλοι οι χρήστες χωρίς νέα έκδοση εφαρμογής. */
+async function loadPartner(){
+  try{
+    const res = await fetch('partner.json?t=' + Math.floor(Date.now()/3600000), { cache:'no-store' });
+    if(!res.ok) return;
+    const data = await res.json();
+    if(data && data.enabled === true && typeof data.url === 'string' && /^https:\/\//.test(data.url)){
+      partnerRemote = { text: String(data.text || 'e-shop').slice(0,24), url: data.url };
+    } else if(data && data.enabled === false){
+      partnerRemote = { hidden: true };
+    }
+    applyEquipButton();
+  }catch(e){ /* χωρίς σύνδεση ή χωρίς αρχείο: κρατάμε τις τοπικές ρυθμίσεις */ }
+}
+
 function applyEquipButton(){
   const link = document.getElementById('equip-link');
-  const hidden = LS.get('psarema_equip_btn_hidden', false);
-  const text = LS.get('psarema_equip_btn_text', 'e-shop');
-  const url = LS.get('psarema_equip_btn_url', 'https://miserlis-fishing.gr/');
+  let hidden = LS.get('psarema_equip_btn_hidden', false);
+  let text = LS.get('psarema_equip_btn_text', 'e-shop');
+  let url = LS.get('psarema_equip_btn_url', 'https://miserlis-fishing.gr/');
+  if(partnerRemote){
+    if(partnerRemote.hidden){ hidden = true; }
+    else { text = partnerRemote.text; url = partnerRemote.url; hidden = false; }
+  }
   link.style.display = hidden ? 'none' : '';
   link.textContent = text;
   link.href = url;
@@ -3206,6 +3265,7 @@ function applyEquipButton(){
   const dot = document.getElementById('equip-visibility-dot');
   if(dot) dot.classList.toggle('on', !hidden);
 }
+loadPartner();
 document.getElementById('btn-toggle-equip').addEventListener('click', ()=>{
   const hidden = LS.get('psarema_equip_btn_hidden', false);
   LS.set('psarema_equip_btn_hidden', !hidden);
