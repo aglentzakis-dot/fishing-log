@@ -63,6 +63,23 @@
     padding: 10px 14px; border-radius: 10px 10px 0 0; font-family:'Inter',sans-serif; font-weight:600; font-size: 0.82rem; cursor:pointer;
   }
   nav.tabs button.active{ background: var(--foam); color: var(--deep); }
+  nav.tabs{ scrollbar-width:none; }
+  nav.tabs::-webkit-scrollbar{ display:none; }
+  .tabs-scroll-hint{
+    background: var(--deep); padding: 6px 12px 5px;
+    display:none;
+  }
+  .tabs-scroll-hint.on{ display:block; }
+  .tabs-scroll-hint .tabs-scroll-thumb{
+    height:3px; border-radius:3px; background: rgba(255,255,255,0.85);
+    width:30%; margin-left:0; transition: margin-left 0.12s linear;
+  }
+  .tabs-scroll-hint{ position:relative; }
+  .tabs-scroll-hint::before{
+    content:""; position:absolute; left:12px; right:12px; top:6px;
+    height:3px; border-radius:3px; background: rgba(255,255,255,0.22);
+  }
+  .tabs-scroll-hint .tabs-scroll-thumb{ position:relative; z-index:1; }
   main{ max-width: 640px; margin: 0 auto; padding: 16px; }
   .view{ display:none; } .view.active{ display:block; }
   .card{ background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
@@ -258,6 +275,7 @@
   <button data-view="predictions">Προβλέψεις</button>
   <button data-view="settings">Ρυθμίσεις</button>
 </nav>
+<div class="tabs-scroll-hint" id="tabs-scroll-hint"><div class="tabs-scroll-thumb" id="tabs-scroll-thumb"></div></div>
 
 <main>
 
@@ -991,6 +1009,28 @@ document.getElementById('e-photo-input-camera').addEventListener('change', (ev)=
 document.getElementById('e-photo-input-gallery').addEventListener('change', (ev)=>{ addPhotosToGrid('e-photo-grid', ev.target.files, 3); ev.target.value = ''; });
 
 /* ---------- tabs ---------- */
+/* Ένδειξη ότι η μπάρα καρτελών σύρεται αριστερά-δεξιά */
+(function(){
+  const nav = document.querySelector('nav.tabs');
+  const hint = document.getElementById('tabs-scroll-hint');
+  const thumb = document.getElementById('tabs-scroll-thumb');
+  if(!nav || !hint || !thumb) return;
+  function update(){
+    const extra = nav.scrollWidth - nav.clientWidth;
+    if(extra <= 4){ hint.classList.remove('on'); return; }
+    hint.classList.add('on');
+    const ratio = nav.clientWidth / nav.scrollWidth;
+    const w = Math.max(18, ratio * 100);
+    thumb.style.width = w + '%';
+    const pos = nav.scrollLeft / extra;
+    thumb.style.marginLeft = (pos * (100 - w)) + '%';
+  }
+  nav.addEventListener('scroll', update, { passive:true });
+  window.addEventListener('resize', update);
+  setTimeout(update, 0);
+  setTimeout(update, 400);
+})();
+
 document.querySelectorAll('nav.tabs button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
