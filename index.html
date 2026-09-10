@@ -855,6 +855,7 @@ const GR_TO_EN = {
   "Ψάρια ανά φάση σελήνης":"Fish by moon phase","Ψάρια ανά πίεση":"Fish by pressure","Ψάρια ανά είδος":"Fish by species",
   "Ψάρια ανά παλίρροια":"Fish by tide","Καιρικές συνθήκες κατά την ψαριά":"Weather during the trip",
   "Κατεύθυνση ανέμου":"Wind direction","Εξορμήσεις":"Trips","Ψάρια συνολικά":"Total fish",
+  "Τεχνική ψαρέματος":"Fishing technique",
   "Μ.Ο. ψάρια/εξόρμηση":"Avg. fish/trip","Συνολικά κιλά":"Total weight","Επιλέξτε είδος":"Select species",
   // toasts / messages
   "Τα δεδομένα εισήχθησαν ✓":"Data imported ✓","Αποτυχία επεξεργασίας φωτογραφίας":"Failed to process photo",
@@ -928,7 +929,6 @@ const GR_TO_EN = {
   "Η εφαρμογή παρέχεται όπως είναι (χωρίς εγγύηση), χωρίς καμία ευθύνη για τυχόν απώλεια δεδομένων, από οποιαδήποτε αιτία (διαγραφή browser, βλάβη συσκευής, τεχνικό πρόβλημα κ.ά.). Συνιστάται τακτική εξαγωγή/αποθήκευση από τον ίδιο τον χρήστη.":"The app is provided as-is (no warranty), with no liability for any data loss, from any cause (browser data clearing, device failure, technical issue, etc.). Regular export/backup by the user is recommended.",
   "Αν κάποια λειτουργία δεν φορτώνει σωστά (π.χ. καιρός, χάρτης, τοποθεσία), δοκίμασε να ανοίξεις την εφαρμογή σε άλλο browser (π.χ.":"If a feature doesn't load correctly (e.g. weather, map, location), try opening the app in a different browser (e.g.","— μερικοί browsers περιορίζουν αυτού του τύπου τις λειτουργίες.":"— some browsers restrict this type of functionality.",
   "Διαγραφή όλων":"Delete all",
-  "Τοποθεσίες ανά καιρό":"Locations by weather","Δεν υπάρχουν ακόμα αρκετά δεδομένα καιρού ανά τοποθεσία":"Not enough weather data per location yet",
   "Επικοινωνία με διαχειριστή":"Contact the developer","Προτείνετε αλλαγές, βελτιώσεις ή ό,τι σας δυσκόλεψε στην εφαρμογή — γράψτε το εδώ.":"Suggest changes, improvements, or anything that gave you trouble in the app — write it here.",
   "Όνομα (προαιρετικό)":"Name (optional)","Email (προαιρετικό, για απάντηση)":"Email (optional, for a reply)","Μήνυμα":"Message",
   "Γράψε ένα μήνυμα πριν την αποστολή":"Write a message before sending","Το μήνυμα στάλθηκε ✓":"Message sent ✓",
@@ -1259,7 +1259,11 @@ function renderBaitBreakdown(prefix){
   const store = prefix === 'f' ? fishBaitBreakdown : eFishBaitBreakdown;
 
   if(!shouldShowBaitBreakdown(prefix)){ section.style.display = 'none'; return; }
+  const wasHidden = section.style.display === 'none';
   section.style.display = '';
+  if(wasHidden){
+    setTimeout(()=>{ section.scrollIntoView({behavior:'smooth', block:'nearest'}); }, 60);
+  }
 
   const qtyMap = {};
   document.querySelectorAll(`#${qtyListId} .qty-item`).forEach(row=>{
@@ -1314,9 +1318,30 @@ function renderBaitBreakdown(prefix){
       const row = btn.closest('.baitbreak-row');
       const sp = row.dataset.sp, b = row.dataset.bait;
       const dir = parseInt(btn.dataset.dir);
-      const cur = (store[sp] && store[sp][b]) || 0;
       if(!store[sp]) store[sp] = {};
-      store[sp][b] = Math.max(0, cur + dir);
+      const spTotal = qtyMap[sp] || 0;
+      const assignedNow = baitArr.reduce((sum,x)=> sum + (store[sp][x]||0), 0);
+      if(dir === 1){
+        if(assignedNow < spTotal){
+          // υπάρχει ακόμα αδιάθετη ποσότητα από το σύνολο — απλή προσθήκη
+          store[sp][b] = (store[sp][b]||0) + 1;
+        } else {
+          // όλα ήδη μοιρασμένα — πάρε 1 από το δόλωμα με το μεγαλύτερο τρέχον απόθεμα
+          let source = null, max = -1;
+          baitArr.forEach(o=>{
+            if(o === b) return;
+            const v = store[sp][o] || 0;
+            if(v > max){ max = v; source = o; }
+          });
+          if(source !== null && max > 0){
+            store[sp][source] = max - 1;
+            store[sp][b] = (store[sp][b]||0) + 1;
+          }
+        }
+      } else {
+        const cur = store[sp][b] || 0;
+        if(cur > 0) store[sp][b] = cur - 1;
+      }
       renderBaitBreakdown(prefix);
     });
   });
@@ -2228,7 +2253,7 @@ function renderStats(){
   if(entries.length === 0){ wrap.innerHTML = `<div class="empty">${tr('Χρειάζονται καταχωρήσεις για στατιστικά')}</div>`; return; }
 
   let totalFish = 0, totalWeight = 0, missingTimeInFish = 0;
-  const bySpecies = {}, byLocation = {}, byWeather = {}, byWindDir = {}, byMoonPhase = {}, byBait = {}, byPressure = {}, byTide = {};
+  const bySpecies = {}, byLocation = {}, byWeather = {}, byWindDir = {}, byMoonPhase = {}, byBait = {}, byPressure = {}, byTide = {}, byTechnique = {};
   const byMonth = new Array(12).fill(0);
   const byHourBucket = new Array(8).fill(0); // 3h buckets covering 24h
   const entryTotals = [];
@@ -2288,6 +2313,7 @@ function renderStats(){
     } else {
       (e.bait||[]).forEach(b=>{ byBait[b] = (byBait[b]||0) + entryFish; });
     }
+    (e.equip||[]).forEach(t=>{ if(entryFish>0) byTechnique[t] = (byTechnique[t]||0) + entryFish; });
 
     const month = new Date(e.date+'T12:00:00').getMonth();
     byMonth[month] += entryFish;
@@ -2384,7 +2410,7 @@ function renderStats(){
     if(kind === 'hour'){
       return `<div class="bar-row stat-mismatch-row"><div class="bar-label" style="width:64px; opacity:0.65;">—</div><div style="flex:1; font-size:0.8rem; opacity:0.65;">${label}${mismatchBadge()}</div><div class="bar-val">${missingTimeInFish}</div></div>`;
     }
-    return `<div class="bar-row stat-mismatch-row"><div class="bar-label" style="opacity:0.65;">${label}${mismatchBadge()}</div><div class="bar-track" style="opacity:0.25;"><div class="bar-fill" style="width:0%;"></div></div><div class="bar-val">${missingTimeInFish}</div></div>`;
+    return `<div class="bar-row stat-mismatch-row"><div class="bar-label" style="width:auto; flex:1; white-space:normal; opacity:0.65;">${label}${mismatchBadge()}</div><div class="bar-track" style="opacity:0.25;"><div class="bar-fill" style="width:0%;"></div></div><div class="bar-val">${missingTimeInFish}</div></div>`;
   }
   function barBlock(title, obj, maxOverride, orderKeys, extraHeaderHtml, extraRowHtml){
     const max = maxOverride || Math.max(...Object.values(obj), 1);
@@ -2422,18 +2448,6 @@ function renderStats(){
     </div>`;
   });
   const locRows = collapsibleList(locRowsAll, 'loc-rows');
-
-  const locWeatherRowsArr = Object.entries(byLocation)
-    .filter(([,d])=>d.weatherCounts && Object.keys(d.weatherCounts).length)
-    .sort((a,b)=>b[1].fish-a[1].fish)
-    .map(([n,d])=>{
-      const topWx = Object.entries(d.weatherCounts).sort((a,b)=>b[1]-a[1])[0];
-      const topWind = Object.entries(d.windCounts).sort((a,b)=>b[1]-a[1])[0];
-      return `<div class="bar-row" style="align-items:flex-start;">
-        <div class="bar-label" style="width:auto; flex:1;">${n}<br><span style="font-weight:400; color:#7c8f95; font-size:0.75rem;">${tr(topWx[0])} · ${tr(topWind[0])} (${topWind[1]}/${d.trips})</span></div>
-      </div>`;
-    });
-  const locWeatherHtml = locWeatherRowsArr.length ? collapsibleList(locWeatherRowsArr, 'loc-weather') : `<div class="hint">${tr('Δεν υπάρχουν ακόμα αρκετά δεδομένα καιρού ανά τοποθεσία')}</div>`;
 
   const bestSpotsRowsArr = Object.entries(byLocation).sort((a,b)=>b[1].fish-a[1].fish).map(([n,d])=>{
     const kgStr = d.weight ? d.weight.toFixed(1).replace('.',',') + ' kg' : '—';
@@ -2483,14 +2497,14 @@ function renderStats(){
     byWindDir: barBlock('Κατεύθυνση ανέμου', byWindDir),
     byLocation: `<div class="stat-block"><h3>${tr("Ανά τοποθεσία")}</h3>${locRows}</div>`,
     bestSpots: `<div class="stat-block"><h3>${tr("📍 Τα καλύτερα σημεία μου")}</h3>${bestSpotsHtml}</div>`,
-    byLocationWeather: `<div class="stat-block"><h3>${tr("Τοποθεσίες ανά καιρό")}</h3>${locWeatherHtml}</div>`,
+    byTechnique: barBlock('Τεχνική ψαρέματος', byTechnique),
     speciesConditions: `<div class="stat-block"><h3>${tr("🎯 Καλύτερες συνθήκες ανά είδος")}</h3>
       <div class="species-cond-list">${speciesButtons}</div>
       <div id="species-cond-result"></div>
     </div>`
   };
 
-  const defaultOrder = ['summary','topCatches','bySpecies','speciesConditions','byMonth','byMoon','byPressure','byTide','byWindDir','byWeather','byBait','byHour','byLocationWeather','byLocation','bestSpots'];
+  const defaultOrder = ['summary','topCatches','bySpecies','speciesConditions','byMonth','byMoon','byPressure','byTide','byWindDir','byWeather','byBait','byHour','byLocation','bestSpots','byTechnique'];
   let order = LS.get('psarema_stats_order', defaultOrder);
   defaultOrder.forEach(k=>{ if(!order.includes(k)) order.push(k); });
   order = order.filter(k=>sections[k] !== undefined);
@@ -2505,7 +2519,7 @@ function renderStats(){
     </div>`).join('');
 }
 function moveStatsSection(key, direction){
-  const defaultOrder = ['summary','topCatches','bySpecies','speciesConditions','byMonth','byMoon','byPressure','byTide','byWindDir','byWeather','byBait','byHour','byLocationWeather','byLocation','bestSpots'];
+  const defaultOrder = ['summary','topCatches','bySpecies','speciesConditions','byMonth','byMoon','byPressure','byTide','byWindDir','byWeather','byBait','byHour','byLocation','bestSpots','byTechnique'];
   let order = LS.get('psarema_stats_order', defaultOrder);
   defaultOrder.forEach(k=>{ if(!order.includes(k)) order.push(k); });
   const idx = order.indexOf(key);
