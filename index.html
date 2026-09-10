@@ -121,7 +121,7 @@
   .baitbreak-species-title{ font-weight:700; color:var(--deep); font-size:0.85rem; margin-bottom:6px; }
   .baitbreak-total{ font-weight:400; opacity:0.6; }
   .baitbreak-row{ background:transparent; border:none; padding:5px 0; }
-  .baitbreak-input{ width:34px; text-align:center; }
+  .baitbreak-input{ width:44px; text-align:center; }
   .baitbreak-assigned{ font-size:0.74rem; opacity:0.55; margin-top:4px; }
   .baitbreak-assigned.mismatch{ color:var(--danger); opacity:0.9; font-weight:600; }
   .stepper{ display:flex; align-items:center; gap:6px; }
@@ -1292,7 +1292,7 @@ function renderBaitBreakdown(prefix){
         <span>${tr(b)}</span>
         <div class="stepper">
           <button type="button" class="stepper-btn baitbreak-btn" data-dir="-1">−</button>
-          <input type="number" min="0" class="baitbreak-input" value="${v}" readonly>
+          <input type="number" min="0" max="${total}" class="baitbreak-input" value="${v}">
           <button type="button" class="stepper-btn baitbreak-btn" data-dir="1">+</button>
         </div>
       </div>`;
@@ -1313,35 +1313,53 @@ function renderBaitBreakdown(prefix){
 
   listEl.innerHTML = html;
 
+  function applyBaitValue(sp, b, rawNewVal){
+    if(!store[sp]) store[sp] = {};
+    const spTotal = qtyMap[sp] || 0;
+    let newVal = Math.round(parseFloat(rawNewVal));
+    if(isNaN(newVal) || newVal < 0) newVal = 0;
+    if(newVal > spTotal) newVal = spTotal;
+    const oldVal = store[sp][b] || 0;
+    let delta = newVal - oldVal;
+    if(delta > 0){
+      const assignedOthers = baitArr.reduce((sum,x)=> x===b ? sum : sum + (store[sp][x]||0), 0);
+      const freePool = Math.max(0, spTotal - assignedOthers - oldVal);
+      const fromPool = Math.min(delta, freePool);
+      store[sp][b] = oldVal + fromPool;
+      let remaining = delta - fromPool;
+      while(remaining > 0){
+        let source = null, max = 0;
+        baitArr.forEach(o=>{
+          if(o === b) return;
+          const v = store[sp][o] || 0;
+          if(v > max){ max = v; source = o; }
+        });
+        if(!source) break;
+        const take = Math.min(remaining, max);
+        store[sp][source] = max - take;
+        store[sp][b] = (store[sp][b]||0) + take;
+        remaining -= take;
+      }
+    } else {
+      store[sp][b] = newVal;
+    }
+  }
+
   listEl.querySelectorAll('.baitbreak-btn').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const row = btn.closest('.baitbreak-row');
       const sp = row.dataset.sp, b = row.dataset.bait;
       const dir = parseInt(btn.dataset.dir);
-      if(!store[sp]) store[sp] = {};
-      const spTotal = qtyMap[sp] || 0;
-      const assignedNow = baitArr.reduce((sum,x)=> sum + (store[sp][x]||0), 0);
-      if(dir === 1){
-        if(assignedNow < spTotal){
-          // υπάρχει ακόμα αδιάθετη ποσότητα από το σύνολο — απλή προσθήκη
-          store[sp][b] = (store[sp][b]||0) + 1;
-        } else {
-          // όλα ήδη μοιρασμένα — πάρε 1 από το δόλωμα με το μεγαλύτερο τρέχον απόθεμα
-          let source = null, max = -1;
-          baitArr.forEach(o=>{
-            if(o === b) return;
-            const v = store[sp][o] || 0;
-            if(v > max){ max = v; source = o; }
-          });
-          if(source !== null && max > 0){
-            store[sp][source] = max - 1;
-            store[sp][b] = (store[sp][b]||0) + 1;
-          }
-        }
-      } else {
-        const cur = store[sp][b] || 0;
-        if(cur > 0) store[sp][b] = cur - 1;
-      }
+      const cur = (store[sp] && store[sp][b]) || 0;
+      applyBaitValue(sp, b, cur + dir);
+      renderBaitBreakdown(prefix);
+    });
+  });
+  listEl.querySelectorAll('.baitbreak-input').forEach(inp=>{
+    inp.addEventListener('change', ()=>{
+      const row = inp.closest('.baitbreak-row');
+      const sp = row.dataset.sp, b = row.dataset.bait;
+      applyBaitValue(sp, b, inp.value);
       renderBaitBreakdown(prefix);
     });
   });
