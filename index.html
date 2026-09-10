@@ -2230,20 +2230,24 @@ function renderStats(){
   function mismatchBadge(){
     if(!missingTimeInFish) return '';
     const msg = currentLang === 'en'
-      ? (missingTimeInFish === 1
-          ? '1 catch is missing a recorded arrival time, so it isn\'t included here.'
-          : `${missingTimeInFish} catches are missing a recorded arrival time, so they aren't included here.`)
-      : (missingTimeInFish === 1
-          ? '1 ψάρι είναι από καταχώρηση χωρίς καταγεγραμμένη ώρα άφιξης, οπότε δεν εμφανίζεται εδώ.'
-          : `${missingTimeInFish} ψάρια είναι από καταχωρήσεις χωρίς καταγεγραμμένη ώρα άφιξης, οπότε δεν εμφανίζονται εδώ.`);
+      ? 'Find the matching entry in your list and add an arrival time, so predictions become more accurate.'
+      : 'Βρες την αντίστοιχη καταχώρηση στη λίστα και συμπλήρωσε ώρα άφιξης, ώστε η πρόβλεψη να γίνει πιο αντικειμενική.';
     return `<details class="stat-mismatch"><summary title="${escapeHtml(msg)}">❓</summary><div class="stat-mismatch-body">${escapeHtml(msg)}</div></details>`;
   }
-  function barBlock(title, obj, maxOverride, orderKeys, extraHtml){
+  function mismatchRow(kind){
+    if(!missingTimeInFish) return '';
+    const label = currentLang === 'en' ? 'No time recorded' : 'Χωρίς καταχώρηση ώρας';
+    if(kind === 'hour'){
+      return `<div class="bar-row stat-mismatch-row"><div class="bar-label" style="width:64px; opacity:0.65;">—</div><div style="flex:1; font-size:0.8rem; opacity:0.65;">${label}${mismatchBadge()}</div><div class="bar-val">${missingTimeInFish}</div></div>`;
+    }
+    return `<div class="bar-row stat-mismatch-row"><div class="bar-label" style="opacity:0.65;">${label}${mismatchBadge()}</div><div class="bar-track" style="opacity:0.25;"><div class="bar-fill" style="width:0%;"></div></div><div class="bar-val">${missingTimeInFish}</div></div>`;
+  }
+  function barBlock(title, obj, maxOverride, orderKeys, extraHeaderHtml, extraRowHtml){
     const max = maxOverride || Math.max(...Object.values(obj), 1);
     const entries = orderKeys ? orderKeys.filter(k=>obj[k]!=null).map(k=>[k,obj[k]]) : Object.entries(obj).sort((a,b)=>b[1]-a[1]);
     const rows = entries.map(([n,v])=>`
       <div class="bar-row"><div class="bar-label">${tr(n)}</div><div class="bar-track"><div class="bar-fill" style="width:${(v/max*100)}%"></div></div><div class="bar-val">${v}</div></div>`).join('');
-    return `<div class="stat-block"><h3>${tr(title)}${extraHtml||''}</h3>${rows}</div>`;
+    return `<div class="stat-block"><h3>${tr(title)}${extraHeaderHtml||''}</h3>${rows}${extraRowHtml||''}</div>`;
   }
 
   const monthsEL = ['Ιαν','Φεβ','Μάρ','Απρ','Μάι','Ιούν','Ιούλ','Αύγ','Σεπ','Οκτ','Νοέ','Δεκ'];
@@ -2323,13 +2327,13 @@ function renderStats(){
     summary: summaryCard,
     topCatches: `<div class="stat-block"><h3>${tr("Καλύτερες εξορμήσεις")}</h3>${topCatchesHtml}</div>`,
     bySpecies: barBlock('Ψάρια ανά είδος', bySpecies),
-    byHour: `<div class="stat-block"><h3>${tr("Επιτυχία ανά ώρα")}${mismatchBadge()}</h3>${hourRows}</div>`,
+    byHour: `<div class="stat-block"><h3>${tr("Επιτυχία ανά ώρα")}</h3>${hourRows}${mismatchRow('hour')}</div>`,
     byBait: `<div class="stat-block"><h3>${tr("Επιτυχία ανά δόλωμα")}</h3>${baitHtml}</div>`,
     byMoon: barBlock('Ψάρια ανά φάση σελήνης', byMoonPhase, null, currentLang === 'en'
       ? ['New Moon','Waxing Crescent','First Quarter','Waxing Gibbous','Full Moon','Waning Gibbous','Last Quarter','Waning Crescent']
       : ['Νέα Σελήνη','Αύξων Μηνίσκος','Πρώτο Τέταρτο','Αύξων Αμφίκυρτος','Πανσέληνος','Φθίνων Αμφίκυρτος','Τελευταίο Τέταρτο','Φθίνων Μηνίσκος']),
     byPressure: barBlock('Ψάρια ανά πίεση', byPressure),
-    byTide: barBlock('Ψάρια ανά παλίρροια', byTide, null, null, mismatchBadge()),
+    byTide: barBlock('Ψάρια ανά παλίρροια', byTide, null, null, null, mismatchRow('tide')),
     byMonth: `<div class="stat-block"><h3>${tr("Εποχικότητα (ψάρια ανά μήνα)")}</h3>${monthBars}</div>`,
     byWeather: barBlock('Καιρικές συνθήκες κατά την ψαριά', byWeather),
     byWindDir: barBlock('Κατεύθυνση ανέμου', byWindDir),
