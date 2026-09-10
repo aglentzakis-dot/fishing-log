@@ -115,6 +115,15 @@
   .addrow button{ background: var(--deep); color:#fff; border:none; border-radius:8px; padding: 0 14px; font-weight:600; cursor:pointer; }
   .qty-list{ margin-top:10px; display:flex; flex-direction:column; gap:8px; }
   .qty-item{ display:flex; align-items:center; justify-content:space-between; background: var(--foam); border:1px solid var(--line); border-radius:9px; padding: 8px 12px; }
+  .baitbreak-section{ margin-top:14px; }
+  .info-btn{ background:transparent; border:none; padding:2px 4px; font-size:0.85rem; opacity:0.6; cursor:pointer; }
+  .baitbreak-species-block{ margin-top:8px; border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:#fff; }
+  .baitbreak-species-title{ font-weight:700; color:var(--deep); font-size:0.85rem; margin-bottom:6px; }
+  .baitbreak-total{ font-weight:400; opacity:0.6; }
+  .baitbreak-row{ background:transparent; border:none; padding:5px 0; }
+  .baitbreak-input{ width:34px; text-align:center; }
+  .baitbreak-assigned{ font-size:0.74rem; opacity:0.55; margin-top:4px; }
+  .baitbreak-assigned.mismatch{ color:var(--danger); opacity:0.9; font-weight:600; }
   .stepper{ display:flex; align-items:center; gap:6px; }
   .stepper-btn{ width:30px; height:30px; border-radius:8px; border:1.5px solid var(--line); background:var(--white); color:var(--deep); font-size:1.1rem; font-weight:700; cursor:pointer; padding:0; line-height:1; display:flex; align-items:center; justify-content:center; }
   .stepper-btn:active{ background: var(--teal); color:#fff; border-color:var(--teal); }
@@ -381,6 +390,14 @@
         <div class="addrow"><input type="text" id="bait-new" placeholder="Προσθήκη νέου δολώματος"><button type="button" id="bait-add">+</button></div>
       </details>
 
+      <div id="f-baitbreak-section" class="baitbreak-section" style="display:none;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <span class="i18n-plain">Δόλωμα ανά είδος</span>
+          <button type="button" class="info-btn" id="btn-open-baitbreak-explain-f" title="Πώς δουλεύει">ℹ️</button>
+        </label>
+        <div id="f-baitbreak-list"></div>
+      </div>
+
       <label id="i18n-technique-label">Τεχνική ψαρέματος</label>
       <details class="picker" id="equip-picker">
         <summary><span id="equip-count-sum">Επίλεξε τεχνική</span></summary>
@@ -637,6 +654,14 @@
       <div class="picker-list" id="e-bait-chip-list"></div>
     </details>
 
+    <div id="e-baitbreak-section" class="baitbreak-section" style="display:none;">
+      <label style="display:flex; align-items:center; gap:6px;">
+        <span class="i18n-plain">Δόλωμα ανά είδος</span>
+        <button type="button" class="info-btn" id="btn-open-baitbreak-explain-e" title="Πώς δουλεύει">ℹ️</button>
+      </label>
+      <div id="e-baitbreak-list"></div>
+    </div>
+
     <label id="i18n-e-technique-label">Τεχνική ψαρέματος</label>
     <details class="picker" id="e-equip-picker">
       <summary><span id="e-equip-count-sum">Επίλεξε τεχνική</span></summary>
@@ -675,6 +700,20 @@
       <div class="footer-tools">
         <button type="button" id="btn-weather-order-reset"><span class="i18n-plain">Επαναφορά προεπιλογής</span></button>
       </div>
+    </div>
+  </div>
+</div>
+
+<div class="map-picker-overlay" id="baitbreak-explain-overlay">
+  <div class="map-picker-sheet" style="max-width:460px;">
+    <div class="map-picker-head">
+      <h2 id="i18n-baitbreak-explain-title">Δόλωμα ανά είδος</h2>
+      <button type="button" class="modal-close" id="baitbreak-explain-close">✕</button>
+    </div>
+    <div style="padding:0 16px 16px; overflow-y:auto;" id="i18n-baitbreak-explain-body">
+      <p>Όταν μια εξόρμηση έχει 2 ή περισσότερα είδη ψαριών ΚΑΙ 2 ή περισσότερα δολώματα, εμφανίζεται εδώ ένας μικρός πίνακας για κάθε είδος, ώστε να δηλώσεις με ποιο δόλωμα έπιασες πόσα από αυτό το είδος.</p>
+      <p>Στην αρχή, όλα τα ψάρια ενός είδους πιστώνονται αυτόματα στο πρώτο δόλωμα που έχεις επιλέξει. Χρησιμοποίησε τα ➕ ➖ για να τα μοιράσεις σωστά ανάμεσα στα δολώματα — π.χ. 5 τσιπούρες με Μονοδόλι και 1 με Μάνα.</p>
+      <p style="margin-bottom:0;">Η ένδειξη κάτω από κάθε είδος («X από Y») σου δείχνει πόσα έχεις ήδη μοιράσει· όταν ταιριάζει με το σύνολο, είσαι εντάξει. Αν δεν το συμπληρώσεις καθόλου, δεν χάνεται τίποτα — η καταχώρηση αποθηκεύεται κανονικά.</p>
     </div>
   </div>
 </div>
@@ -947,7 +986,9 @@ let selAngler = new Set();
 let eSelAngler = new Set();
 
 let selFish = new Set(), selBait = new Set(), selEquip = new Set(LS.get('psarema_last_equip', []));
+let fishBaitBreakdown = {};
 let eSelFish = new Set(), eSelBait = new Set(), eSelEquip = new Set();
+let eFishBaitBreakdown = {};
 let editingId = null;
 let fWeatherData = null;
 let eWeatherData = null;
@@ -1197,6 +1238,99 @@ function updateFishFollowups(prefix){
   if(hasFish && !weightEl.value) weightEl.classList.add('needs-fill'); else weightEl.classList.remove('needs-fill');
   const picker = document.getElementById(pickerId);
   if(hasFish && baitSet.size === 0) picker.classList.add('needs-fill-box'); else picker.classList.remove('needs-fill-box');
+  renderBaitBreakdown(prefix);
+}
+
+/* ---------- bait-per-species breakdown ---------- */
+function shouldShowBaitBreakdown(prefix){
+  const fishSet = prefix === 'f' ? selFish : eSelFish;
+  const baitSet = prefix === 'f' ? selBait : eSelBait;
+  return fishSet.size >= 2 && baitSet.size >= 2;
+}
+function renderBaitBreakdown(prefix){
+  const sectionId = prefix === 'f' ? 'f-baitbreak-section' : 'e-baitbreak-section';
+  const listId = prefix === 'f' ? 'f-baitbreak-list' : 'e-baitbreak-list';
+  const qtyListId = prefix === 'f' ? 'fish-qty-list' : 'e-fish-qty-list';
+  const section = document.getElementById(sectionId);
+  const listEl = document.getElementById(listId);
+  if(!section || !listEl) return;
+  const fishSet = prefix === 'f' ? selFish : eSelFish;
+  const baitSet = prefix === 'f' ? selBait : eSelBait;
+  const store = prefix === 'f' ? fishBaitBreakdown : eFishBaitBreakdown;
+
+  if(!shouldShowBaitBreakdown(prefix)){ section.style.display = 'none'; return; }
+  section.style.display = '';
+
+  const qtyMap = {};
+  document.querySelectorAll(`#${qtyListId} .qty-item`).forEach(row=>{
+    qtyMap[row.dataset.name] = parseInt(row.querySelector('input').value) || 0;
+  });
+  const baitArr = [...baitSet];
+
+  let html = '';
+  [...fishSet].forEach(sp=>{
+    const total = qtyMap[sp] || 0;
+    if(total <= 0) return;
+    if(!store[sp]) store[sp] = {};
+    Object.keys(store[sp]).forEach(b=>{ if(!baitArr.includes(b)) delete store[sp][b]; });
+    const hasAny = baitArr.some(b => (store[sp][b]||0) > 0);
+    if(!hasAny){
+      Object.keys(store[sp]).forEach(k=>delete store[sp][k]);
+      store[sp][baitArr[0]] = total;
+    }
+
+    const assigned = baitArr.reduce((sum,b)=> sum + (store[sp][b]||0), 0);
+    const mismatch = assigned !== total;
+
+    const rows = baitArr.map(b=>{
+      const v = store[sp][b] || 0;
+      return `<div class="qty-item baitbreak-row" data-sp="${escapeHtml(sp)}" data-bait="${escapeHtml(b)}">
+        <span>${tr(b)}</span>
+        <div class="stepper">
+          <button type="button" class="stepper-btn baitbreak-btn" data-dir="-1">−</button>
+          <input type="number" min="0" class="baitbreak-input" value="${v}" readonly>
+          <button type="button" class="stepper-btn baitbreak-btn" data-dir="1">+</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    const assignedText = currentLang==='en'
+      ? `${assigned} of ${total} assigned`
+      : `${assigned} από ${total} έχουν ανατεθεί`;
+
+    html += `<div class="baitbreak-species-block">
+      <div class="baitbreak-species-title">${tr(sp)} <span class="baitbreak-total">(${total})</span></div>
+      ${rows}
+      <div class="baitbreak-assigned${mismatch ? ' mismatch' : ''}">${assignedText}</div>
+    </div>`;
+  });
+
+  Object.keys(store).forEach(sp=>{ if(!fishSet.has(sp) || !(qtyMap[sp] > 0)) delete store[sp]; });
+
+  listEl.innerHTML = html;
+
+  listEl.querySelectorAll('.baitbreak-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const row = btn.closest('.baitbreak-row');
+      const sp = row.dataset.sp, b = row.dataset.bait;
+      const dir = parseInt(btn.dataset.dir);
+      const cur = (store[sp] && store[sp][b]) || 0;
+      if(!store[sp]) store[sp] = {};
+      store[sp][b] = Math.max(0, cur + dir);
+      renderBaitBreakdown(prefix);
+    });
+  });
+}
+function collectFishBait(prefix){
+  if(!shouldShowBaitBreakdown(prefix)) return undefined;
+  const store = prefix === 'f' ? fishBaitBreakdown : eFishBaitBreakdown;
+  const out = {};
+  Object.entries(store).forEach(([sp, map])=>{
+    const cleaned = {};
+    Object.entries(map).forEach(([b,q])=>{ if(q > 0) cleaned[b] = q; });
+    if(Object.keys(cleaned).length) out[sp] = cleaned;
+  });
+  return Object.keys(out).length ? out : undefined;
 }
 function setupAdd(inputId, btnId, arr, storeKey, rerender){
   document.getElementById(btnId).addEventListener('click', ()=>{
@@ -1881,6 +2015,7 @@ document.getElementById('btn-save').addEventListener('click', async ()=>{
     fish: fishQty,
     weight: parseFloat(document.getElementById('f-weight').value) || 0,
     bait: [...selBait],
+    fishBait: collectFishBait('f'),
     equip: [...selEquip],
     notes: document.getElementById('f-notes').value.trim(),
     photos: photoKeys
@@ -1893,6 +2028,7 @@ document.getElementById('btn-save').addEventListener('click', async ()=>{
   resetForm();
 });
 function resetForm(){
+  fishBaitBreakdown = {};
   ['angler-picker','fish-picker','bait-picker','equip-picker'].forEach(id=>{
     const det = document.getElementById(id);
     if(det) det.open = false;
@@ -1991,6 +2127,7 @@ async function openDetail(id){
 
   eSelFish = new Set(Object.keys(e.fish||{}).filter(n=>(e.fish[n]||0) > 0));
   eSelBait = new Set(e.bait || []);
+  eFishBaitBreakdown = e.fishBait ? JSON.parse(JSON.stringify(e.fishBait)) : {};
   eSelEquip = new Set(e.equip || []);
   function bindDeletable(listId, arr, selSet, countId, onToggle, storeKey){
     const ctx = {arr, storeKey, rerender: ()=> renderChipList(listId, arr, selSet, countId, onToggle, ctx)};
@@ -2064,6 +2201,7 @@ document.getElementById('e-btn-save').addEventListener('click', async ()=>{
     fish: fishQty,
     weight: parseFloat(document.getElementById('e-weight').value) || 0,
     bait: [...eSelBait],
+    fishBait: collectFishBait('e'),
     equip: [...eSelEquip],
     notes: document.getElementById('e-notes').value.trim(),
     photos: photoKeys
@@ -2143,7 +2281,13 @@ function renderStats(){
       const h1 = parseInt(e.timeIn.split(':')[0]);
       if(!isNaN(h1)) byHourBucket[Math.floor(h1/3)] += entryFish;
     }
-    (e.bait||[]).forEach(b=>{ byBait[b] = (byBait[b]||0) + entryFish; });
+    if(e.fishBait){
+      Object.values(e.fishBait).forEach(map=>{
+        Object.entries(map).forEach(([b,q])=>{ if(q>0) byBait[b] = (byBait[b]||0) + q; });
+      });
+    } else {
+      (e.bait||[]).forEach(b=>{ byBait[b] = (byBait[b]||0) + entryFish; });
+    }
 
     const month = new Date(e.date+'T12:00:00').getMonth();
     byMonth[month] += entryFish;
@@ -2751,7 +2895,11 @@ function computeBestConditions(name){
         waveMax = waveMax===null ? e.weather.wave : Math.max(waveMax, e.weather.wave);
       }
     }
-    (e.bait||[]).forEach(b=>{ baitCounts[b] = (baitCounts[b]||0) + qty; });
+    if(e.fishBait && e.fishBait[name]){
+      Object.entries(e.fishBait[name]).forEach(([b,q])=>{ if(q>0) baitCounts[b] = (baitCounts[b]||0) + q; });
+    } else {
+      (e.bait||[]).forEach(b=>{ baitCounts[b] = (baitCounts[b]||0) + qty; });
+    }
 
     if(e.timeIn){
       const info = computeMoonInfo(e.date);
@@ -2957,6 +3105,18 @@ document.getElementById('stats-explain-close').addEventListener('click', ()=>{
 });
 document.getElementById('stats-explain-overlay').addEventListener('click', (ev)=>{
   if(ev.target.id === 'stats-explain-overlay') document.getElementById('stats-explain-overlay').classList.remove('show');
+});
+['btn-open-baitbreak-explain-f','btn-open-baitbreak-explain-e'].forEach(id=>{
+  const btn = document.getElementById(id);
+  if(btn) btn.addEventListener('click', ()=>{
+    document.getElementById('baitbreak-explain-overlay').classList.add('show');
+  });
+});
+document.getElementById('baitbreak-explain-close').addEventListener('click', ()=>{
+  document.getElementById('baitbreak-explain-overlay').classList.remove('show');
+});
+document.getElementById('baitbreak-explain-overlay').addEventListener('click', (ev)=>{
+  if(ev.target.id === 'baitbreak-explain-overlay') document.getElementById('baitbreak-explain-overlay').classList.remove('show');
 });
 document.getElementById('btn-open-contact').addEventListener('click', ()=>{
   document.getElementById('contact-modal-overlay').classList.add('show');
@@ -3558,16 +3718,26 @@ function applyLanguage(lang){
     statsExplainBody.innerHTML = lang === 'en'
       ? `<p><strong>Fish by species / month / moon phase / pressure / tide / hour / bait / wind / weather:</strong> each catch is counted under the category it matches (e.g. the moon phase or pressure at the time of that trip). Only fish with a quantity greater than 0 are counted.</p>
          <p><strong>By location — success rate:</strong> the green/red percentage next to each location is the share of your trips there that resulted in at least one fish (trips with fish ÷ total trips). A faint red 0% means no fish have been recorded there yet.</p>
-         <p><strong>Locations by weather:</strong> for each location, shows the single most frequent weather condition and wind direction recorded there.</p>
          <p><strong>My best spots:</strong> ranks your locations by total fish caught, with total weight; tap a row to see the typical conditions (weather, wind, best hour) recorded there.</p>
          <p><strong>Best conditions by species:</strong> for a chosen species, shows the day of week, hour range, wind, wave and bait most associated with catching it in your history.</p>
          <p style="margin-bottom:0;">All figures come only from your own recorded entries — nothing is estimated or predicted here (predictions live in their own tab).</p>`
       : `<p><strong>Ψάρια ανά είδος / μήνα / φάση σελήνης / πίεση / παλίρροια / ώρα / δόλωμα / άνεμο / καιρό:</strong> κάθε ψάρι μετράει στην κατηγορία που ταιριάζει (π.χ. η φάση σελήνης ή η πίεση τη στιγμή εκείνης της εξόρμησης). Μετράνε μόνο τα ψάρια με ποσότητα μεγαλύτερη του 0.</p>
          <p><strong>Ανά τοποθεσία — ποσοστό επιτυχίας:</strong> το πράσινο/κόκκινο ποσοστό δίπλα σε κάθε τοποθεσία είναι το ποσοστό των εξορμήσεών σου εκεί που έδωσαν τουλάχιστον ένα ψάρι (εξορμήσεις με ψάρια ÷ σύνολο εξορμήσεων). Αχνό κόκκινο 0% σημαίνει ότι δεν έχεις καταγράψει ακόμα ψάρι εκεί.</p>
-         <p><strong>Τοποθεσίες ανά καιρό:</strong> για κάθε τοποθεσία, δείχνει τον πιο συχνό καιρό και την πιο συχνή κατεύθυνση ανέμου που έχεις καταγράψει εκεί.</p>
          <p><strong>Τα καλύτερα σημεία μου:</strong> κατατάσσει τις τοποθεσίες σου βάσει συνολικών ψαριών, με τα κιλά δίπλα· πάτα μια γραμμή για να δεις τις τυπικές συνθήκες (καιρός, άνεμος, καλύτερη ώρα) που έχεις καταγράψει εκεί.</p>
          <p><strong>Καλύτερες συνθήκες ανά είδος:</strong> για ένα είδος που επιλέγεις, δείχνει τη μέρα της εβδομάδας, το εύρος ώρας, τον άνεμο, το κύμα και το δόλωμα που συνδέονται περισσότερο με την αλίευσή του στο ιστορικό σου.</p>
          <p style="margin-bottom:0;">Όλα τα νούμερα προέρχονται μόνο από τις δικές σου καταχωρήσεις — τίποτα εδώ δεν είναι εκτίμηση ή πρόβλεψη (οι προβλέψεις έχουν τη δική τους καρτέλα).</p>`;
+  }
+  const baitbreakExplainTitle = document.getElementById('i18n-baitbreak-explain-title');
+  if(baitbreakExplainTitle) baitbreakExplainTitle.textContent = lang === 'en' ? 'Bait per species' : 'Δόλωμα ανά είδος';
+  const baitbreakExplainBody = document.getElementById('i18n-baitbreak-explain-body');
+  if(baitbreakExplainBody){
+    baitbreakExplainBody.innerHTML = lang === 'en'
+      ? `<p>When a trip has 2 or more fish species AND 2 or more baits, a small table appears here for each species, so you can note which bait caught how many of that species.</p>
+         <p>At first, all fish of a species are credited to the first bait you've selected. Use the ➕ ➖ buttons to split them correctly between baits — e.g. 5 bream on a single hook rig and 1 on dough bait.</p>
+         <p style="margin-bottom:0;">The note under each species ("X of Y") shows how many you've assigned so far; once it matches the total, you're done. If you skip it entirely, nothing is lost — the entry still saves normally.</p>`
+      : `<p>Όταν μια εξόρμηση έχει 2 ή περισσότερα είδη ψαριών ΚΑΙ 2 ή περισσότερα δολώματα, εμφανίζεται εδώ ένας μικρός πίνακας για κάθε είδος, ώστε να δηλώσεις με ποιο δόλωμα έπιασες πόσα από αυτό το είδος.</p>
+         <p>Στην αρχή, όλα τα ψάρια ενός είδους πιστώνονται αυτόματα στο πρώτο δόλωμα που έχεις επιλέξει. Χρησιμοποίησε τα ➕ ➖ για να τα μοιράσεις σωστά ανάμεσα στα δολώματα — π.χ. 5 τσιπούρες με Μονοδόλι και 1 με Μάνα.</p>
+         <p style="margin-bottom:0;">Η ένδειξη κάτω από κάθε είδος («X από Y») σου δείχνει πόσα έχεις ήδη μοιράσει· όταν ταιριάζει με το σύνολο, είσαι εντάξει. Αν δεν το συμπληρώσεις καθόλου, δεν χάνεται τίποτα — η καταχώρηση αποθηκεύεται κανονικά.</p>`;
   }
   document.getElementById('lang-toggle').textContent = lang === 'en' ? '🇬🇧' : '🇬🇷';
   const legalTitle = document.getElementById('i18n-legal-header');
