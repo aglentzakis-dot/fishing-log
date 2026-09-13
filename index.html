@@ -328,11 +328,24 @@
   <button data-view="settings">Ρυθμίσεις</button>
 </nav>
 <div class="tabs-scroll-hint" id="tabs-scroll-hint"><div class="tabs-scroll-thumb" id="tabs-scroll-thumb"></div></div>
+<div id="demo-mode-banner" style="display:none; align-items:center; justify-content:space-between; gap:10px; background:var(--coral); color:#fff; padding:9px 14px; font-size:0.82rem; font-weight:700;">
+  <span>🎬 <span class="i18n-plain">Λειτουργία επίδειξης — τίποτα δεν αποθηκεύεται</span></span>
+  <button type="button" id="btn-exit-demo" style="background:#fff; color:var(--coral); border:none; border-radius:8px; padding:6px 10px; font-weight:700; font-size:0.78rem;"><span class="i18n-plain">Έξοδος</span></button>
+</div>
 
 <main>
 
   <!-- NEW ENTRY -->
   <div class="view active" id="view-new">
+    <div class="card" id="demo-firstrun-card" style="display:none; background:var(--foam); border:1.5px dashed var(--teal);">
+      <p class="hint" style="margin:0 0 8px; color:var(--deep); font-weight:600;">
+        <span class="i18n-plain">👋 Πρώτη φορά εδώ; Δες μια γρήγορη επίδειξη με 10 φανταστικές καταχωρήσεις, για να καταλάβεις τι κάνει η εφαρμογή.</span>
+      </p>
+      <div style="display:flex; gap:8px;">
+        <button type="button" class="species-cond-btn" id="btn-start-demo">▶️ <span class="i18n-plain">Δες το Demo</span></button>
+        <button type="button" class="species-cond-btn" id="btn-dismiss-demo" style="opacity:0.65;">✕ <span class="i18n-plain">Όχι τώρα</span></button>
+      </div>
+    </div>
     <div class="card">
       <h2 id="i18n-trip-details">Στοιχεία εξόδου</h2>
 
@@ -497,6 +510,9 @@
 
   <!-- SETTINGS -->
   <div class="view" id="view-settings">
+    <div class="card" style="text-align:center;">
+      <button type="button" class="species-cond-btn" id="btn-settings-demo">🎬 <span class="i18n-plain">Δες ένα demo της εφαρμογής</span></button>
+    </div>
     <div class="card">
       <h2 id="i18n-data-header">Δεδομένα</h2>
       <p class="hint" id="i18n-beta-notice" style="background:#fdf1ec; border:1px solid #f0c8b4; border-radius:8px; padding:8px 10px;"><strong>Δοκιμαστική έκδοση (beta)</strong> — προσθέτουμε συνεχώς νέα στοιχεία και τη βελτιώνουμε.</p>
@@ -981,6 +997,92 @@ if(!LS.get('psarema_equip_v2_migrated', false)){
   equips = LS.get('psarema_equip', DEFAULTS.equip.slice());
 }
 let entries = LS.get('psarema_entries', []);
+let demoMode = false;
+
+/* ---------- demo mode: 10 φανταστικές καταχωρήσεις, εντελώς ξεχωριστές από τα πραγματικά δεδομένα ---------- */
+function buildDemoEntries(){
+  const mkW = (pressure, weathercode, windKmh, windDirDeg, wave, seaTemp) => ({
+    pressure, weathercode, windKmh, windDirDeg, wave, seaTemp,
+    beaufort: beaufort(windKmh)
+  });
+  return [
+    { id:'demo-1', angler:[], date:'2026-07-12', timeIn:'06:00', timeOut:'09:30',
+      locName:'Παγασητικός (Πευκί)', coords:'38.9700, 23.2800',
+      weather: mkW(1016,1,14,320,0.3,25.5),
+      fish:{'Τσιπούρα':3,'Σαργός':1}, weight:1.8,
+      bait:['Μονοδόλι','Μάνα'], fishBait:{'Τσιπούρα':{'Μονοδόλι':2,'Μάνα':1},'Σαργός':{'Μάνα':1}},
+      equip:['🎣 Εγγλέζικο'], notes:'Δροσερό πρωινό, ήρεμη θάλασσα.', photos:[] },
+    { id:'demo-2', angler:[], date:'2026-07-20', timeIn:'19:30', timeOut:'22:00',
+      locName:'Βόρειος Ευβοϊκός', coords:'38.8100, 23.6200',
+      weather: mkW(1012,2,22,90,0.6,26.1),
+      fish:{'Λαβράκι':2}, weight:2.4,
+      bait:['Φαραώ'], equip:['🎣 Spinning'], notes:'Δύο καλά λαβράκια το σούρουπο.', photos:[] },
+    { id:'demo-3', angler:[], date:'2026-07-29', timeIn:'05:30', timeOut:'08:00',
+      locName:'Κόλπος Πεταλιών', coords:'38.1000, 24.2000',
+      weather: mkW(1018,0,10,45,0.2,26.8),
+      fish:{'Γόπα':6,'Μπαρμπούνι':2}, weight:1.1,
+      bait:['Μονοδόλι'], equip:['🎣 Bolognese'], notes:'Γεμάτη ψαριά, πολλή γόπα.', photos:[] },
+    { id:'demo-4', angler:[], date:'2026-08-03', timeIn:'', timeOut:'',
+      locName:'Παγασητικός (Πευκί)', coords:'38.9700, 23.2800',
+      weather: mkW(1008,61,28,200,1.2,27.3),
+      fish:{}, weight:0,
+      bait:['Μονοδόλι'], equip:['🎣 Εγγλέζικο'], notes:'Άδεια βόλτα, δυνατός νοτιάς.', photos:[] },
+    { id:'demo-5', angler:[], date:'2026-08-11', timeIn:'20:00', timeOut:'23:30',
+      locName:'Σαρωνικός (Βουλιαγμένη)', coords:'37.8900, 23.7800',
+      weather: mkW(1014,1,16,270,0.4,27.0),
+      fish:{'Σκορπίνα':1,'Σαργός':2}, weight:1.6,
+      bait:['Ακροβάτης','Μάνα'], fishBait:{'Σκορπίνα':{'Ακροβάτης':1},'Σαργός':{'Μάνα':2}},
+      equip:['🎣 Καθετή'], notes:'Πανσέληνος, καλή βραδιά.', photos:[] },
+    { id:'demo-6', angler:[], date:'2026-08-18', timeIn:'06:15', timeOut:'10:00',
+      locName:'Βόρειος Ευβοϊκός', coords:'38.8100, 23.6200',
+      weather: mkW(1019,2,12,30,0.3,26.5),
+      fish:{'Τσιπούρα':5}, weight:2.9,
+      bait:['Μάνα'], equip:['🎣 Εγγλέζικο'], notes:'Πέντε τσιπούρες, καλό μέγεθος.', photos:[] },
+    { id:'demo-7', angler:[], date:'2026-08-25', timeIn:'19:00', timeOut:'21:00',
+      locName:'Κόρινθος', coords:'37.9000, 22.9000',
+      weather: mkW(1011,3,20,150,0.8,26.9),
+      fish:{'Κέφαλος':4}, weight:1.4,
+      bait:['Φαραώ'], equip:['🎣 Bolognese'], notes:'Συννεφιά, κεφαλόπουλα στο ρηχό.', photos:[] },
+    { id:'demo-8', angler:[], date:'2026-09-02', timeIn:'05:45', timeOut:'08:30',
+      locName:'Παγασητικός (Πευκί)', coords:'38.9700, 23.2800',
+      weather: mkW(1017,1,9,300,0.2,25.8),
+      fish:{'Τσιπούρα':2,'Λαβράκι':1,'Γόπα':3}, weight:2.2,
+      bait:['Μονοδόλι','Φαραώ'],
+      fishBait:{'Τσιπούρα':{'Μονοδόλι':2},'Λαβράκι':{'Φαραώ':1},'Γόπα':{'Μονοδόλι':3}},
+      equip:['🎣 Εγγλέζικο','🎣 Spinning'], notes:'Μικτή ψαριά, ήρεμο πρωινό.', photos:[] },
+    { id:'demo-9', angler:[], date:'2026-09-06', timeIn:'', timeOut:'',
+      locName:'Σαρωνικός (Βουλιαγμένη)', coords:'37.8900, 23.7800',
+      weather: mkW(1009,63,32,240,1.6,25.9),
+      fish:{'Σαργός':1}, weight:0.4,
+      bait:['Μάνα'], equip:['🎣 Καθετή'], notes:'Δυσκολία λόγω κύματος.', photos:[] },
+    { id:'demo-10', angler:[], date:'2026-09-10', timeIn:'18:30', timeOut:'21:30',
+      locName:'Βόρειος Ευβοϊκός', coords:'38.8100, 23.6200',
+      weather: mkW(1015,1,13,60,0.4,25.2),
+      fish:{'Λαβράκι':1,'Τσιπούρα':2}, weight:1.9,
+      bait:['Φαραώ','Μονοδόλι'], fishBait:{'Λαβράκι':{'Φαραώ':1},'Τσιπούρα':{'Μονοδόλι':2}},
+      equip:['🎣 Spinning'], notes:'Ήρεμο σούρουπο, καλή απόδοση.', photos:[] }
+  ];
+}
+function enterDemoMode(){
+  demoMode = true;
+  entries = buildDemoEntries();
+  LS.set('psarema_seen_demo', true);
+  refreshAfterDemoToggle();
+  toast(currentLang==='en' ? 'Demo mode is on — nothing here is saved' : 'Λειτουργία επίδειξης ενεργή — τίποτα εδώ δεν αποθηκεύεται');
+}
+function exitDemoMode(){
+  demoMode = false;
+  entries = LS.get('psarema_entries', []);
+  refreshAfterDemoToggle();
+}
+function refreshAfterDemoToggle(){
+  const banner = document.getElementById('demo-mode-banner');
+  if(banner) banner.style.display = demoMode ? 'flex' : 'none';
+  const firstRunCard = document.getElementById('demo-firstrun-card');
+  if(firstRunCard) firstRunCard.style.display = (!demoMode && !LS.get('psarema_seen_demo', false) && entries.length === 0) ? 'block' : 'none';
+  if(typeof renderEntries === 'function') renderEntries();
+  if(typeof renderStats === 'function') renderStats();
+}
 let anglers = LS.get('psarema_anglers', []);
 let selAngler = new Set();
 let eSelAngler = new Set();
@@ -2033,6 +2135,7 @@ document.getElementById('e-fetch-weather').addEventListener('click', ()=>runFetc
 
 /* ---------- save new entry ---------- */
 document.getElementById('btn-save').addEventListener('click', async ()=>{
+  if(demoMode){ toast(currentLang==='en' ? 'Exit demo mode first to save your own entries' : 'Βγες πρώτα από το demo για να αποθηκεύσεις τη δική σου εξόρμηση'); return; }
   const date = document.getElementById('f-date').value;
   if(!date){ toast('Βάλε ημερομηνία'); return; }
   const fishQty = {};
@@ -2219,6 +2322,7 @@ document.getElementById('modal-close').addEventListener('click', closeModal);
 document.getElementById('modal-overlay').addEventListener('click', (ev)=>{ if(ev.target.id === 'modal-overlay') closeModal(); });
 function closeModal(){ document.getElementById('modal-overlay').classList.remove('show'); editingId = null; }
 document.getElementById('e-btn-save').addEventListener('click', async ()=>{
+  if(demoMode){ toast(currentLang==='en' ? 'Exit demo mode first to save changes' : 'Βγες πρώτα από το demo για να αποθηκεύσεις αλλαγές'); return; }
   const idx = entries.findIndex(x=>x.id === editingId);
   if(idx === -1) return;
   const fishQty = {};
@@ -2830,35 +2934,33 @@ async function predictBestDayByCoords(){
   if(!parsed){ resultEl.innerHTML = `<div class="hint">${tr('Βάλε έγκυρες συντεταγμένες.')}</div>`; return; }
   resultEl.innerHTML = `<div class="hint">${tr('Υπολογισμός...')}</div>`;
   try{
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${parsed.lat}&longitude=${parsed.lng}&hourly=weathercode,windspeed_10m,pressure_msl&forecast_days=5&timezone=auto`;
-    const res = await fetch(url);
-    if(!res.ok) throw new Error('forecast fetch failed');
-    const data = await res.json();
-    const times = data.hourly.time;
-    const days = {};
-    for(let i=0;i<times.length;i++){
-      if(!times[i].endsWith('T12:00')) continue;
-      const dayKey = times[i].slice(0,10);
-      const wsp = data.hourly.windspeed_10m[i];
-      const bf = beaufort(wsp);
-      const wcode = data.hourly.weathercode[i];
-      const pressure = data.hourly.pressure_msl[i];
-      let score = Math.max(0, 6 - bf);
-      if(wcode <= 2) score += 2;
-      else if(wcode >= 61) score -= 2;
-      days[dayKey] = { score, bf, wcode, pressure, windKmh: wsp };
+    // Βήμα 1: πάρε τις ημερομηνίες της πρόγνωσης (σεβαστή η τοπική ζώνη ώρας του σημείου)
+    const dateUrl = `https://api.open-meteo.com/v1/forecast?latitude=${parsed.lat}&longitude=${parsed.lng}&hourly=weathercode&forecast_days=5&timezone=auto`;
+    const dateRes = await fetch(dateUrl);
+    if(!dateRes.ok) throw new Error('forecast fetch failed');
+    const dateData = await dateRes.json();
+    const dayKeys = [...new Set(dateData.hourly.time
+      .filter(t => t.endsWith('T12:00'))
+      .map(t => t.slice(0,10)))];
+    if(!dayKeys.length){ resultEl.innerHTML = `<div class="hint">${tr('Δεν βρέθηκαν δεδομένα πρόγνωσης.')}</div>`; return; }
+
+    // Βήμα 2: για κάθε ημέρα, υπολόγισε το ΙΔΙΟ πλήρες σκορ που θα εμφανιστεί τελικά στον χρήστη
+    let best = null;
+    for(const dayKey of dayKeys){
+      const dayData = await fetchWeatherAndWave(parsed.lat, parsed.lng, dayKey, '12:00');
+      const dayScores = scoreComponents(dayData, dayKey);
+      const dayOverall = overallFromScores(dayScores);
+      if(!best || dayOverall.overall > best.overallInfo.overall){
+        best = { dayKey, fullData: dayData, scores: dayScores, overallInfo: dayOverall };
+      }
     }
-    const sorted = Object.entries(days).sort((a,b)=>b[1].score-a[1].score);
-    if(!sorted.length){ resultEl.innerHTML = `<div class="hint">${tr('Δεν βρέθηκαν δεδομένα πρόγνωσης.')}</div>`; return; }
-    const [bestDate] = sorted[0];
+
+    const { dayKey: bestDate, fullData, scores, overallInfo } = best;
     const dt = new Date(bestDate+'T12:00:00');
     const dayNamesEL2 = ['Κυριακή','Δευτέρα','Τρίτη','Τετάρτη','Πέμπτη','Παρασκευή','Σάββατο'];
     const dayNamesEN2 = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     const dayNames = currentLang === 'en' ? dayNamesEN2 : dayNamesEL2;
     const dateStr = dt.toLocaleDateString(currentLang === 'en' ? 'en-GB' : 'el-GR', {day:'numeric', month:'long'});
-    const fullData = await fetchWeatherAndWave(parsed.lat, parsed.lng, bestDate, '12:00');
-    const scores = scoreComponents(fullData, bestDate);
-    const overallInfo = overallFromScores(scores);
     const moonInfo = computeMoonInfo(bestDate);
     const extra = `
       <div class="condition-line" style="opacity:0.75; font-size:0.8rem;">${tr('Γενική εκτίμηση βάσει καιρού (άνεμος, συνθήκες, πίεση) — όχι ειδική για συγκεκριμένο ψάρι.')}</div>`;
@@ -3033,6 +3135,7 @@ window.showLocationConditions = function(locName){
 
 /* ---------- export / import / clear ---------- */
 document.getElementById('btn-export').addEventListener('click', async ()=>{
+  if(demoMode){ toast(currentLang==='en' ? 'Exit demo mode first' : 'Βγες πρώτα από το demo'); return; }
   const photos = {};
   for(const e of entries){
     for(const key of (e.photos||[])){
@@ -3332,6 +3435,7 @@ document.getElementById('btn-contact-send').addEventListener('click', ()=>{
   });
 });
 document.getElementById('btn-import').addEventListener('click', ()=>{
+  if(demoMode){ toast(currentLang==='en' ? 'Exit demo mode first' : 'Βγες πρώτα από το demo'); return; }
   if(!confirm(tr('Προσοχή: η εισαγωγή αρχείου θα αντικαταστήσει όλα τα τρέχοντα δεδομένα σου (καταχωρήσεις, λίστες, φωτογραφίες). Ό,τι υπάρχει τώρα και δεν το έχεις εξάγει, θα χαθεί οριστικά. Θέλεις να συνεχίσεις;'))) return;
   document.getElementById('file-import').click();
 });
@@ -3359,7 +3463,38 @@ document.getElementById('file-import').addEventListener('change', (ev)=>{
   };
   reader.readAsText(file);
 });
+function goToView(view){
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const btn = document.querySelector(`nav.tabs button[data-view="${view}"]`);
+  if(btn) btn.classList.add('active');
+  document.getElementById('view-'+view).classList.add('active');
+  if(view === 'list') renderEntries();
+  if(view === 'stats') renderStats();
+}
+document.getElementById('btn-start-demo').addEventListener('click', ()=>{
+  enterDemoMode();
+  goToView('list');
+});
+document.getElementById('btn-dismiss-demo').addEventListener('click', ()=>{
+  LS.set('psarema_seen_demo', true);
+  document.getElementById('demo-firstrun-card').style.display = 'none';
+});
+document.getElementById('btn-settings-demo').addEventListener('click', ()=>{
+  enterDemoMode();
+  goToView('list');
+});
+document.getElementById('btn-exit-demo').addEventListener('click', ()=>{
+  exitDemoMode();
+  goToView('new');
+});
+if(!LS.get('psarema_seen_demo', false) && entries.length === 0){
+  const card = document.getElementById('demo-firstrun-card');
+  if(card) card.style.display = 'block';
+}
+
 document.getElementById('btn-clear').addEventListener('click', ()=>{
+  if(demoMode){ toast(currentLang==='en' ? 'Exit demo mode first' : 'Βγες πρώτα από το demo'); return; }
   if(!confirm(tr('Σίγουρα θέλεις να διαγράψεις ΟΛΑ τα δεδομένα; Δεν αναιρείται.'))) return;
   entries = [];
   LS.set('psarema_entries', entries);
