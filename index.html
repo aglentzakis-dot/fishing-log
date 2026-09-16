@@ -3551,6 +3551,16 @@ document.getElementById('header-title-input').addEventListener('input', ()=>{
 });
 
 async function applyHeaderPhoto(){
+  if(!LS.get('psarema_header_initialized', false)){
+    LS.set('psarema_header_initialized', true);
+    const hasExisting = LS.get('psarema_has_header_photo', false);
+    let existingData = null;
+    if(hasExisting){ try{ existingData = await idbGet('header-photo'); }catch(e){} }
+    if(!hasExisting || !existingData){
+      await applyHeaderPreset('header-presets/preset-2.jpg');
+      return;
+    }
+  }
   const has = LS.get('psarema_has_header_photo', false);
   const header = document.getElementById('app-header');
   if(!has){ header.classList.remove('has-photo'); return; }
