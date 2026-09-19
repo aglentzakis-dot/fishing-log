@@ -20,13 +20,6 @@
     --coral: #E2653F; --ink: #12262B; --line: #C9D8D4; --white: #FFFFFF; --danger: #B23A2E;
   }
   *{box-sizing:border-box;}
-  .pred-reliability{
-    font-size:0.78rem; line-height:1.35; border-radius:10px;
-    padding:7px 10px; margin:6px 0 10px; border:1px solid;
-  }
-  .pred-rel-low{ background:rgba(226,101,63,0.12); border-color:rgba(226,101,63,0.45); }
-  .pred-rel-mid{ background:rgba(28,122,133,0.12); border-color:rgba(28,122,133,0.45); }
-  .pred-rel-good{ background:rgba(46,139,87,0.12); border-color:rgba(46,139,87,0.45); }
   html,body{margin:0;padding:0; max-width:100%; overflow-x:hidden;}
   body{ background: var(--foam); color: var(--ink); font-family: 'Inter', sans-serif; padding-bottom: 90px; -webkit-tap-highlight-color: transparent; }
   h1,h2,h3{ font-family: 'Bitter', serif; margin: 0; }
@@ -63,23 +56,6 @@
     padding: 10px 14px; border-radius: 10px 10px 0 0; font-family:'Inter',sans-serif; font-weight:600; font-size: 0.82rem; cursor:pointer;
   }
   nav.tabs button.active{ background: var(--foam); color: var(--deep); }
-  nav.tabs{ scrollbar-width:none; }
-  nav.tabs::-webkit-scrollbar{ display:none; }
-  .tabs-scroll-hint{
-    background: var(--deep); padding: 6px 12px 5px;
-    display:none;
-  }
-  .tabs-scroll-hint.on{ display:block; }
-  .tabs-scroll-hint .tabs-scroll-thumb{
-    height:3px; border-radius:3px; background: rgba(255,255,255,0.85);
-    width:30%; margin-left:0; transition: margin-left 0.12s linear;
-  }
-  .tabs-scroll-hint{ position:relative; }
-  .tabs-scroll-hint::before{
-    content:""; position:absolute; left:12px; right:12px; top:6px;
-    height:3px; border-radius:3px; background: rgba(255,255,255,0.22);
-  }
-  .tabs-scroll-hint .tabs-scroll-thumb{ position:relative; z-index:1; }
   main{ max-width: 640px; margin: 0 auto; padding: 16px; }
   .view{ display:none; } .view.active{ display:block; }
   .card{ background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
@@ -115,15 +91,6 @@
   .addrow button{ background: var(--deep); color:#fff; border:none; border-radius:8px; padding: 0 14px; font-weight:600; cursor:pointer; }
   .qty-list{ margin-top:10px; display:flex; flex-direction:column; gap:8px; }
   .qty-item{ display:flex; align-items:center; justify-content:space-between; background: var(--foam); border:1px solid var(--line); border-radius:9px; padding: 8px 12px; }
-  .baitbreak-section{ margin-top:14px; }
-  .info-btn{ background:transparent; border:none; padding:2px 4px; font-size:0.85rem; opacity:0.6; cursor:pointer; }
-  .baitbreak-species-block{ margin-top:8px; border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:#fff; }
-  .baitbreak-species-title{ font-weight:700; color:var(--deep); font-size:0.85rem; margin-bottom:6px; }
-  .baitbreak-total{ font-weight:400; opacity:0.6; }
-  .baitbreak-row{ background:transparent; border:none; padding:5px 0; }
-  .baitbreak-input{ width:44px; text-align:center; }
-  .baitbreak-assigned{ font-size:0.74rem; opacity:0.55; margin-top:4px; }
-  .baitbreak-assigned.mismatch{ color:var(--danger); opacity:0.9; font-weight:600; }
   .stepper{ display:flex; align-items:center; gap:6px; }
   .stepper-btn{ width:30px; height:30px; border-radius:8px; border:1.5px solid var(--line); background:var(--white); color:var(--deep); font-size:1.1rem; font-weight:700; cursor:pointer; padding:0; line-height:1; display:flex; align-items:center; justify-content:center; }
   .stepper-btn:active{ background: var(--teal); color:#fff; border-color:var(--teal); }
@@ -173,7 +140,7 @@
   .month-folder{ margin-bottom: 12px; }
   .month-folder summary{
     list-style:none; cursor:pointer; display:flex; justify-content:space-between; align-items:center;
-    padding: 12px 14px; background: var(--teal); color:#fff; border-radius: 10px; font-family:'Bitter',serif; font-weight:700; font-size:0.95rem;
+    padding: 12px 14px; background: var(--deep); color:#fff; border-radius: 10px; font-family:'Bitter',serif; font-weight:700; font-size:0.95rem;
   }
   .month-folder summary::-webkit-details-marker{ display:none; }
   .month-folder summary .count{ font-family:'Inter',sans-serif; font-weight:600; font-size:0.78rem; opacity:0.85; }
@@ -192,18 +159,6 @@
   .tag.wx{ background:#eaf1fb; border-color:#c7d9f2; color:#1d4e8f; }
   .empty{ text-align:center; color:#7c8f95; padding: 30px 10px; font-size:0.9rem; }
   .stat-block{ margin-bottom: 20px; }
-  .stat-mismatch{ display:inline-block; margin-left:6px; vertical-align:middle; }
-  .stat-mismatch summary{
-    list-style:none; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;
-    width:18px; height:18px; border-radius:50%; background:rgba(178,58,46,0.14); color:var(--danger);
-    font-size:0.68rem; font-weight:700; line-height:1;
-  }
-  .stat-mismatch summary::-webkit-details-marker{ display:none; }
-  .stat-mismatch-body{
-    margin-top:6px; font-family:'Inter',sans-serif; font-weight:400; font-size:0.76rem; line-height:1.4;
-    color: var(--danger); background:rgba(178,58,46,0.08); border:1px solid rgba(178,58,46,0.25);
-    border-radius:8px; padding:7px 10px;
-  }
   .stat-block h3{ font-size:0.85rem; text-transform:uppercase; letter-spacing:0.4px; color:#4d6169; margin: -2px -2px 10px -2px; padding: 6px 8px; background: rgba(28,122,133,0.08); border-radius: 6px; }
   .summary-list{ display:flex; flex-direction:column; gap:8px; font-size:0.98rem; }
   .summary-list strong{ color: var(--deep); }
@@ -215,37 +170,6 @@
   .visibility-dot.on{ background:#3fa34d; }
   .species-cond-list{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
   .species-cond-btn{ background: var(--foam); border:1.5px solid var(--line); color:var(--deep); border-radius:20px; padding:8px 14px; font-size:0.85rem; font-weight:600; cursor:pointer; }
-
-  /* --- today-score location picker --- */
-  .today-loc-picker{ position:relative; margin:2px 0 10px; }
-  .today-loc-trigger{
-    width:100%; display:flex; justify-content:space-between; align-items:center;
-    background: var(--foam); border:1.5px solid var(--line); color:var(--deep);
-    border-radius:14px; padding:10px 14px; font-size:0.88rem; font-weight:600; cursor:pointer;
-    text-align:left;
-  }
-  .today-loc-caret{ opacity:0.6; font-size:0.8rem; margin-left:8px; }
-  .today-loc-dropdown{
-    position:absolute; z-index:20; left:0; right:0; top:calc(100% + 6px);
-    background:#fff; border:1.5px solid var(--line); border-radius:14px;
-    box-shadow:0 8px 24px rgba(0,0,0,0.14); max-height:320px; overflow-y:auto; padding:8px;
-  }
-  .today-loc-sort{ display:flex; gap:6px; margin-bottom:6px; }
-  .today-loc-sort-btn{
-    flex:1; background: var(--foam); border:1px solid var(--line); border-radius:10px;
-    padding:6px 8px; font-size:0.75rem; font-weight:600; color:var(--deep); opacity:0.6; cursor:pointer;
-  }
-  .today-loc-sort-btn.active{ opacity:1; background: var(--foam2, var(--foam)); border-color: var(--deep); }
-  .today-loc-item{
-    width:100%; display:flex; justify-content:space-between; align-items:center; gap:8px;
-    background:transparent; border:none; border-radius:10px; padding:9px 8px; text-align:left;
-    font-size:0.85rem; color:var(--deep); cursor:pointer;
-  }
-  .today-loc-item:active, .today-loc-item:hover{ background: var(--foam); }
-  .today-loc-item.selected{ background: var(--foam); font-weight:700; }
-  .today-loc-gps{ border-bottom:1px solid var(--line); border-radius:10px 10px 0 0; margin-bottom:4px; padding-bottom:11px; }
-  .today-loc-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .today-loc-count{ flex-shrink:0; font-size:0.72rem; opacity:0.55; font-weight:600; }
   .species-cond-btn:active{ background: var(--teal); color:#fff; }
   .condition-card{ background: var(--deep); color:#fff; border-radius:12px; padding:16px; margin-top:6px; }
   .condition-title{ font-family:'Bitter',serif; font-weight:700; font-size:0.95rem; margin-bottom:10px; }
@@ -327,25 +251,11 @@
   <button data-view="predictions">Προβλέψεις</button>
   <button data-view="settings">Ρυθμίσεις</button>
 </nav>
-<div class="tabs-scroll-hint" id="tabs-scroll-hint"><div class="tabs-scroll-thumb" id="tabs-scroll-thumb"></div></div>
-<div id="demo-mode-banner" style="display:none; align-items:center; justify-content:space-between; gap:10px; background:var(--coral); color:#fff; padding:9px 14px; font-size:0.82rem; font-weight:700;">
-  <span>🎬 <span class="i18n-plain">Λειτουργία επίδειξης — τίποτα δεν αποθηκεύεται</span></span>
-  <button type="button" id="btn-exit-demo" style="background:#fff; color:var(--coral); border:none; border-radius:8px; padding:6px 10px; font-weight:700; font-size:0.78rem;"><span class="i18n-plain">Έξοδος</span></button>
-</div>
 
 <main>
 
   <!-- NEW ENTRY -->
   <div class="view active" id="view-new">
-    <div class="card" id="demo-firstrun-card" style="display:none; background:var(--foam); border:1.5px dashed var(--teal);">
-      <p class="hint" style="margin:0 0 8px; color:var(--deep); font-weight:600;">
-        <span class="i18n-plain">👋 Πρώτη φορά εδώ; Δες μια γρήγορη επίδειξη με 10 φανταστικές καταχωρήσεις, για να καταλάβεις τι κάνει η εφαρμογή.</span>
-      </p>
-      <div style="display:flex; gap:8px;">
-        <button type="button" class="species-cond-btn" id="btn-start-demo">▶️ <span class="i18n-plain">Δες το Demo</span></button>
-        <button type="button" class="species-cond-btn" id="btn-dismiss-demo" style="opacity:0.65;">✕ <span class="i18n-plain">Όχι τώρα</span></button>
-      </div>
-    </div>
     <div class="card">
       <h2 id="i18n-trip-details">Στοιχεία εξόδου</h2>
 
@@ -403,14 +313,6 @@
         <div class="addrow"><input type="text" id="bait-new" placeholder="Προσθήκη νέου δολώματος"><button type="button" id="bait-add">+</button></div>
       </details>
 
-      <div id="f-baitbreak-section" class="baitbreak-section" style="display:none;">
-        <label style="display:flex; align-items:center; gap:6px;">
-          <span class="i18n-plain">Δόλωμα ανά είδος</span>
-          <button type="button" class="info-btn" id="btn-open-baitbreak-explain-f" title="Πώς δουλεύει">ℹ️</button>
-        </label>
-        <div id="f-baitbreak-list"></div>
-      </div>
-
       <label id="i18n-technique-label">Τεχνική ψαρέματος</label>
       <details class="picker" id="equip-picker">
         <summary><span id="equip-count-sum">Επίλεξε τεχνική</span></summary>
@@ -451,26 +353,15 @@
   <div class="view" id="view-predictions">
     <div class="card">
       <h2 id="i18n-today-header">🎣 Σήμερα</h2>
-
-      <div class="today-loc-picker">
-        <button type="button" class="today-loc-trigger" id="btn-today-location">
-          <span id="today-location-label">📍 …</span>
-          <span class="today-loc-caret">▾</span>
-        </button>
-        <div class="today-loc-dropdown" id="today-location-dropdown" style="display:none;">
-          <div class="today-loc-sort">
-            <button type="button" class="today-loc-sort-btn" id="sort-by-visits" data-sort="visits"><span class="i18n-plain">Επισκέψεις</span></button>
-            <button type="button" class="today-loc-sort-btn" id="sort-by-alpha" data-sort="alpha"><span class="i18n-plain">Αλφαβητικά</span></button>
-          </div>
-          <button type="button" class="today-loc-item today-loc-gps" id="today-loc-gps-btn">
-            <span class="today-loc-name">📍 <span class="i18n-plain">Τρέχουσα θέση μου</span></span>
-          </button>
-          <div id="today-location-list"></div>
-        </div>
-      </div>
-
       <button type="button" class="species-cond-btn" id="btn-today-score" onclick="computeTodayScore()"><span class="i18n-plain">Ενημέρωση</span></button>
       <div id="today-score-result"></div>
+    </div>
+
+    <div class="card">
+      <h2 id="i18n-pred1-header">🔮 Καλύτερη στιγμή (βάσει ιστορικού)</h2>
+      <p class="hint" id="i18n-pred1-hint">Υπολογίζει πότε πιθανόν να είναι η καλύτερη στιγμή για ψάρεμα, βάσει του ιστορικού σου και της πρόγνωσης καιρού.</p>
+      <button type="button" class="species-cond-btn" id="btn-predict-best-time" onclick="predictBestTime()">Υπολόγισε την καλύτερη στιγμή</button>
+      <div id="prediction-result"></div>
     </div>
 
     <div class="card">
@@ -478,7 +369,6 @@
       <p class="hint" id="i18n-pred2-hint">Βάλε συντεταγμένες και θα βρει ποια από τις επόμενες 5 ημέρες έχει τις πιο ευνοϊκές γενικές συνθήκες ψαρέματος εκεί (άνεμος, καιρός, πίεση).</p>
       <label class="i18n-coords-label">Συντεταγμένες</label>
       <textarea id="pred-coords" rows="2" placeholder="π.χ. 37,6623056, 24,0367908"></textarea>
-      <div class="geo-row"><button type="button" id="btn-map-pred">🗺️ <span class="i18n-plain">Επιλογή στον χάρτη</span></button></div>
       <button type="button" class="species-cond-btn" id="btn-predict-best-day" onclick="predictBestDayByCoords()">Βρες καλύτερη ημέρα</button>
       <div id="pred-coords-result"></div>
     </div>
@@ -488,7 +378,6 @@
       <p class="hint" id="i18n-pred3-hint">Βάλε συντεταγμένες και μια ημερομηνία, και θα δεις τις αναμενόμενες γενικές συνθήκες ψαρέματος εκείνη τη μέρα.</p>
       <label id="i18n-pred3-coords-label">Συντεταγμένες</label>
       <textarea id="pred-date-coords" rows="2" placeholder="π.χ. 37,6623056, 24,0367908"></textarea>
-      <div class="geo-row"><button type="button" id="btn-map-pred-date">🗺️ <span class="i18n-plain">Επιλογή στον χάρτη</span></button></div>
       <label id="i18n-pred3-date-label">Ημερομηνία</label>
       <input type="date" id="pred-date-input">
       <button type="button" class="species-cond-btn" id="btn-show-conditions" onclick="showConditionsForDate()">Δες συνθήκες</button>
@@ -499,7 +388,7 @@
       <summary id="i18n-explain-summary">ℹ️ Πώς υπολογίζονται οι προβλέψεις</summary>
       <div class="explain-body" id="i18n-explain-body">
         <p>Οι προβλέψεις βασίζονται στα δεδομένα καιρού/θάλασσας του Open-Meteo και σε απλή στατιστική ανάλυση, όχι σε τεχνητή νοημοσύνη ή εγγυημένη πρόγνωση.</p>
-        <p><strong>Σήμερα:</strong> υπολογίζει ένα σκορ 0–100 για το σημείο που επιλέξεις (ή για το πιο συχνό σου σημείο, αν δεν έχεις διαλέξει κάποιο), συνδυάζοντας τον τρέχοντα καιρό εκεί, τη σελήνη και τις σεληνιακές περιόδους, και το πόσο συχνά έπιανες ψάρια στο παρελθόν σε παρόμοιες συνθήκες.</p>
+        <p><strong>Καλύτερη στιγμή (ιστορικό):</strong> ψάχνει ποιες μέρες/ώρες/άνεμο είχες όταν έπιανες περισσότερα ψάρια στο παρελθόν, και βρίσκει πότε μέσα στις επόμενες 7 μέρες θα ξαναμοιάζουν αυτές οι συνθήκες, στο σημείο που έχεις τα περισσότερα ψάρια καταγεγραμμένα.</p>
         <p><strong>Καλύτερη ημέρα σε σημείο:</strong> εξετάζει τις επόμενες 5 μέρες σε συγκεκριμένες συντεταγμένες και βαθμολογεί κάθε μέρα με βάση άνεμο, καιρικές συνθήκες και πίεση — χωρίς να λαμβάνει υπόψη συγκεκριμένο είδος ψαριού.</p>
         <p><strong>Συνθήκες για ημερομηνία:</strong> δείχνει απλά τα αναμενόμενα καιρικά/θαλάσσια στοιχεία για μια συγκεκριμένη μέρα, χωρίς βαθμολόγηση.</p>
         <p><strong>Αξιοπιστία πρόγνωσης:</strong> είναι μεγαλύτερη όσο πιο κοντά είναι η ημερομηνία στο σήμερα, και μειώνεται όσο απομακρύνεται (οι προγνώσεις καιρού γίνονται λιγότερο ακριβείς πέρα από 5-7 μέρες).</p>
@@ -510,9 +399,6 @@
 
   <!-- SETTINGS -->
   <div class="view" id="view-settings">
-    <div class="card" style="text-align:center;">
-      <button type="button" class="species-cond-btn" id="btn-settings-demo">🎬 <span class="i18n-plain">Δες ένα demo της εφαρμογής</span></button>
-    </div>
     <div class="card">
       <h2 id="i18n-data-header">Δεδομένα</h2>
       <p class="hint" id="i18n-beta-notice" style="background:#fdf1ec; border:1px solid #f0c8b4; border-radius:8px; padding:8px 10px;"><strong>Δοκιμαστική έκδοση (beta)</strong> — προσθέτουμε συνεχώς νέα στοιχεία και τη βελτιώνουμε.</p>
@@ -537,6 +423,20 @@
       <label id="i18n-delete-all-label" style="margin-top:18px;">Διαγραφή όλων</label>
       <div class="footer-tools">
         <button type="button" id="btn-clear" style="color:var(--danger); border-color:var(--danger);">🗑 Διαγραφή όλων των δεδομένων</button>
+      </div>
+    </div>
+
+    <div class="card" id="shared-backup-card">
+      <h2 class="i18n-plain">Φάκελος αντιγράφων</h2>
+      <p class="hint i18n-plain">Αποθήκευσε αντίγραφα ασφαλείας σε έναν κοινό φάκελο στο κινητό σου, μοιρασμένο με τις άλλες εφαρμογές σου (π.χ. Identify-AI). Κάθε εφαρμογή γράφει μόνο στον δικό της υποφάκελο.</p>
+      <p class="hint" id="shared-backup-status">—</p>
+      <div class="footer-tools">
+        <button type="button" id="btn-shared-backup-pick" class="i18n-plain">📁 Επιλογή/Αλλαγή φακέλου</button>
+        <button type="button" id="btn-shared-backup-clear" style="display:none; color:var(--danger); border-color:var(--danger);">✕</button>
+      </div>
+      <div class="footer-tools" id="shared-backup-actions" style="display:none;">
+        <button type="button" id="btn-shared-backup-now" class="i18n-plain">💾 Αποθήκευση τώρα</button>
+        <button type="button" id="btn-shared-backup-restore" class="i18n-plain">♻️ Επαναφορά από τον φάκελο</button>
       </div>
     </div>
 
@@ -597,18 +497,16 @@
         <div class="chip i18n-plain" data-pos="bottom" id="i18n-pos-bottom">Κάτω</div>
       </div>
 
-      <div id="equip-btn-settings">
       <label style="margin-top:18px;" id="i18n-equip-btn-label" class="i18n-plain">Κουμπί πάνω-δεξιά</label>
       <div class="footer-tools">
         <button type="button" class="ghost-btn-sm" id="btn-toggle-equip" style="margin-top:0;">👁️ <span id="i18n-equip-toggle-text" class="i18n-plain">Απόκρυψη/Εμφάνιση</span> <span class="visibility-dot" id="equip-visibility-dot"></span></button>
       </div>
       <input type="text" id="equip-btn-text-input" placeholder="Κείμενο κουμπιού (π.χ. Εξοπλισμός)" style="margin-top:8px;">
       <input type="text" id="equip-btn-url-input" placeholder="Σύνδεσμος (π.χ. https://miserlis-fishing.gr/)" style="margin-top:8px;">
-      </div>
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.6 · 10 Σεπ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.5 · 30 Αυγ 2026</p>
     </div>
   </div>
 
@@ -670,14 +568,6 @@
       <div class="picker-list" id="e-bait-chip-list"></div>
     </details>
 
-    <div id="e-baitbreak-section" class="baitbreak-section" style="display:none;">
-      <label style="display:flex; align-items:center; gap:6px;">
-        <span class="i18n-plain">Δόλωμα ανά είδος</span>
-        <button type="button" class="info-btn" id="btn-open-baitbreak-explain-e" title="Πώς δουλεύει">ℹ️</button>
-      </label>
-      <div id="e-baitbreak-list"></div>
-    </div>
-
     <label id="i18n-e-technique-label">Τεχνική ψαρέματος</label>
     <details class="picker" id="e-equip-picker">
       <summary><span id="e-equip-count-sum">Επίλεξε τεχνική</span></summary>
@@ -716,20 +606,6 @@
       <div class="footer-tools">
         <button type="button" id="btn-weather-order-reset"><span class="i18n-plain">Επαναφορά προεπιλογής</span></button>
       </div>
-    </div>
-  </div>
-</div>
-
-<div class="map-picker-overlay" id="baitbreak-explain-overlay">
-  <div class="map-picker-sheet" style="max-width:460px;">
-    <div class="map-picker-head">
-      <h2 id="i18n-baitbreak-explain-title">Δόλωμα ανά είδος</h2>
-      <button type="button" class="modal-close" id="baitbreak-explain-close">✕</button>
-    </div>
-    <div style="padding:0 16px 16px; overflow-y:auto;" id="i18n-baitbreak-explain-body">
-      <p>Όταν μια εξόρμηση έχει 2 ή περισσότερα είδη ψαριών ΚΑΙ 2 ή περισσότερα δολώματα, εμφανίζεται εδώ ένας μικρός πίνακας για κάθε είδος, ώστε να δηλώσεις με ποιο δόλωμα έπιασες πόσα από αυτό το είδος.</p>
-      <p>Στην αρχή, όλα τα ψάρια ενός είδους πιστώνονται αυτόματα στο πρώτο δόλωμα που έχεις επιλέξει. Χρησιμοποίησε τα ➕ ➖ για να τα μοιράσεις σωστά ανάμεσα στα δολώματα — π.χ. 5 τσιπούρες με Μονοδόλι και 1 με Μάνα.</p>
-      <p style="margin-bottom:0;">Η ένδειξη κάτω από κάθε είδος («X από Y») σου δείχνει πόσα έχεις ήδη μοιράσει· όταν ταιριάζει με το σύνολο, είσαι εντάξει. Αν δεν το συμπληρώσεις καθόλου, δεν χάνεται τίποτα — η καταχώρηση αποθηκεύεται κανονικά.</p>
     </div>
   </div>
 </div>
@@ -804,6 +680,18 @@
   </div>
 </div>
 
+<div class="map-picker-overlay" id="backup-restore-overlay">
+  <div class="map-picker-sheet" style="max-width:460px;">
+    <div class="map-picker-head">
+      <h2 class="i18n-plain">Επαναφορά από τον φάκελο</h2>
+      <button type="button" class="modal-close" id="backup-restore-close">✕</button>
+    </div>
+    <div style="padding:0 16px 16px; overflow-y:auto;">
+      <p class="hint i18n-plain" style="margin-top:0;">Τα 10 νεότερα αρχεία αντιγράφων. Η επαναφορά αντικαθιστά όλα τα τρέχοντα δεδομένα σου.</p>
+      <div id="backup-restore-list"></div>
+    </div>
+  </div>
+</div>
 
 
 <div class="map-picker-overlay" id="map-picker-overlay">
@@ -834,11 +722,6 @@ const DEFAULTS = {
 let currentLang = LS.get('psarema_lang', 'el');
 /* ---------- literal-text dictionary: bait/species/technique/weather/wind/moon/tide/pressure/toasts/titles ---------- */
 const GR_TO_EN = {
-  // today-score location picker
-  "Τρέχουσα θέση μου":"My current location","Δεν υπάρχουν ακόμα καταχωρήσεις με τοποθεσία":"No entries with a location yet",
-  "Χωρίς όνομα":"Unnamed location","Επισκέψεις":"Visits","Αλφαβητικά":"Alphabetical",
-  "Λήψη τρέχουσας θέσης...":"Getting current location...","Δεν ήταν δυνατή η λήψη της τρέχουσας θέσης":"Could not get current location",
-  "Επίλεξε σημείο":"Choose a spot",
   // default species
   "Τσιπούρα":"Gilt-head bream","Λαβράκι":"Sea bass","Γόπα":"Bogue","Μπαρμπούνι":"Red mullet",
   "Σαργός":"White seabream","Σκορπίνα":"Scorpionfish","Κέφαλος":"Grey mullet",
@@ -871,7 +754,6 @@ const GR_TO_EN = {
   "Ψάρια ανά φάση σελήνης":"Fish by moon phase","Ψάρια ανά πίεση":"Fish by pressure","Ψάρια ανά είδος":"Fish by species",
   "Ψάρια ανά παλίρροια":"Fish by tide","Καιρικές συνθήκες κατά την ψαριά":"Weather during the trip",
   "Κατεύθυνση ανέμου":"Wind direction","Εξορμήσεις":"Trips","Ψάρια συνολικά":"Total fish",
-  "Τεχνική ψαρέματος":"Fishing technique",
   "Μ.Ο. ψάρια/εξόρμηση":"Avg. fish/trip","Συνολικά κιλά":"Total weight","Επιλέξτε είδος":"Select species",
   // toasts / messages
   "Τα δεδομένα εισήχθησαν ✓":"Data imported ✓","Αποτυχία επεξεργασίας φωτογραφίας":"Failed to process photo",
@@ -945,6 +827,7 @@ const GR_TO_EN = {
   "Η εφαρμογή παρέχεται όπως είναι (χωρίς εγγύηση), χωρίς καμία ευθύνη για τυχόν απώλεια δεδομένων, από οποιαδήποτε αιτία (διαγραφή browser, βλάβη συσκευής, τεχνικό πρόβλημα κ.ά.). Συνιστάται τακτική εξαγωγή/αποθήκευση από τον ίδιο τον χρήστη.":"The app is provided as-is (no warranty), with no liability for any data loss, from any cause (browser data clearing, device failure, technical issue, etc.). Regular export/backup by the user is recommended.",
   "Αν κάποια λειτουργία δεν φορτώνει σωστά (π.χ. καιρός, χάρτης, τοποθεσία), δοκίμασε να ανοίξεις την εφαρμογή σε άλλο browser (π.χ.":"If a feature doesn't load correctly (e.g. weather, map, location), try opening the app in a different browser (e.g.","— μερικοί browsers περιορίζουν αυτού του τύπου τις λειτουργίες.":"— some browsers restrict this type of functionality.",
   "Διαγραφή όλων":"Delete all",
+  "Τοποθεσίες ανά καιρό":"Locations by weather","Δεν υπάρχουν ακόμα αρκετά δεδομένα καιρού ανά τοποθεσία":"Not enough weather data per location yet",
   "Επικοινωνία με διαχειριστή":"Contact the developer","Προτείνετε αλλαγές, βελτιώσεις ή ό,τι σας δυσκόλεψε στην εφαρμογή — γράψτε το εδώ.":"Suggest changes, improvements, or anything that gave you trouble in the app — write it here.",
   "Όνομα (προαιρετικό)":"Name (optional)","Email (προαιρετικό, για απάντηση)":"Email (optional, for a reply)","Μήνυμα":"Message",
   "Γράψε ένα μήνυμα πριν την αποστολή":"Write a message before sending","Το μήνυμα στάλθηκε ✓":"Message sent ✓",
@@ -976,7 +859,33 @@ const GR_TO_EN = {
   "Προσοχή: η εισαγωγή αρχείου θα αντικαταστήσει όλα τα τρέχοντα δεδομένα σου (καταχωρήσεις, λίστες, φωτογραφίες). Ό,τι υπάρχει τώρα και δεν το έχεις εξάγει, θα χαθεί οριστικά. Θέλεις να συνεχίσεις;":"Warning: importing a file will replace all your current data (entries, lists, photos). Anything you haven't exported will be permanently lost. Do you want to continue?",
   "Σίγουρα θέλεις να διαγράψεις ΟΛΑ τα δεδομένα; Δεν αναιρείται.":"Are you sure you want to delete ALL data? This cannot be undone.",
   "Λάθος κωδικός":"Wrong code","Δεν υπάρχουν ακόμα καταγεγραμμένα ψάρια":"No fish recorded yet",
-  "Χρειάζονται καταχωρήσεις για στατιστικά":"Entries are needed for statistics"
+  "Χρειάζονται καταχωρήσεις για στατιστικά":"Entries are needed for statistics",
+  // shared backup folder
+  "Φάκελος αντιγράφων":"Backup folder",
+  "Αποθήκευσε αντίγραφα ασφαλείας σε έναν κοινό φάκελο στο κινητό σου, μοιρασμένο με τις άλλες εφαρμογές σου (π.χ. Identify-AI). Κάθε εφαρμογή γράφει μόνο στον δικό της υποφάκελο.":"Save backups to a shared folder on your phone, shared with your other apps (e.g. Identify-AI). Each app writes only to its own subfolder.",
+  "📁 Επιλογή/Αλλαγή φακέλου":"📁 Choose/Change folder","💾 Αποθήκευση τώρα":"💾 Back up now",
+  "♻️ Επαναφορά από τον φάκελο":"♻️ Restore from folder","Επαναφορά από τον φάκελο":"Restore from folder",
+  "Τα 10 νεότερα αρχεία αντιγράφων. Η επαναφορά αντικαθιστά όλα τα τρέχοντα δεδομένα σου.":"The 10 newest backup files. Restoring replaces all your current data.",
+  "Ο browser σου δεν υποστηρίζει επιλογή κοινού φακέλου εδώ — χρησιμοποίησε την Εξαγωγή JSON παραπάνω.":"Your browser doesn't support choosing a shared folder here — use the JSON Export above.",
+  "Ο browser σου δεν υποστηρίζει κοινό φάκελο εδώ — χρησιμοποίησε την Εξαγωγή JSON παραπάνω.":"Your browser doesn't support a shared folder here — use the JSON Export above.",
+  "Δεν δόθηκε άδεια εγγραφής στον φάκελο":"Write permission to the folder was not granted",
+  "Δεν δόθηκε άδεια πρόσβασης στον φάκελο":"Access permission to the folder was not granted",
+  "Ο φάκελος αντιγράφων ορίστηκε ✓":"Backup folder set ✓",
+  "Δεν ήταν δυνατή η επιλογή φακέλου":"Could not choose a folder",
+  "Ο κοινός φάκελος αφαιρέθηκε από την εφαρμογή (τα αρχεία δεν διαγράφηκαν)":"The shared folder was removed from the app (files were not deleted)",
+  "Δεν υπάρχει άδεια εγγραφής στον φάκελο — πάτα «Επιλογή/Αλλαγή φακέλου»":"There's no write permission for the folder — tap \"Choose/Change folder\"",
+  "Αποθηκεύτηκε αντίγραφο στον φάκελο ✓":"Backup saved to the folder ✓",
+  "Αποτυχία αποθήκευσης στον φάκελο":"Failed to save to the folder",
+  "Δεν έχει επιλεγεί φάκελος αντιγράφων.":"No backup folder chosen yet.",
+  "Επιλεγμένος φάκελος:":"Selected folder:","(κοινός φάκελος)":"(shared folder)",
+  "Ο φάκελος έχει επιλεγεί, αλλά χρειάζεται νέα άδεια — πάτα «Επιλογή/Αλλαγή φακέλου».":"The folder is set, but needs permission again — tap \"Choose/Change folder\".",
+  "Αφαίρεση του κοινού φακέλου από αυτή την εφαρμογή; Αφορά ΟΛΕΣ τις εφαρμογές σου που τον χρησιμοποιούν — τα αρχεία backup ΔΕΝ θα διαγραφούν.":"Remove the shared folder from this app? This affects ALL your apps that use it — backup files will NOT be deleted.",
+  "Επίλεξε πρώτα φάκελο":"Choose a folder first",
+  "Δεν βρέθηκαν αρχεία αντιγράφων στον φάκελο.":"No backup files found in the folder.",
+  "νεότερο":"newest",
+  "Η επαναφορά από αυτό το αρχείο θα αντικαταστήσει ΟΛΑ τα τρέχοντα δεδομένα σου (καταχωρήσεις, λίστες, φωτογραφίες). Θέλεις σίγουρα να συνεχίσεις;":"Restoring from this file will replace ALL your current data (entries, lists, photos). Are you sure you want to continue?",
+  "Τα δεδομένα επαναφέρθηκαν ✓":"Data restored ✓",
+  "Αποτυχία επαναφοράς — μη έγκυρο αρχείο":"Restore failed — invalid file"
 };
 function tr(text){
   if(currentLang !== 'en') return text;
@@ -997,100 +906,12 @@ if(!LS.get('psarema_equip_v2_migrated', false)){
   equips = LS.get('psarema_equip', DEFAULTS.equip.slice());
 }
 let entries = LS.get('psarema_entries', []);
-let demoMode = false;
-
-/* ---------- demo mode: 10 φανταστικές καταχωρήσεις, εντελώς ξεχωριστές από τα πραγματικά δεδομένα ---------- */
-function buildDemoEntries(){
-  const mkW = (pressure, weathercode, windKmh, windDirDeg, wave, seaTemp) => ({
-    pressure, weathercode, windKmh, windDirDeg, wave, seaTemp,
-    beaufort: beaufort(windKmh)
-  });
-  return [
-    { id:'demo-1', angler:[], date:'2026-07-12', timeIn:'06:00', timeOut:'09:30',
-      locName:'Παγασητικός (Πευκί)', coords:'38.9700, 23.2800',
-      weather: mkW(1016,1,14,320,0.3,25.5),
-      fish:{'Τσιπούρα':3,'Σαργός':1}, weight:1.8,
-      bait:['Μονοδόλι','Μάνα'], fishBait:{'Τσιπούρα':{'Μονοδόλι':2,'Μάνα':1},'Σαργός':{'Μάνα':1}},
-      equip:['🎣 Εγγλέζικο'], notes:'Δροσερό πρωινό, ήρεμη θάλασσα.', photos:[] },
-    { id:'demo-2', angler:[], date:'2026-07-20', timeIn:'19:30', timeOut:'22:00',
-      locName:'Βόρειος Ευβοϊκός', coords:'38.8100, 23.6200',
-      weather: mkW(1012,2,22,90,0.6,26.1),
-      fish:{'Λαβράκι':2}, weight:2.4,
-      bait:['Φαραώ'], equip:['🎣 Spinning'], notes:'Δύο καλά λαβράκια το σούρουπο.', photos:[] },
-    { id:'demo-3', angler:[], date:'2026-07-29', timeIn:'05:30', timeOut:'08:00',
-      locName:'Κόλπος Πεταλιών', coords:'38.1000, 24.2000',
-      weather: mkW(1018,0,10,45,0.2,26.8),
-      fish:{'Γόπα':6,'Μπαρμπούνι':2}, weight:1.1,
-      bait:['Μονοδόλι'], equip:['🎣 Bolognese'], notes:'Γεμάτη ψαριά, πολλή γόπα.', photos:[] },
-    { id:'demo-4', angler:[], date:'2026-08-03', timeIn:'', timeOut:'',
-      locName:'Παγασητικός (Πευκί)', coords:'38.9700, 23.2800',
-      weather: mkW(1008,61,28,200,1.2,27.3),
-      fish:{}, weight:0,
-      bait:['Μονοδόλι'], equip:['🎣 Εγγλέζικο'], notes:'Άδεια βόλτα, δυνατός νοτιάς.', photos:[] },
-    { id:'demo-5', angler:[], date:'2026-08-11', timeIn:'20:00', timeOut:'23:30',
-      locName:'Σαρωνικός (Βουλιαγμένη)', coords:'37.8900, 23.7800',
-      weather: mkW(1014,1,16,270,0.4,27.0),
-      fish:{'Σκορπίνα':1,'Σαργός':2}, weight:1.6,
-      bait:['Ακροβάτης','Μάνα'], fishBait:{'Σκορπίνα':{'Ακροβάτης':1},'Σαργός':{'Μάνα':2}},
-      equip:['🎣 Καθετή'], notes:'Πανσέληνος, καλή βραδιά.', photos:[] },
-    { id:'demo-6', angler:[], date:'2026-08-18', timeIn:'06:15', timeOut:'10:00',
-      locName:'Βόρειος Ευβοϊκός', coords:'38.8100, 23.6200',
-      weather: mkW(1019,2,12,30,0.3,26.5),
-      fish:{'Τσιπούρα':5}, weight:2.9,
-      bait:['Μάνα'], equip:['🎣 Εγγλέζικο'], notes:'Πέντε τσιπούρες, καλό μέγεθος.', photos:[] },
-    { id:'demo-7', angler:[], date:'2026-08-25', timeIn:'19:00', timeOut:'21:00',
-      locName:'Κόρινθος', coords:'37.9000, 22.9000',
-      weather: mkW(1011,3,20,150,0.8,26.9),
-      fish:{'Κέφαλος':4}, weight:1.4,
-      bait:['Φαραώ'], equip:['🎣 Bolognese'], notes:'Συννεφιά, κεφαλόπουλα στο ρηχό.', photos:[] },
-    { id:'demo-8', angler:[], date:'2026-09-02', timeIn:'05:45', timeOut:'08:30',
-      locName:'Παγασητικός (Πευκί)', coords:'38.9700, 23.2800',
-      weather: mkW(1017,1,9,300,0.2,25.8),
-      fish:{'Τσιπούρα':2,'Λαβράκι':1,'Γόπα':3}, weight:2.2,
-      bait:['Μονοδόλι','Φαραώ'],
-      fishBait:{'Τσιπούρα':{'Μονοδόλι':2},'Λαβράκι':{'Φαραώ':1},'Γόπα':{'Μονοδόλι':3}},
-      equip:['🎣 Εγγλέζικο','🎣 Spinning'], notes:'Μικτή ψαριά, ήρεμο πρωινό.', photos:[] },
-    { id:'demo-9', angler:[], date:'2026-09-06', timeIn:'', timeOut:'',
-      locName:'Σαρωνικός (Βουλιαγμένη)', coords:'37.8900, 23.7800',
-      weather: mkW(1009,63,32,240,1.6,25.9),
-      fish:{'Σαργός':1}, weight:0.4,
-      bait:['Μάνα'], equip:['🎣 Καθετή'], notes:'Δυσκολία λόγω κύματος.', photos:[] },
-    { id:'demo-10', angler:[], date:'2026-09-10', timeIn:'18:30', timeOut:'21:30',
-      locName:'Βόρειος Ευβοϊκός', coords:'38.8100, 23.6200',
-      weather: mkW(1015,1,13,60,0.4,25.2),
-      fish:{'Λαβράκι':1,'Τσιπούρα':2}, weight:1.9,
-      bait:['Φαραώ','Μονοδόλι'], fishBait:{'Λαβράκι':{'Φαραώ':1},'Τσιπούρα':{'Μονοδόλι':2}},
-      equip:['🎣 Spinning'], notes:'Ήρεμο σούρουπο, καλή απόδοση.', photos:[] }
-  ];
-}
-function enterDemoMode(){
-  demoMode = true;
-  entries = buildDemoEntries();
-  LS.set('psarema_seen_demo', true);
-  refreshAfterDemoToggle();
-  toast(currentLang==='en' ? 'Demo mode is on — nothing here is saved' : 'Λειτουργία επίδειξης ενεργή — τίποτα εδώ δεν αποθηκεύεται');
-}
-function exitDemoMode(){
-  demoMode = false;
-  entries = LS.get('psarema_entries', []);
-  refreshAfterDemoToggle();
-}
-function refreshAfterDemoToggle(){
-  const banner = document.getElementById('demo-mode-banner');
-  if(banner) banner.style.display = demoMode ? 'flex' : 'none';
-  const firstRunCard = document.getElementById('demo-firstrun-card');
-  if(firstRunCard) firstRunCard.style.display = (!demoMode && !LS.get('psarema_seen_demo', false) && entries.length === 0) ? 'block' : 'none';
-  if(typeof renderEntries === 'function') renderEntries();
-  if(typeof renderStats === 'function') renderStats();
-}
 let anglers = LS.get('psarema_anglers', []);
 let selAngler = new Set();
 let eSelAngler = new Set();
 
 let selFish = new Set(), selBait = new Set(), selEquip = new Set(LS.get('psarema_last_equip', []));
-let fishBaitBreakdown = {};
 let eSelFish = new Set(), eSelBait = new Set(), eSelEquip = new Set();
-let eFishBaitBreakdown = {};
 let editingId = null;
 let fWeatherData = null;
 let eWeatherData = null;
@@ -1134,6 +955,234 @@ async function idbDelete(key){
     tx.onerror = ()=>reject(tx.error);
   });
 }
+
+/* ---------- shared backup folder (File System Access API) ----------
+   Common convention shared with the user's other apps on aglentzakis-dot.github.io
+   (e.g. Identify-AI): one shared root folder handle stored in a separate
+   IndexedDB database "shared-backups" (store "handles", key "root"); each
+   app writes only into its own subfolder inside that root. */
+const SHARED_BACKUP_APP_FOLDER = 'Fish IQ';
+let sharedBackupDbPromise = null;
+function sharedBackupDbOpen(){
+  if(sharedBackupDbPromise) return sharedBackupDbPromise;
+  sharedBackupDbPromise = new Promise((resolve,reject)=>{
+    const req = indexedDB.open('shared-backups', 1);
+    req.onupgradeneeded = ()=>{ if(!req.result.objectStoreNames.contains('handles')) req.result.createObjectStore('handles'); };
+    req.onsuccess = ()=> resolve(req.result);
+    req.onerror = ()=> reject(req.error);
+  });
+  return sharedBackupDbPromise;
+}
+async function sharedBackupHandleGet(key){
+  const db = await sharedBackupDbOpen();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction('handles','readonly');
+    const req = tx.objectStore('handles').get(key);
+    req.onsuccess = ()=>resolve(req.result);
+    req.onerror = ()=>reject(req.error);
+  });
+}
+async function sharedBackupHandleSet(key, value){
+  const db = await sharedBackupDbOpen();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction('handles','readwrite');
+    tx.objectStore('handles').put(value, key);
+    tx.oncomplete = ()=>resolve();
+    tx.onerror = ()=>reject(tx.error);
+  });
+}
+async function sharedBackupHandleDelete(key){
+  const db = await sharedBackupDbOpen();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction('handles','readwrite');
+    tx.objectStore('handles').delete(key);
+    tx.oncomplete = ()=>resolve();
+    tx.onerror = ()=>reject(tx.error);
+  });
+}
+function sharedBackupSupported(){
+  return typeof window.showDirectoryPicker === 'function';
+}
+async function verifyFolderPermission(handle, mode){
+  if(!handle) return false;
+  const opts = { mode: mode || 'readwrite' };
+  try{
+    if((await handle.queryPermission(opts)) === 'granted') return true;
+    if((await handle.requestPermission(opts)) === 'granted') return true;
+  }catch(e){}
+  return false;
+}
+async function hasFolderPermissionSilent(handle, mode){
+  if(!handle) return false;
+  try{ return (await handle.queryPermission({ mode: mode || 'readwrite' })) === 'granted'; }catch(e){ return false; }
+}
+async function pickSharedBackupFolder(){
+  if(!sharedBackupSupported()){
+    toast(tr('Ο browser σου δεν υποστηρίζει επιλογή κοινού φακέλου εδώ — χρησιμοποίησε την Εξαγωγή JSON παραπάνω.'));
+    return;
+  }
+  try{
+    const handle = await window.showDirectoryPicker({ id: 'backups', mode: 'readwrite', startIn: 'downloads' });
+    const granted = await verifyFolderPermission(handle, 'readwrite');
+    if(!granted){ toast(tr('Δεν δόθηκε άδεια εγγραφής στον φάκελο')); return; }
+    await sharedBackupHandleSet('root', handle);
+    toast(tr('Ο φάκελος αντιγράφων ορίστηκε ✓'));
+    await writeBackupToSharedFolder(true);
+    renderBackupFolderStatus();
+  }catch(e){
+    if(e && e.name !== 'AbortError'){ console.error(e); toast(tr('Δεν ήταν δυνατή η επιλογή φακέλου')); }
+  }
+}
+async function clearSharedBackupFolder(){
+  try{ await sharedBackupHandleDelete('root'); }catch(e){}
+  toast(tr('Ο κοινός φάκελος αφαιρέθηκε από την εφαρμογή (τα αρχεία δεν διαγράφηκαν)'));
+  renderBackupFolderStatus();
+}
+async function buildBackupData(){
+  const photos = {};
+  for(const e of entries){
+    for(const key of (e.photos||[])){
+      if(!photos[key]){ try{ const d = await idbGet(key); if(d) photos[key] = d; }catch(err){} }
+    }
+  }
+  return { entries, species, baits, equips, anglers, photos, exportedAt: new Date().toISOString() };
+}
+async function writeBackupToSharedFolder(silent){
+  const root = await sharedBackupHandleGet('root');
+  if(!root) return false;
+  const granted = silent ? await hasFolderPermissionSilent(root, 'readwrite') : await verifyFolderPermission(root, 'readwrite');
+  if(!granted){ if(!silent) toast(tr('Δεν υπάρχει άδεια εγγραφής στον φάκελο — πάτα «Επιλογή/Αλλαγή φακέλου»')); return false; }
+  try{
+    const dir = await root.getDirectoryHandle(SHARED_BACKUP_APP_FOLDER, { create: true });
+    const data = await buildBackupData();
+    const filename = 'psarema-antigrafo-' + new Date().toISOString().slice(0,10) + '.json';
+    const fileHandle = await dir.getFileHandle(filename, { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(JSON.stringify(data, null, 2));
+    await writable.close();
+    if(!silent) toast(tr('Αποθηκεύτηκε αντίγραφο στον φάκελο ✓'));
+    return true;
+  }catch(e){
+    console.error('writeBackupToSharedFolder failed', e);
+    if(!silent) toast(tr('Αποτυχία αποθήκευσης στον φάκελο'));
+    return false;
+  }
+}
+async function maybeWriteSharedBackup(){
+  try{ await writeBackupToSharedFolder(true); }catch(e){}
+}
+async function listSharedBackupFiles(){
+  const root = await sharedBackupHandleGet('root');
+  if(!root) return [];
+  try{
+    const dir = await root.getDirectoryHandle(SHARED_BACKUP_APP_FOLDER, { create: true });
+    const files = [];
+    for await (const [name, handle] of dir.entries()){
+      if(handle.kind === 'file' && name.toLowerCase().endsWith('.json')) files.push({ name, handle });
+    }
+    files.sort((a,b)=> b.name.localeCompare(a.name));
+    return files.slice(0,10);
+  }catch(e){ console.error(e); return []; }
+}
+async function restoreFromSharedBackupFile(fileHandle){
+  if(!confirm(tr('Η επαναφορά από αυτό το αρχείο θα αντικαταστήσει ΟΛΑ τα τρέχοντα δεδομένα σου (καταχωρήσεις, λίστες, φωτογραφίες). Θέλεις σίγουρα να συνεχίσεις;'))) return;
+  try{
+    const file = await fileHandle.getFile();
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if(data.entries) { entries = data.entries; LS.set('psarema_entries', entries); }
+    if(data.species) { species = data.species; LS.set('psarema_species', species); }
+    if(data.baits) { baits = data.baits; LS.set('psarema_bait', baits); }
+    if(data.equips) { equips = data.equips; LS.set('psarema_equip', equips); }
+    if(data.anglers) { anglers = data.anglers; LS.set('psarema_anglers', anglers); }
+    if(data.photos){ for(const [key, dataUrl] of Object.entries(data.photos)){ try{ await idbPut(key, dataUrl); }catch(err){} } }
+    refreshPickers();
+    refreshAnglerPicker();
+    renderEntries();
+    toast(tr('Τα δεδομένα επαναφέρθηκαν ✓'));
+    const overlay = document.getElementById('backup-restore-overlay');
+    if(overlay) overlay.classList.remove('show');
+  }catch(e){ console.error(e); toast(tr('Αποτυχία επαναφοράς — μη έγκυρο αρχείο')); }
+}
+async function renderBackupFolderStatus(){
+  const statusEl = document.getElementById('shared-backup-status');
+  const clearBtn = document.getElementById('btn-shared-backup-clear');
+  const actionsEl = document.getElementById('shared-backup-actions');
+  if(!statusEl) return;
+  if(!sharedBackupSupported()){
+    statusEl.textContent = tr('Ο browser σου δεν υποστηρίζει κοινό φάκελο εδώ — χρησιμοποίησε την Εξαγωγή JSON παραπάνω.');
+    clearBtn.style.display = 'none';
+    actionsEl.style.display = 'none';
+    return;
+  }
+  let root = null;
+  try{ root = await sharedBackupHandleGet('root'); }catch(e){}
+  if(!root){
+    statusEl.textContent = tr('Δεν έχει επιλεγεί φάκελος αντιγράφων.');
+    clearBtn.style.display = 'none';
+    actionsEl.style.display = 'none';
+    return;
+  }
+  clearBtn.style.display = '';
+  const granted = await hasFolderPermissionSilent(root, 'readwrite');
+  if(granted){
+    statusEl.textContent = tr('Επιλεγμένος φάκελος:') + ' ' + (root.name || tr('(κοινός φάκελος)'));
+    actionsEl.style.display = 'flex';
+  } else {
+    statusEl.textContent = tr('Ο φάκελος έχει επιλεγεί, αλλά χρειάζεται νέα άδεια — πάτα «Επιλογή/Αλλαγή φακέλου».');
+    actionsEl.style.display = 'none';
+  }
+}
+function renderBackupRestoreList(files){
+  const listEl = document.getElementById('backup-restore-list');
+  if(!listEl) return;
+  if(!files.length){
+    listEl.innerHTML = `<p class="hint i18n-plain">Δεν βρέθηκαν αρχεία αντιγράφων στον φάκελο.</p>`;
+    return;
+  }
+  listEl.innerHTML = files.map((f,i)=>`
+    <div class="bar-row" style="align-items:center;">
+      <div class="bar-label" style="width:auto; flex:1;">${f.name}${i===0 ? ' <strong style="color:var(--teal);">(' + tr('νεότερο') + ')</strong>' : ''}</div>
+      <button type="button" class="species-cond-btn" data-idx="${i}">♻️</button>
+    </div>`).join('');
+  listEl.querySelectorAll('button[data-idx]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const idx = parseInt(btn.dataset.idx);
+      await restoreFromSharedBackupFile(files[idx].handle);
+    });
+  });
+}
+document.getElementById('btn-shared-backup-pick').addEventListener('click', pickSharedBackupFolder);
+document.getElementById('btn-shared-backup-clear').addEventListener('click', ()=>{
+  if(!confirm(tr('Αφαίρεση του κοινού φακέλου από αυτή την εφαρμογή; Αφορά ΟΛΕΣ τις εφαρμογές σου που τον χρησιμοποιούν — τα αρχεία backup ΔΕΝ θα διαγραφούν.'))) return;
+  clearSharedBackupFolder();
+});
+document.getElementById('btn-shared-backup-now').addEventListener('click', async ()=>{
+  const root = await sharedBackupHandleGet('root');
+  if(!root){ toast(tr('Επίλεξε πρώτα φάκελο')); return; }
+  const granted = await verifyFolderPermission(root, 'readwrite');
+  if(!granted){ toast(tr('Δεν δόθηκε άδεια εγγραφής στον φάκελο')); return; }
+  await writeBackupToSharedFolder(false);
+  renderBackupFolderStatus();
+});
+document.getElementById('btn-shared-backup-restore').addEventListener('click', async ()=>{
+  const root = await sharedBackupHandleGet('root');
+  if(!root){ toast(tr('Επίλεξε πρώτα φάκελο')); return; }
+  const granted = await verifyFolderPermission(root, 'readwrite');
+  if(!granted){ toast(tr('Δεν δόθηκε άδεια πρόσβασης στον φάκελο')); return; }
+  const files = await listSharedBackupFiles();
+  renderBackupRestoreList(files);
+  const overlay = document.getElementById('backup-restore-overlay');
+  if(overlay) overlay.classList.add('show');
+});
+document.getElementById('backup-restore-close').addEventListener('click', ()=>{
+  document.getElementById('backup-restore-overlay').classList.remove('show');
+});
+document.getElementById('backup-restore-overlay').addEventListener('click', (ev)=>{
+  if(ev.target.id === 'backup-restore-overlay') document.getElementById('backup-restore-overlay').classList.remove('show');
+});
+renderBackupFolderStatus();
+
 function resizeImageFile(file, maxDim, quality){
   maxDim = maxDim || 1280; quality = quality || 0.72;
   return new Promise((resolve,reject)=>{
@@ -1213,28 +1262,6 @@ document.getElementById('e-photo-input-camera').addEventListener('change', (ev)=
 document.getElementById('e-photo-input-gallery').addEventListener('change', (ev)=>{ addPhotosToGrid('e-photo-grid', ev.target.files, 3); ev.target.value = ''; });
 
 /* ---------- tabs ---------- */
-/* Ένδειξη ότι η μπάρα καρτελών σύρεται αριστερά-δεξιά */
-(function(){
-  const nav = document.querySelector('nav.tabs');
-  const hint = document.getElementById('tabs-scroll-hint');
-  const thumb = document.getElementById('tabs-scroll-thumb');
-  if(!nav || !hint || !thumb) return;
-  function update(){
-    const extra = nav.scrollWidth - nav.clientWidth;
-    if(extra <= 4){ hint.classList.remove('on'); return; }
-    hint.classList.add('on');
-    const ratio = nav.clientWidth / nav.scrollWidth;
-    const w = Math.max(18, ratio * 100);
-    thumb.style.width = w + '%';
-    const pos = nav.scrollLeft / extra;
-    thumb.style.marginLeft = (pos * (100 - w)) + '%';
-  }
-  nav.addEventListener('scroll', update, { passive:true });
-  window.addEventListener('resize', update);
-  setTimeout(update, 0);
-  setTimeout(update, 400);
-})();
-
 document.querySelectorAll('nav.tabs button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
@@ -1340,142 +1367,6 @@ function updateFishFollowups(prefix){
   if(hasFish && !weightEl.value) weightEl.classList.add('needs-fill'); else weightEl.classList.remove('needs-fill');
   const picker = document.getElementById(pickerId);
   if(hasFish && baitSet.size === 0) picker.classList.add('needs-fill-box'); else picker.classList.remove('needs-fill-box');
-  renderBaitBreakdown(prefix);
-}
-
-/* ---------- bait-per-species breakdown ---------- */
-function shouldShowBaitBreakdown(prefix){
-  const fishSet = prefix === 'f' ? selFish : eSelFish;
-  const baitSet = prefix === 'f' ? selBait : eSelBait;
-  return fishSet.size >= 2 && baitSet.size >= 2;
-}
-function renderBaitBreakdown(prefix){
-  const sectionId = prefix === 'f' ? 'f-baitbreak-section' : 'e-baitbreak-section';
-  const listId = prefix === 'f' ? 'f-baitbreak-list' : 'e-baitbreak-list';
-  const qtyListId = prefix === 'f' ? 'fish-qty-list' : 'e-fish-qty-list';
-  const section = document.getElementById(sectionId);
-  const listEl = document.getElementById(listId);
-  if(!section || !listEl) return;
-  const fishSet = prefix === 'f' ? selFish : eSelFish;
-  const baitSet = prefix === 'f' ? selBait : eSelBait;
-  const store = prefix === 'f' ? fishBaitBreakdown : eFishBaitBreakdown;
-
-  if(!shouldShowBaitBreakdown(prefix)){ section.style.display = 'none'; return; }
-  const wasHidden = section.style.display === 'none';
-  section.style.display = '';
-  if(wasHidden){
-    setTimeout(()=>{ section.scrollIntoView({behavior:'smooth', block:'nearest'}); }, 60);
-  }
-
-  const qtyMap = {};
-  document.querySelectorAll(`#${qtyListId} .qty-item`).forEach(row=>{
-    qtyMap[row.dataset.name] = parseInt(row.querySelector('input').value) || 0;
-  });
-  const baitArr = [...baitSet];
-
-  let html = '';
-  [...fishSet].forEach(sp=>{
-    const total = qtyMap[sp] || 0;
-    if(total <= 0) return;
-    if(!store[sp]) store[sp] = {};
-    Object.keys(store[sp]).forEach(b=>{ if(!baitArr.includes(b)) delete store[sp][b]; });
-    const hasAny = baitArr.some(b => (store[sp][b]||0) > 0);
-    if(!hasAny){
-      Object.keys(store[sp]).forEach(k=>delete store[sp][k]);
-      store[sp][baitArr[0]] = total;
-    }
-
-    const assigned = baitArr.reduce((sum,b)=> sum + (store[sp][b]||0), 0);
-    const mismatch = assigned !== total;
-
-    const rows = baitArr.map(b=>{
-      const v = store[sp][b] || 0;
-      return `<div class="qty-item baitbreak-row" data-sp="${escapeHtml(sp)}" data-bait="${escapeHtml(b)}">
-        <span>${tr(b)}</span>
-        <div class="stepper">
-          <button type="button" class="stepper-btn baitbreak-btn" data-dir="-1">−</button>
-          <input type="number" min="0" max="${total}" class="baitbreak-input" value="${v}">
-          <button type="button" class="stepper-btn baitbreak-btn" data-dir="1">+</button>
-        </div>
-      </div>`;
-    }).join('');
-
-    const assignedText = currentLang==='en'
-      ? `${assigned} of ${total} assigned`
-      : `${assigned} από ${total} έχουν ανατεθεί`;
-
-    html += `<div class="baitbreak-species-block">
-      <div class="baitbreak-species-title">${tr(sp)} <span class="baitbreak-total">(${total})</span></div>
-      ${rows}
-      <div class="baitbreak-assigned${mismatch ? ' mismatch' : ''}">${assignedText}</div>
-    </div>`;
-  });
-
-  Object.keys(store).forEach(sp=>{ if(!fishSet.has(sp) || !(qtyMap[sp] > 0)) delete store[sp]; });
-
-  listEl.innerHTML = html;
-
-  function applyBaitValue(sp, b, rawNewVal){
-    if(!store[sp]) store[sp] = {};
-    const spTotal = qtyMap[sp] || 0;
-    let newVal = Math.round(parseFloat(rawNewVal));
-    if(isNaN(newVal) || newVal < 0) newVal = 0;
-    if(newVal > spTotal) newVal = spTotal;
-    const oldVal = store[sp][b] || 0;
-    let delta = newVal - oldVal;
-    if(delta > 0){
-      const assignedOthers = baitArr.reduce((sum,x)=> x===b ? sum : sum + (store[sp][x]||0), 0);
-      const freePool = Math.max(0, spTotal - assignedOthers - oldVal);
-      const fromPool = Math.min(delta, freePool);
-      store[sp][b] = oldVal + fromPool;
-      let remaining = delta - fromPool;
-      while(remaining > 0){
-        let source = null, max = 0;
-        baitArr.forEach(o=>{
-          if(o === b) return;
-          const v = store[sp][o] || 0;
-          if(v > max){ max = v; source = o; }
-        });
-        if(!source) break;
-        const take = Math.min(remaining, max);
-        store[sp][source] = max - take;
-        store[sp][b] = (store[sp][b]||0) + take;
-        remaining -= take;
-      }
-    } else {
-      store[sp][b] = newVal;
-    }
-  }
-
-  listEl.querySelectorAll('.baitbreak-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const row = btn.closest('.baitbreak-row');
-      const sp = row.dataset.sp, b = row.dataset.bait;
-      const dir = parseInt(btn.dataset.dir);
-      const cur = (store[sp] && store[sp][b]) || 0;
-      applyBaitValue(sp, b, cur + dir);
-      renderBaitBreakdown(prefix);
-    });
-  });
-  listEl.querySelectorAll('.baitbreak-input').forEach(inp=>{
-    inp.addEventListener('change', ()=>{
-      const row = inp.closest('.baitbreak-row');
-      const sp = row.dataset.sp, b = row.dataset.bait;
-      applyBaitValue(sp, b, inp.value);
-      renderBaitBreakdown(prefix);
-    });
-  });
-}
-function collectFishBait(prefix){
-  if(!shouldShowBaitBreakdown(prefix)) return undefined;
-  const store = prefix === 'f' ? fishBaitBreakdown : eFishBaitBreakdown;
-  const out = {};
-  Object.entries(store).forEach(([sp, map])=>{
-    const cleaned = {};
-    Object.entries(map).forEach(([b,q])=>{ if(q > 0) cleaned[b] = q; });
-    if(Object.keys(cleaned).length) out[sp] = cleaned;
-  });
-  return Object.keys(out).length ? out : undefined;
 }
 function setupAdd(inputId, btnId, arr, storeKey, rerender){
   document.getElementById(btnId).addEventListener('click', ()=>{
@@ -1638,8 +1529,6 @@ function closeMapPicker(){
 }
 document.getElementById('btn-map-f').addEventListener('click', ()=>openMapPicker('f'));
 document.getElementById('btn-map-e').addEventListener('click', ()=>openMapPicker('e'));
-document.getElementById('btn-map-pred').addEventListener('click', ()=>openMapPicker('pred'));
-document.getElementById('btn-map-pred-date').addEventListener('click', ()=>openMapPicker('pred-date'));
 document.getElementById('map-picker-close').addEventListener('click', closeMapPicker);
 document.getElementById('map-picker-overlay').addEventListener('click', (ev)=>{ if(ev.target.id === 'map-picker-overlay') closeMapPicker(); });
 document.getElementById('map-picker-confirm').addEventListener('click', ()=>{
@@ -1988,7 +1877,7 @@ const WEATHER_ITEM_DEFAULT_ORDER = ['weather','temp','seatemp','pressure','press
 
 function computePersonalization(scores){
   const withWeather = (typeof entries !== 'undefined' ? entries : []).filter(e => e.weather && e.weather.beaufort != null);
-  if(withWeather.length < 3) return null;
+  if(withWeather.length < 5) return null;
   let allSuccess = 0, matchSum = 0, matchCount = 0;
   withWeather.forEach(e=>{
     const eScores = scoreComponents(e.weather, e.date);
@@ -1998,7 +1887,7 @@ function computePersonalization(scores){
       + Math.abs(eScores.waveScore-scores.waveScore) + Math.abs(eScores.pressureScore-scores.pressureScore);
     if(dist <= 3){ matchCount++; if(hasFish) matchSum++; }
   });
-  if(matchCount < 2) return null;
+  if(matchCount < 3) return null;
   const matchRate = matchSum / matchCount;
   const baseRate = allSuccess / withWeather.length;
   const confidence = Math.min(1, matchCount / 8);
@@ -2135,7 +2024,6 @@ document.getElementById('e-fetch-weather').addEventListener('click', ()=>runFetc
 
 /* ---------- save new entry ---------- */
 document.getElementById('btn-save').addEventListener('click', async ()=>{
-  if(demoMode){ toast(currentLang==='en' ? 'Exit demo mode first to save your own entries' : 'Βγες πρώτα από το demo για να αποθηκεύσεις τη δική σου εξόρμηση'); return; }
   const date = document.getElementById('f-date').value;
   if(!date){ toast('Βάλε ημερομηνία'); return; }
   const fishQty = {};
@@ -2161,7 +2049,6 @@ document.getElementById('btn-save').addEventListener('click', async ()=>{
     fish: fishQty,
     weight: parseFloat(document.getElementById('f-weight').value) || 0,
     bait: [...selBait],
-    fishBait: collectFishBait('f'),
     equip: [...selEquip],
     notes: document.getElementById('f-notes').value.trim(),
     photos: photoKeys
@@ -2171,10 +2058,10 @@ document.getElementById('btn-save').addEventListener('click', async ()=>{
   LS.set('psarema_entries', entries);
   toast('Η καταχώρηση αποθηκεύτηκε ✓');
   maybeSendAutoBackup();
+  maybeWriteSharedBackup();
   resetForm();
 });
 function resetForm(){
-  fishBaitBreakdown = {};
   ['angler-picker','fish-picker','bait-picker','equip-picker'].forEach(id=>{
     const det = document.getElementById(id);
     if(det) det.open = false;
@@ -2273,7 +2160,6 @@ async function openDetail(id){
 
   eSelFish = new Set(Object.keys(e.fish||{}).filter(n=>(e.fish[n]||0) > 0));
   eSelBait = new Set(e.bait || []);
-  eFishBaitBreakdown = e.fishBait ? JSON.parse(JSON.stringify(e.fishBait)) : {};
   eSelEquip = new Set(e.equip || []);
   function bindDeletable(listId, arr, selSet, countId, onToggle, storeKey){
     const ctx = {arr, storeKey, rerender: ()=> renderChipList(listId, arr, selSet, countId, onToggle, ctx)};
@@ -2322,7 +2208,6 @@ document.getElementById('modal-close').addEventListener('click', closeModal);
 document.getElementById('modal-overlay').addEventListener('click', (ev)=>{ if(ev.target.id === 'modal-overlay') closeModal(); });
 function closeModal(){ document.getElementById('modal-overlay').classList.remove('show'); editingId = null; }
 document.getElementById('e-btn-save').addEventListener('click', async ()=>{
-  if(demoMode){ toast(currentLang==='en' ? 'Exit demo mode first to save changes' : 'Βγες πρώτα από το demo για να αποθηκεύσεις αλλαγές'); return; }
   const idx = entries.findIndex(x=>x.id === editingId);
   if(idx === -1) return;
   const fishQty = {};
@@ -2348,7 +2233,6 @@ document.getElementById('e-btn-save').addEventListener('click', async ()=>{
     fish: fishQty,
     weight: parseFloat(document.getElementById('e-weight').value) || 0,
     bait: [...eSelBait],
-    fishBait: collectFishBait('e'),
     equip: [...eSelEquip],
     notes: document.getElementById('e-notes').value.trim(),
     photos: photoKeys
@@ -2374,8 +2258,8 @@ function renderStats(){
   const wrap = document.getElementById('stats-content');
   if(entries.length === 0){ wrap.innerHTML = `<div class="empty">${tr('Χρειάζονται καταχωρήσεις για στατιστικά')}</div>`; return; }
 
-  let totalFish = 0, totalWeight = 0, missingTimeInFish = 0;
-  const bySpecies = {}, byLocation = {}, byWeather = {}, byWindDir = {}, byMoonPhase = {}, byBait = {}, byPressure = {}, byTide = {}, byTechnique = {};
+  let totalFish = 0, totalWeight = 0;
+  const bySpecies = {}, byLocation = {}, byWeather = {}, byWindDir = {}, byMoonPhase = {}, byBait = {}, byPressure = {}, byTide = {};
   const byMonth = new Array(12).fill(0);
   const byHourBucket = new Array(8).fill(0); // 3h buckets covering 24h
   const entryTotals = [];
@@ -2414,7 +2298,6 @@ function renderStats(){
     byLocation[loc].fish += entryFish;
     byLocation[loc].weight += (e.weight || 0);
     if(entryFish > 0) byLocation[loc].tripsWithFish++;
-    if(entryFish > 0 && !e.timeIn) missingTimeInFish += entryFish;
     entryTotals.push({ date: e.date, loc, fish: entryFish });
 
     if(e.timeIn && e.timeOut){
@@ -2428,14 +2311,7 @@ function renderStats(){
       const h1 = parseInt(e.timeIn.split(':')[0]);
       if(!isNaN(h1)) byHourBucket[Math.floor(h1/3)] += entryFish;
     }
-    if(e.fishBait){
-      Object.values(e.fishBait).forEach(map=>{
-        Object.entries(map).forEach(([b,q])=>{ if(q>0) byBait[b] = (byBait[b]||0) + q; });
-      });
-    } else {
-      (e.bait||[]).forEach(b=>{ byBait[b] = (byBait[b]||0) + entryFish; });
-    }
-    (e.equip||[]).forEach(t=>{ if(entryFish>0) byTechnique[t] = (byTechnique[t]||0) + entryFish; });
+    (e.bait||[]).forEach(b=>{ byBait[b] = (byBait[b]||0) + entryFish; });
 
     const month = new Date(e.date+'T12:00:00').getMonth();
     byMonth[month] += entryFish;
@@ -2519,27 +2395,12 @@ function renderStats(){
       <div>${hidden}</div>
     </details>`;
   }
-  function mismatchBadge(){
-    if(!missingTimeInFish) return '';
-    const msg = currentLang === 'en'
-      ? 'Find the matching entry in your list and add an arrival time, so predictions become more accurate.'
-      : 'Βρες την αντίστοιχη καταχώρηση στη λίστα και συμπλήρωσε ώρα άφιξης, ώστε η πρόβλεψη να γίνει πιο αντικειμενική.';
-    return `<details class="stat-mismatch"><summary title="${escapeHtml(msg)}">❓</summary><div class="stat-mismatch-body">${escapeHtml(msg)}</div></details>`;
-  }
-  function mismatchRow(kind){
-    if(!missingTimeInFish) return '';
-    const label = currentLang === 'en' ? 'No time recorded' : 'Χωρίς καταχώρηση ώρας';
-    if(kind === 'hour'){
-      return `<div class="bar-row stat-mismatch-row"><div class="bar-label" style="width:64px; opacity:0.65;">—</div><div style="flex:1; font-size:0.8rem; opacity:0.65;">${label}${mismatchBadge()}</div><div class="bar-val">${missingTimeInFish}</div></div>`;
-    }
-    return `<div class="bar-row stat-mismatch-row"><div class="bar-label" style="width:auto; flex:1; white-space:normal; opacity:0.65;">${label}${mismatchBadge()}</div><div class="bar-track" style="opacity:0.25;"><div class="bar-fill" style="width:0%;"></div></div><div class="bar-val">${missingTimeInFish}</div></div>`;
-  }
-  function barBlock(title, obj, maxOverride, orderKeys, extraHeaderHtml, extraRowHtml){
+  function barBlock(title, obj, maxOverride, orderKeys){
     const max = maxOverride || Math.max(...Object.values(obj), 1);
     const entries = orderKeys ? orderKeys.filter(k=>obj[k]!=null).map(k=>[k,obj[k]]) : Object.entries(obj).sort((a,b)=>b[1]-a[1]);
     const rows = entries.map(([n,v])=>`
       <div class="bar-row"><div class="bar-label">${tr(n)}</div><div class="bar-track"><div class="bar-fill" style="width:${(v/max*100)}%"></div></div><div class="bar-val">${v}</div></div>`).join('');
-    return `<div class="stat-block"><h3>${tr(title)}${extraHeaderHtml||''}</h3>${rows}${extraRowHtml||''}</div>`;
+    return `<div class="stat-block"><h3>${tr(title)}</h3>${rows}</div>`;
   }
 
   const monthsEL = ['Ιαν','Φεβ','Μάρ','Απρ','Μάι','Ιούν','Ιούλ','Αύγ','Σεπ','Οκτ','Νοέ','Δεκ'];
@@ -2570,6 +2431,18 @@ function renderStats(){
     </div>`;
   });
   const locRows = collapsibleList(locRowsAll, 'loc-rows');
+
+  const locWeatherRowsArr = Object.entries(byLocation)
+    .filter(([,d])=>d.weatherCounts && Object.keys(d.weatherCounts).length)
+    .sort((a,b)=>b[1].fish-a[1].fish)
+    .map(([n,d])=>{
+      const topWx = Object.entries(d.weatherCounts).sort((a,b)=>b[1]-a[1])[0];
+      const topWind = Object.entries(d.windCounts).sort((a,b)=>b[1]-a[1])[0];
+      return `<div class="bar-row" style="align-items:flex-start;">
+        <div class="bar-label" style="width:auto; flex:1;">${n}<br><span style="font-weight:400; color:#7c8f95; font-size:0.75rem;">${tr(topWx[0])} · ${tr(topWind[0])} (${topWind[1]}/${d.trips})</span></div>
+      </div>`;
+    });
+  const locWeatherHtml = locWeatherRowsArr.length ? collapsibleList(locWeatherRowsArr, 'loc-weather') : `<div class="hint">${tr('Δεν υπάρχουν ακόμα αρκετά δεδομένα καιρού ανά τοποθεσία')}</div>`;
 
   const bestSpotsRowsArr = Object.entries(byLocation).sort((a,b)=>b[1].fish-a[1].fish).map(([n,d])=>{
     const kgStr = d.weight ? d.weight.toFixed(1).replace('.',',') + ' kg' : '—';
@@ -2607,26 +2480,26 @@ function renderStats(){
     summary: summaryCard,
     topCatches: `<div class="stat-block"><h3>${tr("Καλύτερες εξορμήσεις")}</h3>${topCatchesHtml}</div>`,
     bySpecies: barBlock('Ψάρια ανά είδος', bySpecies),
-    byHour: `<div class="stat-block"><h3>${tr("Επιτυχία ανά ώρα")}</h3>${hourRows}${mismatchRow('hour')}</div>`,
+    byHour: `<div class="stat-block"><h3>${tr("Επιτυχία ανά ώρα")}</h3>${hourRows}</div>`,
     byBait: `<div class="stat-block"><h3>${tr("Επιτυχία ανά δόλωμα")}</h3>${baitHtml}</div>`,
     byMoon: barBlock('Ψάρια ανά φάση σελήνης', byMoonPhase, null, currentLang === 'en'
       ? ['New Moon','Waxing Crescent','First Quarter','Waxing Gibbous','Full Moon','Waning Gibbous','Last Quarter','Waning Crescent']
       : ['Νέα Σελήνη','Αύξων Μηνίσκος','Πρώτο Τέταρτο','Αύξων Αμφίκυρτος','Πανσέληνος','Φθίνων Αμφίκυρτος','Τελευταίο Τέταρτο','Φθίνων Μηνίσκος']),
     byPressure: barBlock('Ψάρια ανά πίεση', byPressure),
-    byTide: barBlock('Ψάρια ανά παλίρροια', byTide, null, null, null, mismatchRow('tide')),
+    byTide: barBlock('Ψάρια ανά παλίρροια', byTide),
     byMonth: `<div class="stat-block"><h3>${tr("Εποχικότητα (ψάρια ανά μήνα)")}</h3>${monthBars}</div>`,
     byWeather: barBlock('Καιρικές συνθήκες κατά την ψαριά', byWeather),
     byWindDir: barBlock('Κατεύθυνση ανέμου', byWindDir),
     byLocation: `<div class="stat-block"><h3>${tr("Ανά τοποθεσία")}</h3>${locRows}</div>`,
     bestSpots: `<div class="stat-block"><h3>${tr("📍 Τα καλύτερα σημεία μου")}</h3>${bestSpotsHtml}</div>`,
-    byTechnique: barBlock('Τεχνική ψαρέματος', byTechnique),
+    byLocationWeather: `<div class="stat-block"><h3>${tr("Τοποθεσίες ανά καιρό")}</h3>${locWeatherHtml}</div>`,
     speciesConditions: `<div class="stat-block"><h3>${tr("🎯 Καλύτερες συνθήκες ανά είδος")}</h3>
       <div class="species-cond-list">${speciesButtons}</div>
       <div id="species-cond-result"></div>
     </div>`
   };
 
-  const defaultOrder = ['summary','topCatches','bySpecies','speciesConditions','byMonth','byMoon','byPressure','byTide','byWindDir','byWeather','byBait','byHour','byLocation','bestSpots','byTechnique'];
+  const defaultOrder = ['summary','topCatches','bySpecies','speciesConditions','byMonth','byMoon','byPressure','byTide','byWindDir','byWeather','byBait','byHour','byLocationWeather','byLocation','bestSpots'];
   let order = LS.get('psarema_stats_order', defaultOrder);
   defaultOrder.forEach(k=>{ if(!order.includes(k)) order.push(k); });
   order = order.filter(k=>sections[k] !== undefined);
@@ -2641,7 +2514,7 @@ function renderStats(){
     </div>`).join('');
 }
 function moveStatsSection(key, direction){
-  const defaultOrder = ['summary','topCatches','bySpecies','speciesConditions','byMonth','byMoon','byPressure','byTide','byWindDir','byWeather','byBait','byHour','byLocation','bestSpots','byTechnique'];
+  const defaultOrder = ['summary','topCatches','bySpecies','speciesConditions','byMonth','byMoon','byPressure','byTide','byWindDir','byWeather','byBait','byHour','byLocationWeather','byLocation','bestSpots'];
   let order = LS.get('psarema_stats_order', defaultOrder);
   defaultOrder.forEach(k=>{ if(!order.includes(k)) order.push(k); });
   const idx = order.indexOf(key);
@@ -2654,6 +2527,122 @@ function moveStatsSection(key, direction){
 window.moveStatsSection = moveStatsSection;
 
 /* ---------- prediction: best upcoming time to fish ---------- */
+async function predictBestTime(){
+  const resultEl = document.getElementById('prediction-result');
+  resultEl.innerHTML = `<div class="hint">${tr('Υπολογισμός...')}</div>`;
+
+  const successEntries = entries.filter(e => e.fish && Object.values(e.fish).some(q=>q>0) && parseCoords(e.coords));
+  if(successEntries.length < 5){
+    resultEl.innerHTML = `<div class="hint">${currentLang==='en' ? `You need at least 5 entries with fish and valid coordinates for a reliable prediction (you currently have ${successEntries.length}).` : `Χρειάζονται τουλάχιστον 5 καταχωρήσεις με ψάρια και έγκυρες συντεταγμένες για αξιόπιστη πρόβλεψη (έχεις προς το παρόν ${successEntries.length}).`}</div>`;
+    return;
+  }
+
+  const weekdayCounts = new Array(7).fill(0);
+  const hourBuckets = new Array(8).fill(0);
+  const windDirCounts = {};
+  let beaufortMin=null, beaufortMax=null;
+  const locFish = {};
+
+  successEntries.forEach(e=>{
+    const totalFish = Object.values(e.fish).reduce((a,b)=>a+b,0);
+    const d = new Date(e.date+'T12:00:00').getDay();
+    weekdayCounts[d] += totalFish;
+    if(e.timeIn){ const h=parseInt(e.timeIn.split(':')[0]); if(!isNaN(h)) hourBuckets[Math.floor(h/3)] += totalFish; }
+    if(e.weather){
+      windDirCounts[getWindDirText(e.weather)] = (windDirCounts[getWindDirText(e.weather)]||0) + totalFish;
+      if(e.weather.beaufort != null){
+        beaufortMin = beaufortMin===null ? e.weather.beaufort : Math.min(beaufortMin, e.weather.beaufort);
+        beaufortMax = beaufortMax===null ? e.weather.beaufort : Math.max(beaufortMax, e.weather.beaufort);
+      }
+    }
+    const loc = e.locName || 'Άγνωστη τοποθεσία';
+    if(!locFish[loc]) locFish[loc] = { fish:0, coords:e.coords, species:{} };
+    locFish[loc].fish += totalFish;
+    locFish[loc].coords = e.coords;
+    Object.entries(e.fish).forEach(([n,q])=>{ if(q>0) locFish[loc].species[n] = (locFish[loc].species[n]||0) + q; });
+  });
+
+  const bestLocEntry = Object.entries(locFish).sort((a,b)=>b[1].fish-a[1].fish)[0];
+  const parsedCoords = bestLocEntry ? parseCoords(bestLocEntry[1].coords) : null;
+  if(!bestLocEntry || !parsedCoords){
+    resultEl.innerHTML = `<div class="hint">${tr('Δεν βρέθηκαν αρκετά αξιόπιστα στοιχεία τοποθεσίας για πρόβλεψη.')}</div>`;
+    return;
+  }
+  const bestLocName = bestLocEntry[0];
+  const bestSpecies = Object.entries(bestLocEntry[1].species).sort((a,b)=>b[1]-a[1])[0];
+  const bestWeekdayIdx = weekdayCounts.indexOf(Math.max(...weekdayCounts));
+  const bestHourBucketIdx = hourBuckets.indexOf(Math.max(...hourBuckets));
+  const bestWindDir = Object.entries(windDirCounts).sort((a,b)=>b[1]-a[1])[0];
+
+  const moonPhaseCounts = {};
+  successEntries.forEach(e=>{
+    const totalFish = Object.values(e.fish).reduce((a,b)=>a+b,0);
+    const ph = moonPhase(e.date);
+    if(ph !== null){
+      const [,label] = moonLabel(ph);
+      moonPhaseCounts[label] = (moonPhaseCounts[label]||0) + totalFish;
+    }
+  });
+  const bestMoonLabel = Object.entries(moonPhaseCounts).sort((a,b)=>b[1]-a[1])[0];
+
+  try{
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${parsedCoords.lat}&longitude=${parsedCoords.lng}&hourly=windspeed_10m,winddirection_10m&forecast_days=7&timezone=auto`;
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('forecast fetch failed');
+    const data = await res.json();
+    const times = data.hourly.time;
+    const now = new Date();
+    let bestScore = -1, bestIdx = -1;
+    for(let i=0;i<times.length;i++){
+      const dt = new Date(times[i]);
+      if(dt < now) continue;
+      const wd = dt.getDay();
+      const hr = dt.getHours();
+      const bucket = Math.floor(hr/3);
+      const wsp = data.hourly.windspeed_10m[i];
+      const bf = beaufort(wsp);
+      const wdir = compassDir(data.hourly.winddirection_10m[i]);
+      let score = 0;
+      if(wd === bestWeekdayIdx) score += 3;
+      if(bucket === bestHourBucketIdx) score += 3;
+      if(bestWindDir && wdir === bestWindDir[0]) score += 2;
+      if(beaufortMin != null && bf >= beaufortMin && bf <= beaufortMax) score += 2;
+      const dph = moonPhase(times[i].slice(0,10));
+      if(dph !== null){
+        const [,dLabel] = moonLabel(dph);
+        if(bestMoonLabel && dLabel === bestMoonLabel[0]) score += 2;
+        const distFromFull = Math.min(Math.abs(dph - 0.5), 1 - Math.abs(dph - 0.5));
+        if(distFromFull < 0.07) score += 1;
+      }
+      if(score > bestScore){ bestScore = score; bestIdx = i; }
+    }
+    if(bestIdx === -1){
+      resultEl.innerHTML = `<div class="hint">${tr('Δεν βρέθηκε κατάλληλη στιγμή στις επόμενες 7 ημέρες.')}</div>`;
+      return;
+    }
+    const bestDt = new Date(times[bestIdx]);
+    const dayNamesEL = ['Κυριακή','Δευτέρα','Τρίτη','Τετάρτη','Πέμπτη','Παρασκευή','Σάββατο'];
+    const dayNamesEN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const dayNames = currentLang === 'en' ? dayNamesEN : dayNamesEL;
+    const dateStr = bestDt.toLocaleDateString(currentLang === 'en' ? 'en-GB' : 'el-GR', {day:'numeric', month:'long'});
+    const dayName = dayNames[bestDt.getDay()];
+    const hourStr = String(bestDt.getHours()).padStart(2,'0') + ':00';
+    const bestDtMoonPh = moonPhase(times[bestIdx].slice(0,10));
+    const moonLine = bestDtMoonPh !== null ? (()=>{ const [em,lb] = moonLabel(bestDtMoonPh); return `<div class="condition-line">${em} ${lb}</div>`; })() : '';
+    resultEl.innerHTML = `<div class="condition-card">
+      <div class="condition-title">🔮 ${tr('Πιθανή καλύτερη στιγμή')}</div>
+      <div class="condition-line">${dayName}, ${dateStr} ${currentLang==='en' ? 'around' : 'γύρω στις'} ${hourStr}</div>
+      <div class="condition-line">📍 ${bestLocName}</div>
+      ${bestSpecies ? `<div class="condition-line">🐟 ${tr('Πιθανό είδος:')} ${tr(bestSpecies[0])}</div>` : ''}
+      ${moonLine}
+      <div class="condition-line" style="opacity:0.75; font-size:0.8rem;">${tr('Εκτίμηση βάσει του δικού σου ιστορικού και της πρόγνωσης καιρού — όχι εγγύηση.')}</div>
+    </div>`;
+  }catch(err){
+    console.error('prediction failed', err);
+    resultEl.innerHTML = `<div class="hint">${tr('Αποτυχία λήψης πρόγνωσης — έλεγξε τη σύνδεση στο ίντερνετ και δοκίμασε ξανά.')}</div>`;
+  }
+}
+window.predictBestTime = predictBestTime;
 
 /* ---------- today's fishing score card ---------- */
 function starRating(n){
@@ -2724,167 +2713,26 @@ function buildScoreCardHtml(scores, overallInfo, moonInfo, data, extraLines){
     ${extraLines || ''}
   </div>`;
 }
-/* ---------- today-score location picker ---------- */
-let todayLocationChoice = LS.get('psarema_today_location', null);
-let todayLocationSort = LS.get('psarema_today_location_sort', 'visits');
-
-function escapeHtml(str){
-  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-function getLocationOptions(){
-  const withCoords = entries.filter(e => parseCoords(e.coords));
-  const map = {};
-  withCoords.forEach(e=>{
-    const loc = (e.locName && e.locName.trim()) || tr('Χωρίς όνομα');
-    if(!map[loc]) map[loc] = { name: loc, coords: e.coords, count: 0 };
-    map[loc].count++;
-    map[loc].coords = e.coords;
-  });
-  return Object.values(map);
-}
-
-function sortLocationOptions(list){
-  if(todayLocationSort === 'alpha'){
-    return list.slice().sort((a,b)=> a.name.localeCompare(b.name, 'el'));
-  }
-  return list.slice().sort((a,b)=> b.count - a.count);
-}
-
-function todayLocationLabelText(){
-  if(!todayLocationChoice) return tr('Επίλεξε σημείο');
-  if(todayLocationChoice.type === 'gps') return '📍 ' + tr('Τρέχουσα θέση μου');
-  return '📍 ' + todayLocationChoice.name;
-}
-
-function updateTodayLocationLabel(){
-  const label = document.getElementById('today-location-label');
-  if(label) label.textContent = todayLocationLabelText();
-}
-
-function renderTodayLocationList(){
-  const listEl = document.getElementById('today-location-list');
-  if(!listEl) return;
-  const options = sortLocationOptions(getLocationOptions());
-  if(!options.length){
-    listEl.innerHTML = `<div class="hint" style="padding:8px;">${tr('Δεν υπάρχουν ακόμα καταχωρήσεις με τοποθεσία')}</div>`;
-    return;
-  }
-  listEl.innerHTML = options.map(o => {
-    const isSel = todayLocationChoice && todayLocationChoice.type === 'entry' && todayLocationChoice.name === o.name;
-    const visitsLabel = (currentLang==='en')
-      ? (o.count === 1 ? '1 visit' : `${o.count} visits`)
-      : (o.count === 1 ? '1 επίσκεψη' : `${o.count} επισκέψεις`);
-    return `<button type="button" class="today-loc-item${isSel?' selected':''}" data-name="${escapeHtml(o.name)}">
-      <span class="today-loc-name">${escapeHtml(o.name)}</span>
-      <span class="today-loc-count">${visitsLabel}</span>
-    </button>`;
-  }).join('');
-  listEl.querySelectorAll('.today-loc-item').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const name = btn.getAttribute('data-name');
-      const opt = options.find(o=>o.name === name);
-      if(!opt) return;
-      selectTodayLocation({ type:'entry', name: opt.name, coords: opt.coords });
-    });
-  });
-}
-
-function selectTodayLocation(choice){
-  todayLocationChoice = choice;
-  LS.set('psarema_today_location', choice);
-  updateTodayLocationLabel();
-  closeTodayLocationDropdown();
-  computeTodayScore();
-}
-
-function openTodayLocationDropdown(){
-  const dd = document.getElementById('today-location-dropdown');
-  if(!dd) return;
-  document.querySelectorAll('.today-loc-sort-btn').forEach(b=>{
-    b.classList.toggle('active', b.getAttribute('data-sort') === todayLocationSort);
-  });
-  renderTodayLocationList();
-  dd.style.display = 'block';
-}
-function closeTodayLocationDropdown(){
-  const dd = document.getElementById('today-location-dropdown');
-  if(dd) dd.style.display = 'none';
-}
-
-(function initTodayLocationPicker(){
-  const trigger = document.getElementById('btn-today-location');
-  if(!trigger) return;
-  trigger.addEventListener('click', (e)=>{
-    e.stopPropagation();
-    const dd = document.getElementById('today-location-dropdown');
-    if(dd && dd.style.display === 'block') closeTodayLocationDropdown();
-    else openTodayLocationDropdown();
-  });
-  document.addEventListener('click', (e)=>{
-    const picker = document.querySelector('.today-loc-picker');
-    if(picker && !picker.contains(e.target)) closeTodayLocationDropdown();
-  });
-  document.querySelectorAll('.today-loc-sort-btn').forEach(b=>{
-    b.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      todayLocationSort = b.getAttribute('data-sort');
-      LS.set('psarema_today_location_sort', todayLocationSort);
-      document.querySelectorAll('.today-loc-sort-btn').forEach(x=>x.classList.toggle('active', x===b));
-      renderTodayLocationList();
-    });
-  });
-  document.getElementById('today-loc-gps-btn').addEventListener('click', (e)=>{
-    e.stopPropagation();
-    if(!navigator.geolocation){ toast('Η συσκευή δεν υποστηρίζει τοποθεσία'); closeTodayLocationDropdown(); return; }
-    toast(tr('Λήψη τρέχουσας θέσης...'));
-    closeTodayLocationDropdown();
-    navigator.geolocation.getCurrentPosition(pos=>{
-      const coords = pos.coords.latitude.toFixed(7) + ', ' + pos.coords.longitude.toFixed(7);
-      selectTodayLocation({ type:'gps', coords });
-    }, ()=>{
-      toast(tr('Δεν ήταν δυνατή η λήψη της τρέχουσας θέσης'));
-    });
-  });
-  updateTodayLocationLabel();
-})();
-
 function computeTodayScore(){
   const resultEl = document.getElementById('today-score-result');
   resultEl.innerHTML = `<div class="hint">${tr('Υπολογισμός...')}</div>`;
 
-  let parsed, best, locName;
-
-  if(todayLocationChoice && todayLocationChoice.type === 'gps'){
-    parsed = parseCoords(todayLocationChoice.coords);
-    locName = tr('Τρέχουσα θέση μου');
-  } else if(todayLocationChoice && todayLocationChoice.type === 'entry'){
-    parsed = parseCoords(todayLocationChoice.coords);
-    locName = todayLocationChoice.name;
-  } else {
-    const withCoords = entries.filter(e => parseCoords(e.coords));
-    const withFish = withCoords.filter(e => e.fish && Object.values(e.fish).some(q=>q>0));
-    const source = withFish.length ? withFish : withCoords;
-    if(!source.length){
-      resultEl.innerHTML = `<div class="hint">${tr('Χρειάζεται τουλάχιστον μία καταχώρηση με έγκυρες συντεταγμένες για να υπολογιστεί το σκορ της ημέρας.')}</div>`;
-      return;
-    }
-    const locCounts = {};
-    source.forEach(e=>{
-      const loc = e.locName || 'x';
-      if(!locCounts[loc]) locCounts[loc] = { count:0, coords:e.coords };
-      locCounts[loc].count++;
-      locCounts[loc].coords = e.coords;
-    });
-    best = Object.values(locCounts).sort((a,b)=>b.count-a.count)[0];
-    parsed = parseCoords(best.coords);
-    locName = Object.keys(locCounts).find(k=>locCounts[k]===best) || '';
-    // Απομνημόνευση της αυτόματης επιλογής, ώστε η ετικέτα να δείχνει τι όντως χρησιμοποιείται
-    todayLocationChoice = { type:'entry', name: locName, coords: best.coords };
-    LS.set('psarema_today_location', todayLocationChoice);
-    updateTodayLocationLabel();
+  const withCoords = entries.filter(e => parseCoords(e.coords));
+  const withFish = withCoords.filter(e => e.fish && Object.values(e.fish).some(q=>q>0));
+  const source = withFish.length ? withFish : withCoords;
+  if(!source.length){
+    resultEl.innerHTML = `<div class="hint">${tr('Χρειάζεται τουλάχιστον μία καταχώρηση με έγκυρες συντεταγμένες για να υπολογιστεί το σκορ της ημέρας.')}</div>`;
+    return;
   }
-
+  const locCounts = {};
+  source.forEach(e=>{
+    const loc = e.locName || 'x';
+    if(!locCounts[loc]) locCounts[loc] = { count:0, coords:e.coords };
+    locCounts[loc].count++;
+    locCounts[loc].coords = e.coords;
+  });
+  const best = Object.values(locCounts).sort((a,b)=>b.count-a.count)[0];
+  const parsed = parseCoords(best.coords);
   if(!parsed){
     resultEl.innerHTML = `<div class="hint">${tr('Δεν βρέθηκαν έγκυρες συντεταγμένες.')}</div>`;
     return;
@@ -2900,6 +2748,7 @@ function computeTodayScore(){
     const scores = scoreComponents(data, todayStr);
     let overallInfo = overallFromScores(scores);
     const moonInfo = computeMoonInfo(todayStr);
+    const locName = Object.keys(locCounts).find(k=>locCounts[k]===best) || '';
     let extra = `<div class="condition-line" style="opacity:0.75; font-size:0.8rem;">📍 ${locName}</div>`;
 
     const solunar = computeSolunarPeriods(todayStr);
@@ -2934,33 +2783,35 @@ async function predictBestDayByCoords(){
   if(!parsed){ resultEl.innerHTML = `<div class="hint">${tr('Βάλε έγκυρες συντεταγμένες.')}</div>`; return; }
   resultEl.innerHTML = `<div class="hint">${tr('Υπολογισμός...')}</div>`;
   try{
-    // Βήμα 1: πάρε τις ημερομηνίες της πρόγνωσης (σεβαστή η τοπική ζώνη ώρας του σημείου)
-    const dateUrl = `https://api.open-meteo.com/v1/forecast?latitude=${parsed.lat}&longitude=${parsed.lng}&hourly=weathercode&forecast_days=5&timezone=auto`;
-    const dateRes = await fetch(dateUrl);
-    if(!dateRes.ok) throw new Error('forecast fetch failed');
-    const dateData = await dateRes.json();
-    const dayKeys = [...new Set(dateData.hourly.time
-      .filter(t => t.endsWith('T12:00'))
-      .map(t => t.slice(0,10)))];
-    if(!dayKeys.length){ resultEl.innerHTML = `<div class="hint">${tr('Δεν βρέθηκαν δεδομένα πρόγνωσης.')}</div>`; return; }
-
-    // Βήμα 2: για κάθε ημέρα, υπολόγισε το ΙΔΙΟ πλήρες σκορ που θα εμφανιστεί τελικά στον χρήστη
-    let best = null;
-    for(const dayKey of dayKeys){
-      const dayData = await fetchWeatherAndWave(parsed.lat, parsed.lng, dayKey, '12:00');
-      const dayScores = scoreComponents(dayData, dayKey);
-      const dayOverall = overallFromScores(dayScores);
-      if(!best || dayOverall.overall > best.overallInfo.overall){
-        best = { dayKey, fullData: dayData, scores: dayScores, overallInfo: dayOverall };
-      }
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${parsed.lat}&longitude=${parsed.lng}&hourly=weathercode,windspeed_10m,pressure_msl&forecast_days=5&timezone=auto`;
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('forecast fetch failed');
+    const data = await res.json();
+    const times = data.hourly.time;
+    const days = {};
+    for(let i=0;i<times.length;i++){
+      if(!times[i].endsWith('T12:00')) continue;
+      const dayKey = times[i].slice(0,10);
+      const wsp = data.hourly.windspeed_10m[i];
+      const bf = beaufort(wsp);
+      const wcode = data.hourly.weathercode[i];
+      const pressure = data.hourly.pressure_msl[i];
+      let score = Math.max(0, 6 - bf);
+      if(wcode <= 2) score += 2;
+      else if(wcode >= 61) score -= 2;
+      days[dayKey] = { score, bf, wcode, pressure, windKmh: wsp };
     }
-
-    const { dayKey: bestDate, fullData, scores, overallInfo } = best;
+    const sorted = Object.entries(days).sort((a,b)=>b[1].score-a[1].score);
+    if(!sorted.length){ resultEl.innerHTML = `<div class="hint">${tr('Δεν βρέθηκαν δεδομένα πρόγνωσης.')}</div>`; return; }
+    const [bestDate] = sorted[0];
     const dt = new Date(bestDate+'T12:00:00');
     const dayNamesEL2 = ['Κυριακή','Δευτέρα','Τρίτη','Τετάρτη','Πέμπτη','Παρασκευή','Σάββατο'];
     const dayNamesEN2 = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     const dayNames = currentLang === 'en' ? dayNamesEN2 : dayNamesEL2;
     const dateStr = dt.toLocaleDateString(currentLang === 'en' ? 'en-GB' : 'el-GR', {day:'numeric', month:'long'});
+    const fullData = await fetchWeatherAndWave(parsed.lat, parsed.lng, bestDate, '12:00');
+    const scores = scoreComponents(fullData, bestDate);
+    const overallInfo = overallFromScores(scores);
     const moonInfo = computeMoonInfo(bestDate);
     const extra = `
       <div class="condition-line" style="opacity:0.75; font-size:0.8rem;">${tr('Γενική εκτίμηση βάσει καιρού (άνεμος, συνθήκες, πίεση) — όχι ειδική για συγκεκριμένο ψάρι.')}</div>`;
@@ -3029,11 +2880,7 @@ function computeBestConditions(name){
         waveMax = waveMax===null ? e.weather.wave : Math.max(waveMax, e.weather.wave);
       }
     }
-    if(e.fishBait && e.fishBait[name]){
-      Object.entries(e.fishBait[name]).forEach(([b,q])=>{ if(q>0) baitCounts[b] = (baitCounts[b]||0) + q; });
-    } else {
-      (e.bait||[]).forEach(b=>{ baitCounts[b] = (baitCounts[b]||0) + qty; });
-    }
+    (e.bait||[]).forEach(b=>{ baitCounts[b] = (baitCounts[b]||0) + qty; });
 
     if(e.timeIn){
       const info = computeMoonInfo(e.date);
@@ -3135,7 +2982,6 @@ window.showLocationConditions = function(locName){
 
 /* ---------- export / import / clear ---------- */
 document.getElementById('btn-export').addEventListener('click', async ()=>{
-  if(demoMode){ toast(currentLang==='en' ? 'Exit demo mode first' : 'Βγες πρώτα από το demo'); return; }
   const photos = {};
   for(const e of entries){
     for(const key of (e.photos||[])){
@@ -3240,18 +3086,6 @@ document.getElementById('stats-explain-close').addEventListener('click', ()=>{
 });
 document.getElementById('stats-explain-overlay').addEventListener('click', (ev)=>{
   if(ev.target.id === 'stats-explain-overlay') document.getElementById('stats-explain-overlay').classList.remove('show');
-});
-['btn-open-baitbreak-explain-f','btn-open-baitbreak-explain-e'].forEach(id=>{
-  const btn = document.getElementById(id);
-  if(btn) btn.addEventListener('click', ()=>{
-    document.getElementById('baitbreak-explain-overlay').classList.add('show');
-  });
-});
-document.getElementById('baitbreak-explain-close').addEventListener('click', ()=>{
-  document.getElementById('baitbreak-explain-overlay').classList.remove('show');
-});
-document.getElementById('baitbreak-explain-overlay').addEventListener('click', (ev)=>{
-  if(ev.target.id === 'baitbreak-explain-overlay') document.getElementById('baitbreak-explain-overlay').classList.remove('show');
 });
 document.getElementById('btn-open-contact').addEventListener('click', ()=>{
   document.getElementById('contact-modal-overlay').classList.add('show');
@@ -3435,7 +3269,6 @@ document.getElementById('btn-contact-send').addEventListener('click', ()=>{
   });
 });
 document.getElementById('btn-import').addEventListener('click', ()=>{
-  if(demoMode){ toast(currentLang==='en' ? 'Exit demo mode first' : 'Βγες πρώτα από το demo'); return; }
   if(!confirm(tr('Προσοχή: η εισαγωγή αρχείου θα αντικαταστήσει όλα τα τρέχοντα δεδομένα σου (καταχωρήσεις, λίστες, φωτογραφίες). Ό,τι υπάρχει τώρα και δεν το έχεις εξάγει, θα χαθεί οριστικά. Θέλεις να συνεχίσεις;'))) return;
   document.getElementById('file-import').click();
 });
@@ -3459,47 +3292,18 @@ document.getElementById('file-import').addEventListener('change', (ev)=>{
       refreshPickers();
       refreshAnglerPicker();
       toast('Τα δεδομένα εισήχθησαν ✓');
+      maybeWriteSharedBackup();
     }catch(e){ toast('Μη έγκυρο αρχείο'); }
   };
   reader.readAsText(file);
 });
-function goToView(view){
-  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const btn = document.querySelector(`nav.tabs button[data-view="${view}"]`);
-  if(btn) btn.classList.add('active');
-  document.getElementById('view-'+view).classList.add('active');
-  if(view === 'list') renderEntries();
-  if(view === 'stats') renderStats();
-}
-document.getElementById('btn-start-demo').addEventListener('click', ()=>{
-  enterDemoMode();
-  goToView('list');
-});
-document.getElementById('btn-dismiss-demo').addEventListener('click', ()=>{
-  LS.set('psarema_seen_demo', true);
-  document.getElementById('demo-firstrun-card').style.display = 'none';
-});
-document.getElementById('btn-settings-demo').addEventListener('click', ()=>{
-  enterDemoMode();
-  goToView('list');
-});
-document.getElementById('btn-exit-demo').addEventListener('click', ()=>{
-  exitDemoMode();
-  goToView('new');
-});
-if(!LS.get('psarema_seen_demo', false) && entries.length === 0){
-  const card = document.getElementById('demo-firstrun-card');
-  if(card) card.style.display = 'block';
-}
-
 document.getElementById('btn-clear').addEventListener('click', ()=>{
-  if(demoMode){ toast(currentLang==='en' ? 'Exit demo mode first' : 'Βγες πρώτα από το demo'); return; }
   if(!confirm(tr('Σίγουρα θέλεις να διαγράψεις ΟΛΑ τα δεδομένα; Δεν αναιρείται.'))) return;
   entries = [];
   LS.set('psarema_entries', entries);
   toast('Όλα τα δεδομένα διαγράφηκαν');
   renderEntries();
+  maybeWriteSharedBackup();
 });
 
 /* ---------- color theme ---------- */
@@ -3551,16 +3355,6 @@ document.getElementById('header-title-input').addEventListener('input', ()=>{
 });
 
 async function applyHeaderPhoto(){
-  if(!LS.get('psarema_header_initialized', false)){
-    LS.set('psarema_header_initialized', true);
-    const hasExisting = LS.get('psarema_has_header_photo', false);
-    let existingData = null;
-    if(hasExisting){ try{ existingData = await idbGet('header-photo'); }catch(e){} }
-    if(!hasExisting || !existingData){
-      await applyHeaderPreset('header-presets/preset-2.jpg');
-      return;
-    }
-  }
   const has = LS.get('psarema_has_header_photo', false);
   const header = document.getElementById('app-header');
   if(!has){ header.classList.remove('has-photo'); return; }
@@ -3682,37 +3476,11 @@ document.querySelectorAll('#title-pos-options .chip').forEach(chip=>{
 });
 
 /* ---------- equip button: hide / rename / relink ---------- */
-let partnerRemote = null;
-
-/* Απομακρυσμένη ρύθμιση συνεργαζόμενου καταστήματος.
-   Διαβάζεται από το partner.json δίπλα στο index.html - αλλάζεις εκεί όνομα/σύνδεσμο
-   και το βλέπουν όλοι οι χρήστες χωρίς νέα έκδοση εφαρμογής. */
-async function loadPartner(){
-  try{
-    const res = await fetch('partner.json?t=' + Math.floor(Date.now()/3600000), { cache:'no-store' });
-    if(!res.ok) return;
-    const data = await res.json();
-    if(data && data.enabled === true && typeof data.url === 'string' && /^https:\/\//.test(data.url)){
-      partnerRemote = { text: String(data.text || 'e-shop').slice(0,24), url: data.url };
-    } else if(data && data.enabled === false){
-      partnerRemote = { hidden: true };
-    }
-    applyEquipButton();
-  }catch(e){ /* χωρίς σύνδεση ή χωρίς αρχείο: κρατάμε τις τοπικές ρυθμίσεις */ }
-}
-
 function applyEquipButton(){
   const link = document.getElementById('equip-link');
-  let hidden = LS.get('psarema_equip_btn_hidden', false);
-  let text = LS.get('psarema_equip_btn_text', 'e-shop');
-  let url = LS.get('psarema_equip_btn_url', 'https://miserlis-fishing.gr/');
-  if(partnerRemote){
-    if(partnerRemote.hidden){ hidden = true; }
-    else { text = partnerRemote.text; url = partnerRemote.url; hidden = false; }
-    // Η θέση είναι δεσμευμένη: κρύβουμε τα χειριστήρια από τον χρήστη
-    const box = document.getElementById('equip-btn-settings');
-    if(box) box.style.display = 'none';
-  }
+  const hidden = LS.get('psarema_equip_btn_hidden', false);
+  const text = LS.get('psarema_equip_btn_text', 'e-shop');
+  const url = LS.get('psarema_equip_btn_url', 'https://miserlis-fishing.gr/');
   link.style.display = hidden ? 'none' : '';
   link.textContent = text;
   link.href = url;
@@ -3721,7 +3489,6 @@ function applyEquipButton(){
   const dot = document.getElementById('equip-visibility-dot');
   if(dot) dot.classList.toggle('on', !hidden);
 }
-loadPartner();
 document.getElementById('btn-toggle-equip').addEventListener('click', ()=>{
   const hidden = LS.get('psarema_equip_btn_hidden', false);
   LS.set('psarema_equip_btn_hidden', !hidden);
@@ -3745,6 +3512,7 @@ applyHeaderTitle();
 applyHeaderPhoto();
 applyHeaderTitlePos();
 applyEquipButton();
+maybeWriteSharedBackup();
 
 /* ---------- language toggle (partial translation of core UI) ---------- */
 const I18N = {
@@ -3755,7 +3523,8 @@ const I18N = {
     'i18n-weather-label': 'Weather & sea (automatic)', 'i18n-species-label': 'Fish species', 'i18n-weight-label': 'Total catch weight',
     'i18n-bait-label': 'Bait', 'i18n-technique-label': 'Fishing technique', 'i18n-notes-label': 'Notes', 'i18n-photos-label': 'Photos (up to 3)',
     'i18n-entries-header': 'Entries', 'i18n-stats-header': 'Statistics',
-    'i18n-pred2-header': '📍 Best day at a location', 'i18n-pred3-header': '📅 Conditions for a specific date',
+    'i18n-pred1-header': '🔮 Best time (based on history)', 'i18n-pred2-header': '📍 Best day at a location', 'i18n-pred3-header': '📅 Conditions for a specific date',
+    'i18n-pred1-hint': 'Calculates when the best time for fishing is likely to be, based on your own history and the weather forecast.',
     'i18n-pred2-hint': 'Enter coordinates and it will find which of the next 5 days has the most favourable general fishing conditions there (wind, weather, pressure).',
     'i18n-pred3-hint': "Enter coordinates and a date, and you'll see the expected general fishing conditions for that day.",
     'i18n-contact-header': 'Contact the developer', 'i18n-contact-hint': 'Suggest changes, improvements, or anything that gave you trouble in the app — write it here.',
@@ -3783,8 +3552,8 @@ function applyLanguage(lang){
   });
   const idKeys = ['i18n-trip-details','i18n-angler-label','i18n-date-label','i18n-timein-label','i18n-timeout-label',
     'i18n-locname-label','i18n-weather-label','i18n-species-label','i18n-weight-label','i18n-bait-label','i18n-technique-label',
-    'i18n-notes-label','i18n-photos-label','i18n-entries-header','i18n-stats-header','i18n-pred2-header',
-    'i18n-pred3-header','i18n-data-header','i18n-modal-title','i18n-pred2-hint','i18n-pred3-hint',
+    'i18n-notes-label','i18n-photos-label','i18n-entries-header','i18n-stats-header','i18n-pred1-header','i18n-pred2-header',
+    'i18n-pred3-header','i18n-data-header','i18n-modal-title','i18n-pred1-hint','i18n-pred2-hint','i18n-pred3-hint',
     'i18n-contact-header','i18n-contact-hint','i18n-contact-name-label','i18n-contact-email-label','i18n-contact-message-label','i18n-today-header','i18n-contact-rating-label',
     'i18n-weather-order-title','i18n-weather-order-hint'];
   idKeys.forEach(key=>{
@@ -3862,6 +3631,8 @@ function applyLanguage(lang){
     const greek = greekMap[el.dataset.key];
     if(greek) el.textContent = lang === 'en' ? (GR_TO_EN[greek] || greek) : greek;
   });
+  const predBtn1 = document.getElementById('btn-predict-best-time');
+  if(predBtn1) predBtn1.textContent = lang === 'en' ? 'Calculate the best time' : 'Υπολόγισε την καλύτερη στιγμή';
   const predBtn2 = document.getElementById('btn-predict-best-day');
   if(predBtn2) predBtn2.textContent = lang === 'en' ? 'Find best day' : 'Βρες καλύτερη ημέρα';
   const coordsPlaceholder = lang === 'en' ? 'e.g. 37.6623056, 24.0367908 or a link/text from Apple Maps' : 'π.χ. 37,6623056, 24,0367908 ή link/κείμενο από Apple Maps';
@@ -3876,13 +3647,13 @@ function applyLanguage(lang){
   if(explainBody){
     explainBody.innerHTML = lang === 'en'
       ? `<p>Predictions are based on Open-Meteo weather/sea data and simple statistical analysis, not artificial intelligence or a guaranteed forecast.</p>
-         <p><strong>Today:</strong> calculates a 0–100 score for the spot you pick (or your most-visited spot, if you haven't chosen one), combining the current weather there, the moon and solunar periods, and how often you've caught fish in the past under similar conditions.</p>
+         <p><strong>Best time (history):</strong> looks at which days/hours/wind you had when you caught more fish in the past, and finds when within the next 7 days those conditions are likely to occur again, at the spot with the most fish recorded.</p>
          <p><strong>Best day at a location:</strong> examines the next 5 days at specific coordinates and scores each day based on wind, weather conditions and pressure — without considering a specific fish species.</p>
          <p><strong>Conditions for a date:</strong> simply shows the expected weather/sea data for a specific day, without scoring.</p>
          <p><strong>Forecast confidence:</strong> is higher the closer the date is to today, and decreases the further away it is (weather forecasts become less accurate beyond 5-7 days).</p>
          <p style="margin-bottom:0;">No prediction guarantees a result — these are estimates to help you decide.</p>`
       : `<p>Οι προβλέψεις βασίζονται στα δεδομένα καιρού/θάλασσας του Open-Meteo και σε απλή στατιστική ανάλυση, όχι σε τεχνητή νοημοσύνη ή εγγυημένη πρόγνωση.</p>
-         <p><strong>Σήμερα:</strong> υπολογίζει ένα σκορ 0–100 για το σημείο που επιλέξεις (ή για το πιο συχνό σου σημείο, αν δεν έχεις διαλέξει κάποιο), συνδυάζοντας τον τρέχοντα καιρό εκεί, τη σελήνη και τις σεληνιακές περιόδους, και το πόσο συχνά έπιανες ψάρια στο παρελθόν σε παρόμοιες συνθήκες.</p>
+         <p><strong>Καλύτερη στιγμή (ιστορικό):</strong> ψάχνει ποιες μέρες/ώρες/άνεμο είχες όταν έπιανες περισσότερα ψάρια στο παρελθόν, και βρίσκει πότε μέσα στις επόμενες 7 μέρες θα ξαναμοιάζουν αυτές οι συνθήκες, στο σημείο που έχεις τα περισσότερα ψάρια καταγεγραμμένα.</p>
          <p><strong>Καλύτερη ημέρα σε σημείο:</strong> εξετάζει τις επόμενες 5 μέρες σε συγκεκριμένες συντεταγμένες και βαθμολογεί κάθε μέρα με βάση άνεμο, καιρικές συνθήκες και πίεση — χωρίς να λαμβάνει υπόψη συγκεκριμένο είδος ψαριού.</p>
          <p><strong>Συνθήκες για ημερομηνία:</strong> δείχνει απλά τα αναμενόμενα καιρικά/θαλάσσια στοιχεία για μια συγκεκριμένη μέρα, χωρίς βαθμολόγηση.</p>
          <p><strong>Αξιοπιστία πρόγνωσης:</strong> είναι μεγαλύτερη όσο πιο κοντά είναι η ημερομηνία στο σήμερα, και μειώνεται όσο απομακρύνεται (οι προγνώσεις καιρού γίνονται λιγότερο ακριβείς πέρα από 5-7 μέρες).</p>
@@ -3895,26 +3666,16 @@ function applyLanguage(lang){
     statsExplainBody.innerHTML = lang === 'en'
       ? `<p><strong>Fish by species / month / moon phase / pressure / tide / hour / bait / wind / weather:</strong> each catch is counted under the category it matches (e.g. the moon phase or pressure at the time of that trip). Only fish with a quantity greater than 0 are counted.</p>
          <p><strong>By location — success rate:</strong> the green/red percentage next to each location is the share of your trips there that resulted in at least one fish (trips with fish ÷ total trips). A faint red 0% means no fish have been recorded there yet.</p>
+         <p><strong>Locations by weather:</strong> for each location, shows the single most frequent weather condition and wind direction recorded there.</p>
          <p><strong>My best spots:</strong> ranks your locations by total fish caught, with total weight; tap a row to see the typical conditions (weather, wind, best hour) recorded there.</p>
          <p><strong>Best conditions by species:</strong> for a chosen species, shows the day of week, hour range, wind, wave and bait most associated with catching it in your history.</p>
          <p style="margin-bottom:0;">All figures come only from your own recorded entries — nothing is estimated or predicted here (predictions live in their own tab).</p>`
       : `<p><strong>Ψάρια ανά είδος / μήνα / φάση σελήνης / πίεση / παλίρροια / ώρα / δόλωμα / άνεμο / καιρό:</strong> κάθε ψάρι μετράει στην κατηγορία που ταιριάζει (π.χ. η φάση σελήνης ή η πίεση τη στιγμή εκείνης της εξόρμησης). Μετράνε μόνο τα ψάρια με ποσότητα μεγαλύτερη του 0.</p>
          <p><strong>Ανά τοποθεσία — ποσοστό επιτυχίας:</strong> το πράσινο/κόκκινο ποσοστό δίπλα σε κάθε τοποθεσία είναι το ποσοστό των εξορμήσεών σου εκεί που έδωσαν τουλάχιστον ένα ψάρι (εξορμήσεις με ψάρια ÷ σύνολο εξορμήσεων). Αχνό κόκκινο 0% σημαίνει ότι δεν έχεις καταγράψει ακόμα ψάρι εκεί.</p>
+         <p><strong>Τοποθεσίες ανά καιρό:</strong> για κάθε τοποθεσία, δείχνει τον πιο συχνό καιρό και την πιο συχνή κατεύθυνση ανέμου που έχεις καταγράψει εκεί.</p>
          <p><strong>Τα καλύτερα σημεία μου:</strong> κατατάσσει τις τοποθεσίες σου βάσει συνολικών ψαριών, με τα κιλά δίπλα· πάτα μια γραμμή για να δεις τις τυπικές συνθήκες (καιρός, άνεμος, καλύτερη ώρα) που έχεις καταγράψει εκεί.</p>
          <p><strong>Καλύτερες συνθήκες ανά είδος:</strong> για ένα είδος που επιλέγεις, δείχνει τη μέρα της εβδομάδας, το εύρος ώρας, τον άνεμο, το κύμα και το δόλωμα που συνδέονται περισσότερο με την αλίευσή του στο ιστορικό σου.</p>
          <p style="margin-bottom:0;">Όλα τα νούμερα προέρχονται μόνο από τις δικές σου καταχωρήσεις — τίποτα εδώ δεν είναι εκτίμηση ή πρόβλεψη (οι προβλέψεις έχουν τη δική τους καρτέλα).</p>`;
-  }
-  const baitbreakExplainTitle = document.getElementById('i18n-baitbreak-explain-title');
-  if(baitbreakExplainTitle) baitbreakExplainTitle.textContent = lang === 'en' ? 'Bait per species' : 'Δόλωμα ανά είδος';
-  const baitbreakExplainBody = document.getElementById('i18n-baitbreak-explain-body');
-  if(baitbreakExplainBody){
-    baitbreakExplainBody.innerHTML = lang === 'en'
-      ? `<p>When a trip has 2 or more fish species AND 2 or more baits, a small table appears here for each species, so you can note which bait caught how many of that species.</p>
-         <p>At first, all fish of a species are credited to the first bait you've selected. Use the ➕ ➖ buttons to split them correctly between baits — e.g. 5 bream on a single hook rig and 1 on dough bait.</p>
-         <p style="margin-bottom:0;">The note under each species ("X of Y") shows how many you've assigned so far; once it matches the total, you're done. If you skip it entirely, nothing is lost — the entry still saves normally.</p>`
-      : `<p>Όταν μια εξόρμηση έχει 2 ή περισσότερα είδη ψαριών ΚΑΙ 2 ή περισσότερα δολώματα, εμφανίζεται εδώ ένας μικρός πίνακας για κάθε είδος, ώστε να δηλώσεις με ποιο δόλωμα έπιασες πόσα από αυτό το είδος.</p>
-         <p>Στην αρχή, όλα τα ψάρια ενός είδους πιστώνονται αυτόματα στο πρώτο δόλωμα που έχεις επιλέξει. Χρησιμοποίησε τα ➕ ➖ για να τα μοιράσεις σωστά ανάμεσα στα δολώματα — π.χ. 5 τσιπούρες με Μονοδόλι και 1 με Μάνα.</p>
-         <p style="margin-bottom:0;">Η ένδειξη κάτω από κάθε είδος («X από Y») σου δείχνει πόσα έχεις ήδη μοιράσει· όταν ταιριάζει με το σύνολο, είσαι εντάξει. Αν δεν το συμπληρώσεις καθόλου, δεν χάνεται τίποτα — η καταχώρηση αποθηκεύεται κανονικά.</p>`;
   }
   document.getElementById('lang-toggle').textContent = lang === 'en' ? '🇬🇧' : '🇬🇷';
   const legalTitle = document.getElementById('i18n-legal-header');
