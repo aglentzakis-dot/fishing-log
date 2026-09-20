@@ -518,7 +518,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.6 · 20 Σεπ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.7 · 20 Σεπ 2026</p>
     </div>
   </div>
 
@@ -766,6 +766,7 @@ const GR_TO_EN = {
   "🎯 Καλύτερες συνθήκες ανά είδος":"🎯 Best conditions by species","Καλύτερες εξορμήσεις":"Best trips",
   "Ψάρια ανά φάση σελήνης":"Fish by moon phase","Ψάρια ανά πίεση":"Fish by pressure","Ψάρια ανά είδος":"Fish by species",
   "Ψάρια ανά παλίρροια":"Fish by tide","Καιρικές συνθήκες κατά την ψαριά":"Weather during the trip",
+  "Ψάρια ανά καιρική συνθήκη":"Fish by weather condition","Ψάρια ανά κατεύθυνση ανέμου":"Fish by wind direction",
   "Κατεύθυνση ανέμου":"Wind direction","Εξορμήσεις":"Trips","Ψάρια συνολικά":"Total fish",
   "Μ.Ο. ψάρια/εξόρμηση":"Avg. fish/trip","Συνολικά κιλά":"Total weight","Επιλέξτε είδος":"Select species",
   // toasts / messages
@@ -2565,8 +2566,10 @@ function renderStats(){
     }
 
     if(e.weather){
-      byWeather[getWeatherText(e.weather)] = (byWeather[getWeatherText(e.weather)]||0) + 1;
-      byWindDir[getWindDirText(e.weather)] = (byWindDir[getWindDirText(e.weather)]||0) + 1;
+      // Fish caught under each condition, not just how many trips happened to have it —
+      // otherwise a windy day you fished often but caught nothing would look "productive".
+      byWeather[getWeatherText(e.weather)] = (byWeather[getWeatherText(e.weather)]||0) + myEntryFish;
+      byWindDir[getWindDirText(e.weather)] = (byWindDir[getWindDirText(e.weather)]||0) + myEntryFish;
       if(e.weather.pressure != null){
         const pb = pressureBucket(e.weather.pressure);
         byPressure[pb] = (byPressure[pb]||0) + myEntryFish;
@@ -2748,8 +2751,8 @@ function renderStats(){
     byPressure: barBlock('Ψάρια ανά πίεση', byPressure),
     byTide: barBlock('Ψάρια ανά παλίρροια', byTide),
     byMonth: `<div class="stat-block"><h3>${tr("Εποχικότητα (ψάρια ανά μήνα)")}</h3>${monthBars}</div>`,
-    byWeather: barBlock('Καιρικές συνθήκες κατά την ψαριά', byWeather),
-    byWindDir: barBlock('Κατεύθυνση ανέμου', byWindDir),
+    byWeather: barBlock('Ψάρια ανά καιρική συνθήκη', byWeather),
+    byWindDir: barBlock('Ψάρια ανά κατεύθυνση ανέμου', byWindDir),
     byLocation: `<div class="stat-block"><h3>${tr("Ανά τοποθεσία")}</h3>${locRows}</div>`,
     bestSpots: `<div class="stat-block"><h3>${tr("📍 Τα καλύτερα σημεία μου")}</h3>${bestSpotsHtml}</div>`,
     byLocationWeather: `<div class="stat-block"><h3>${tr("Τοποθεσίες ανά καιρό")}</h3>${locWeatherHtml}</div>`,
@@ -3072,10 +3075,18 @@ async function predictBestDayByCoords(){
     const dateStr = dt.toLocaleDateString(currentLang === 'en' ? 'en-GB' : 'el-GR', {day:'numeric', month:'long'});
     const fullData = await fetchWeatherAndWave(parsed.lat, parsed.lng, bestDate, '12:00');
     const scores = scoreComponents(fullData, bestDate);
-    const overallInfo = overallFromScores(scores);
+    let overallInfo = overallFromScores(scores);
     const moonInfo = computeMoonInfo(bestDate);
-    const extra = `
+    let extra = `
       <div class="condition-line" style="opacity:0.75; font-size:0.8rem;">${tr('Γενική εκτίμηση βάσει καιρού (άνεμος, συνθήκες, πίεση) — όχι ειδική για συγκεκριμένο ψάρι.')}</div>`;
+    let overallNum = overallInfo.overall;
+    const personalized = computePersonalization(scores);
+    if(personalized){
+      const deltaPct = Math.round((personalized.matchRate - personalized.baseRate) * 40 * personalized.confidence);
+      overallNum = Math.max(0, Math.min(100, overallNum + deltaPct));
+      extra += `<div class="condition-line" style="opacity:0.85; font-size:0.8rem;">📊 ${Math.round(personalized.matchRate*100)}% επιτυχία σε ${personalized.matchCount} παρόμοιες παλιές εξορμήσεις σου (μ.ό. ${Math.round(personalized.baseRate*100)}%)</div>`;
+      overallInfo = { avg: overallNum/20, overall: overallNum, label: overallInfo.label };
+    }
     resultEl.innerHTML = `<div class="condition-title" style="margin-bottom:6px;">📍 ${tr('Καλύτερη ημέρα στις επόμενες 5')}: ${dayNames[dt.getDay()]}, ${dateStr}</div>`
       + buildScoreCardHtml(scores, overallInfo, moonInfo, fullData, extra);
   }catch(err){
@@ -3098,8 +3109,16 @@ async function showConditionsForDate(){
     const dateLabel = new Date(dateVal+'T12:00:00').toLocaleDateString(currentLang === 'en' ? 'en-GB' : 'el-GR', {day:'numeric', month:'long', year:'numeric'});
     const confidence = forecastConfidence(dateVal);
     const scores = scoreComponents(data, dateVal);
-    const overallInfo = overallFromScores(scores);
-    const extra = `<div class="condition-line">📊 ${tr('Αξιοπιστία πρόγνωσης:')} ${confidence}%</div>`;
+    let overallInfo = overallFromScores(scores);
+    let extra = `<div class="condition-line">📊 ${tr('Αξιοπιστία πρόγνωσης:')} ${confidence}%</div>`;
+    let overallNum = overallInfo.overall;
+    const personalized = computePersonalization(scores);
+    if(personalized){
+      const deltaPct = Math.round((personalized.matchRate - personalized.baseRate) * 40 * personalized.confidence);
+      overallNum = Math.max(0, Math.min(100, overallNum + deltaPct));
+      extra += `<div class="condition-line" style="opacity:0.85; font-size:0.8rem;">📊 ${Math.round(personalized.matchRate*100)}% επιτυχία σε ${personalized.matchCount} παρόμοιες παλιές εξορμήσεις σου (μ.ό. ${Math.round(personalized.baseRate*100)}%)</div>`;
+      overallInfo = { avg: overallNum/20, overall: overallNum, label: overallInfo.label };
+    }
     resultEl.innerHTML = `<div class="condition-title" style="margin-bottom:6px;">📅 ${tr('Συνθήκες για')} ${dateLabel}</div>`
       + buildScoreCardHtml(scores, overallInfo, moon, data, extra);
   }catch(err){
@@ -3120,10 +3139,13 @@ function computeBestConditions(name){
   const baitCounts = {};
   let beaufortMin=null, beaufortMax=null, waveMin=null, waveMax=null;
   const tideDiffs = [];
+  const weightPerFishSamples = []; // rough size signal: trip's total kg ÷ trip's total fish (weight isn't logged per species)
 
   relevant.forEach(e=>{
     const qty = e.fish[name] || 1;
     const weight = rateWeight(qty, e); // fish/hour for this species, so a fast catch counts for more than a slow one
+    const tripFishTotal = Object.values(e.fish||{}).reduce((a,b)=>a+(b||0),0);
+    if(e.weight && tripFishTotal > 0) weightPerFishSamples.push(e.weight / tripFishTotal);
     const d = new Date(e.date+'T12:00:00').getDay();
     weekdayCounts[d] += weight;
 
@@ -3170,8 +3192,9 @@ function computeBestConditions(name){
   const avgTideDiff = tideDiffs.length ? tideDiffs.reduce((a,b)=>a+b,0)/tideDiffs.length : null;
 
   const topDays = weekdayCounts.map((v,i)=>({i,v})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  const avgWeightPerFish = weightPerFishSamples.length ? weightPerFishSamples.reduce((a,b)=>a+b,0)/weightPerFishSamples.length : null;
 
-  return { relevant, topDays, bestHourRange, bestWindDir, beaufortMin, beaufortMax, waveMin, waveMax, avgTideDiff, bestBait };
+  return { relevant, topDays, bestHourRange, bestWindDir, beaufortMin, beaufortMax, waveMin, waveMax, avgTideDiff, bestBait, avgWeightPerFish };
 }
 function formatBestConditions(name, info){
   if(!info || info.relevant.length === 0){
@@ -3201,10 +3224,21 @@ function formatBestConditions(name, info){
     }
   }
   const baitStr = info.bestBait ? `${tr('δόλωμα:')} ${tr(info.bestBait[0])}` : null;
-  const lines = [dayStr, info.bestHourRange, windStr, waveStr, tideStr, baitStr].filter(Boolean);
+  let weightStr = null;
+  if(info.avgWeightPerFish != null){
+    const wv = currentLang === 'en' ? info.avgWeightPerFish.toFixed(2) : info.avgWeightPerFish.toFixed(2).replace('.',',');
+    weightStr = currentLang === 'en'
+      ? `⚖️ ~${wv} kg avg. per fish (estimated from trip totals)`
+      : `⚖️ ~${wv} kg μέσο βάρος ανά ψάρι (εκτίμηση από το σύνολο της εξόρμησης)`;
+  }
+  const lines = [dayStr, info.bestHourRange, windStr, waveStr, tideStr, baitStr, weightStr].filter(Boolean);
+  const sampleNote = currentLang === 'en'
+    ? `Based on ${info.relevant.length} trip${info.relevant.length===1?'':'s'}${info.relevant.length < 3 ? ' — still limited data, take with a grain of salt' : ''}`
+    : `Βάσει ${info.relevant.length} εξόρμηση${info.relevant.length===1?'ς':'σεων'}${info.relevant.length < 3 ? ' — ακόμα λίγα δεδομένα, πάρ' + "'" + 'το με επιφύλαξη' : ''}`;
   return `<div class="condition-card">
     <div class="condition-title">🎯 ${currentLang==='en' ? `Your best condition for ${tr(name)}` : `Η καλύτερή σου συνθήκη για ${name}`}</div>
     ${lines.map(l=>`<div class="condition-line">${l}</div>`).join('')}
+    <div class="condition-line" style="opacity:0.7; font-size:0.78rem;">${sampleNote}</div>
   </div>`;
 }
 window.showSpeciesConditions = function(name){
@@ -3236,9 +3270,13 @@ window.showLocationConditions = function(locName){
     topWind ? `${tr('Άνεμος')} ${tr(topWind[0])}` : null,
     hourLabel ? `${tr('Καλύτερη ώρα:')} ${hourLabel}` : null
   ].filter(Boolean);
+  const sampleNote = currentLang === 'en'
+    ? `Based on ${relevant.length} trip${relevant.length===1?'':'s'} here${relevant.length < 3 ? ' — still limited data' : ''}`
+    : `Βάσει ${relevant.length} εξόρμηση${relevant.length===1?'ς':'σεων'} εδώ${relevant.length < 3 ? ' — ακόμα λίγα δεδομένα' : ''}`;
   resultEl.innerHTML = `<div class="condition-card">
     <div class="condition-title">📍 ${locName}</div>
     ${lines.map(l=>`<div class="condition-line">${l}</div>`).join('')}
+    <div class="condition-line" style="opacity:0.7; font-size:0.78rem;">${sampleNote}</div>
   </div>`;
 };
 
