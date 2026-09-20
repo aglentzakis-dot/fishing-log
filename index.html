@@ -405,6 +405,12 @@
 
   <!-- SETTINGS -->
   <div class="view" id="view-settings">
+    <div class="card" id="primary-angler-card">
+      <h2 class="i18n-plain">Ποιος είσαι εσύ</h2>
+      <p class="hint i18n-plain">Όταν πηγαίνεις ψάρεμα με άλλον ψαρά, χρησιμοποιείται ώστε τα γενικά στατιστικά (σύνολο ψαριών, καλύτερο είδος, καλύτερη εξόρμηση κ.λπ.) να δείχνουν μόνο τα δικά σου ψάρια — όχι αυτά που έπιασε ο άλλος.</p>
+      <select id="primary-angler-select"></select>
+    </div>
+
     <div class="card">
       <h2 id="i18n-data-header">Δεδομένα</h2>
       <p class="hint" id="i18n-beta-notice" style="background:#fdf1ec; border:1px solid #f0c8b4; border-radius:8px; padding:8px 10px;"><strong>Δοκιμαστική έκδοση (beta)</strong> — προσθέτουμε συνεχώς νέα στοιχεία και τη βελτιώνουμε.</p>
@@ -898,7 +904,18 @@ const GR_TO_EN = {
   "Μοίρασε τα ψάρια κάθε είδους ανάμεσα στους ψαράδες — το σύνολο παραμένει ίδιο.":"Split each species' catch between the anglers — the total stays the same.",
   "Ψάρια ανά ψαρά":"Fish per angler",
   "Δεν υπάρχουν ακόμα καταγεγραμμένοι ψαράδες":"No anglers recorded yet",
-  "Σε εξορμήσεις με πάνω από έναν ψαρά χωρίς ανάθεση ποιος έπιασε τι, τα ψάρια δεν προσμετρώνται εδώ ανά άτομο.":"For trips with more than one angler where who-caught-what wasn't assigned, those fish aren't counted per person here."
+  "Σε εξορμήσεις με πάνω από έναν ψαρά χωρίς ανάθεση ποιος έπιασε τι, τα ψάρια δεν προσμετρώνται εδώ ανά άτομο.":"For trips with more than one angler where who-caught-what wasn't assigned, those fish aren't counted per person here.",
+  // "who are you" / personal vs joint-trip stats
+  "Ποιος είσαι εσύ":"Who you are",
+  "Όταν πηγαίνεις ψάρεμα με άλλον ψαρά, χρησιμοποιείται ώστε τα γενικά στατιστικά (σύνολο ψαριών, καλύτερο είδος, καλύτερη εξόρμηση κ.λπ.) να δείχνουν μόνο τα δικά σου ψάρια — όχι αυτά που έπιασε ο άλλος.":"When you go fishing with someone else, this is used so the general statistics (total fish, best species, best trip, etc.) show only your own fish — not what the other angler caught.",
+  "Τα παραπάνω δείχνουν μόνο τα ψάρια του/της":"The above shows only the fish caught by",
+  "(ρύθμιση «Ποιος είσαι εσύ» στις Ρυθμίσεις).":"(the \"Who you are\" setting, in Settings).",
+  "Σε κάποιες κοινές εξορμήσεις δεν έχει δηλωθεί ποιος έπιασε τι — δεν προσμετρώνται ακόμα εδώ.":"Some joint trips don't have who-caught-what assigned yet — they aren't counted here yet.",
+  "Σύνολο κάθε ψαρά σε όλες τις εξορμήσεις του — μόνος του και μαζί με άλλους.":"Each angler's total across all their trips — solo and with others.",
+  "Σύγκριση σε κοινές εξορμήσεις":"Comparison on joint trips",
+  "Δεν υπάρχουν ακόμα κοινές εξορμήσεις (με 2+ ψαράδες).":"No joint trips yet (with 2+ anglers).",
+  "κοινές εξορμήσεις συνολικά — μόνο αυτές μετράνε εδώ, ώστε να φαίνεται καθαρά ποιος πιάνει περισσότερα όταν ψαρεύετε μαζί.":"joint trips in total — only these count here, so it's clear who catches more when you fish together.",
+  "Σε κάποιες από αυτές δεν έχει δηλωθεί ποιος έπιασε τι — δεν προσμετρώνται ακόμα.":"Some of these don't have who-caught-what assigned yet — they aren't counted yet."
 };
 function tr(text){
   if(currentLang !== 'en') return text;
@@ -1511,10 +1528,31 @@ function refreshAnglerPicker(){
   renderChipList('angler-chip-list', anglers, selAngler, 'angler-count-sum', ()=>{ updatePickerSummaryText('angler-count-sum', selAngler, 'Επίλεξε ψαρά(-άδες)'); renderAnglerFishBreakdown('f'); }, {arr:anglers, storeKey:'psarema_anglers', rerender:refreshAnglerPicker});
   updatePickerSummaryText('angler-count-sum', selAngler, 'Επίλεξε ψαρά(-άδες)');
   renderAnglerFishBreakdown('f');
+  renderPrimaryAnglerSelect();
 }
 setupAdd('angler-new','angler-add', anglers, 'psarema_anglers', refreshAnglerPicker);
 if(selAngler.size === 0 && anglers.length > 0) selAngler.add(anglers[0]);
 refreshAnglerPicker();
+
+/* ---------- "who are you" — which angler name the overall/personal stats attribute fish to ---------- */
+function getPrimaryAngler(){
+  const stored = LS.get('psarema_primary_angler', null);
+  if(stored && anglers.includes(stored)) return stored;
+  return anglers.length ? anglers[0] : null;
+}
+function renderPrimaryAnglerSelect(){
+  const sel = document.getElementById('primary-angler-select');
+  if(!sel) return;
+  if(!anglers.length){ sel.innerHTML = `<option value="">—</option>`; sel.disabled = true; return; }
+  sel.disabled = false;
+  const current = getPrimaryAngler();
+  sel.innerHTML = anglers.map(a=>`<option value="${escapeAttr(a)}" ${a===current?'selected':''}>${a}</option>`).join('');
+}
+document.getElementById('primary-angler-select').addEventListener('change', (ev)=>{
+  LS.set('psarema_primary_angler', ev.target.value);
+  renderStats();
+});
+renderPrimaryAnglerSelect();
 
 /* ---------- coordinate parsing ---------- */
 function parseCoords(raw){
@@ -2001,17 +2039,42 @@ function windGustsScore(bfBase, gustKmh){
 
 const WEATHER_ITEM_DEFAULT_ORDER = ['weather','temp','seatemp','pressure','pressuretrend','wind','windgusts','winddir','windtrend','wave','wavedir','waveperiod','moon','tide','solunar','sun','fishscore'];
 
+/* ---------- catch-rate helpers: a big catch in a short trip signals better conditions than the
+   same catch spread over many hours, so predictions weigh fish PER HOUR, not raw fish counts ---------- */
+function entryHours(e){
+  if(!e.timeIn || !e.timeOut) return null;
+  const [h1,m1] = e.timeIn.split(':').map(Number);
+  const [h2,m2] = e.timeOut.split(':').map(Number);
+  let hrs = (h2+m2/60) - (h1+m1/60);
+  if(hrs < 0) hrs += 24;
+  return hrs >= 0.25 ? hrs : null; // ignore implausibly short durations so one lucky quick fish doesn't skew the rate
+}
+function rateWeight(qty, e){
+  const hrs = entryHours(e);
+  return hrs ? qty / hrs : qty;
+}
+
 function computePersonalization(scores){
   const withWeather = (typeof entries !== 'undefined' ? entries : []).filter(e => e.weather && e.weather.beaufort != null);
   if(withWeather.length < 5) return null;
+  // "success" = a catch rate (fish/hour) at or above your own historical average — so 1 fish in 6 hours
+  // isn't treated the same as 20 fish in 1 hour, when trip duration is known; falls back to "caught anything"
+  // for entries without a recorded duration.
+  const rated = withWeather.map(e=>{
+    const totalFish = e.fish ? Object.values(e.fish).reduce((a,b)=>a+(b||0),0) : 0;
+    const hrs = entryHours(e);
+    return { e, totalFish, rate: hrs ? totalFish/hrs : null };
+  });
+  const knownRates = rated.filter(r=>r.rate != null).map(r=>r.rate);
+  const avgRate = knownRates.length ? knownRates.reduce((a,b)=>a+b,0)/knownRates.length : null;
   let allSuccess = 0, matchSum = 0, matchCount = 0;
-  withWeather.forEach(e=>{
+  rated.forEach(({e, totalFish, rate})=>{
     const eScores = scoreComponents(e.weather, e.date);
-    const hasFish = e.fish && Object.values(e.fish).some(q=>q>0);
-    if(hasFish) allSuccess++;
+    const isGood = rate != null ? (avgRate != null ? rate >= avgRate : totalFish > 0) : totalFish > 0;
+    if(isGood) allSuccess++;
     const dist = Math.abs(eScores.moonScore-scores.moonScore) + Math.abs(eScores.windScore-scores.windScore)
       + Math.abs(eScores.waveScore-scores.waveScore) + Math.abs(eScores.pressureScore-scores.pressureScore);
-    if(dist <= 3){ matchCount++; if(hasFish) matchSum++; }
+    if(dist <= 3){ matchCount++; if(isGood) matchSum++; }
   });
   if(matchCount < 3) return null;
   const matchRate = matchSum / matchCount;
@@ -2392,11 +2455,34 @@ function renderStats(){
   if(entries.length === 0){ wrap.innerHTML = `<div class="empty">${tr('Χρειάζονται καταχωρήσεις για στατιστικά')}</div>`; return; }
 
   let totalFish = 0, totalWeight = 0;
-  const bySpecies = {}, byLocation = {}, byWeather = {}, byWindDir = {}, byMoonPhase = {}, byBait = {}, byPressure = {}, byTide = {}, byAngler = {};
-  let hasUnassignedMultiAngler = false;
+  const bySpecies = {}, byLocation = {}, byWeather = {}, byWindDir = {}, byMoonPhase = {}, byBait = {}, byPressure = {}, byTide = {}, byAngler = {}, byAnglerJoint = {};
+  let hasUnassignedMultiAngler = false, hasUnassignedForMe = false, jointTrips = 0;
   const byMonth = new Array(12).fill(0);
   const byHourBucket = new Array(8).fill(0); // 3h buckets covering 24h
   const entryTotals = [];
+  const primaryAngler = getPrimaryAngler();
+
+  // Which of an entry's fish (per species) belong to the primary angler ("me"), so overall/personal
+  // stats aren't inflated by a companion's catches on shared trips. Solo entries under someone else's
+  // name, or joint trips where the split hasn't been filled in, don't add to "my" totals.
+  function myFishBySpeciesForEntry(e){
+    const anglerArr = Array.isArray(e.angler) ? e.angler : (e.angler ? [e.angler] : []);
+    const fish = e.fish || {};
+    if(!primaryAngler || anglerArr.length === 0) return { species: {...fish}, ambiguous:false };
+    if(anglerArr.length === 1){
+      return { species: anglerArr[0] === primaryAngler ? {...fish} : {}, ambiguous:false };
+    }
+    if(!anglerArr.includes(primaryAngler)) return { species: {}, ambiguous:false };
+    if(e.anglerFish && Object.keys(e.anglerFish).length){
+      const out = {};
+      Object.entries(e.anglerFish).forEach(([sp, perAngler])=>{
+        const q = perAngler[primaryAngler] || 0;
+        if(q > 0) out[sp] = q;
+      });
+      return { species: out, ambiguous:false };
+    }
+    return { species: {}, ambiguous:true };
+  }
 
   function pressureBucket(p){
     if(p < 1005) return '< 1005 hPa';
@@ -2425,27 +2511,36 @@ function renderStats(){
     if(!byLocation[loc]) byLocation[loc] = {trips:0, fish:0, hours:0, weight:0, tripsWithFish:0};
     byLocation[loc].trips++;
 
-    let entryFish = 0;
-    Object.entries(e.fish||{}).forEach(([n,q])=>{ if(q>0){ bySpecies[n] = (bySpecies[n]||0) + q; entryFish += q; } });
-    totalFish += entryFish;
+    let entryFish = 0; // whole-trip total (every angler present) — used only for the per-angler comparisons below
+    Object.entries(e.fish||{}).forEach(([n,q])=>{ if(q>0){ entryFish += q; } });
+
+    const myInfo = myFishBySpeciesForEntry(e);
+    let myEntryFish = 0;
+    Object.entries(myInfo.species).forEach(([n,q])=>{ if(q>0){ bySpecies[n] = (bySpecies[n]||0) + q; myEntryFish += q; } });
+    if(myInfo.ambiguous) hasUnassignedForMe = true;
+    totalFish += myEntryFish;
     totalWeight += (e.weight || 0);
 
     const anglerArrStats = Array.isArray(e.angler) ? e.angler : (e.angler ? [e.angler] : []);
     if(anglerArrStats.length === 1){
       byAngler[anglerArrStats[0]] = (byAngler[anglerArrStats[0]]||0) + entryFish;
     } else if(anglerArrStats.length >= 2){
+      jointTrips++;
       if(e.anglerFish && Object.keys(e.anglerFish).length){
         Object.values(e.anglerFish).forEach(perSpecies=>{
-          Object.entries(perSpecies).forEach(([a,q])=>{ if(q>0) byAngler[a] = (byAngler[a]||0) + q; });
+          Object.entries(perSpecies).forEach(([a,q])=>{
+            if(q>0){ byAngler[a] = (byAngler[a]||0) + q; byAnglerJoint[a] = (byAnglerJoint[a]||0) + q; }
+          });
         });
       } else if(entryFish > 0){
         hasUnassignedMultiAngler = true;
       }
     }
+    // Location stats describe the SPOT, not personal credit — count everyone's fish there, same as before.
     byLocation[loc].fish += entryFish;
     byLocation[loc].weight += (e.weight || 0);
     if(entryFish > 0) byLocation[loc].tripsWithFish++;
-    entryTotals.push({ date: e.date, loc, fish: entryFish });
+    entryTotals.push({ date: e.date, loc, fish: myEntryFish });
 
     if(e.timeIn && e.timeOut){
       const [h1,m1] = e.timeIn.split(':').map(Number);
@@ -2456,17 +2551,17 @@ function renderStats(){
     }
     if(e.timeIn){
       const h1 = parseInt(e.timeIn.split(':')[0]);
-      if(!isNaN(h1)) byHourBucket[Math.floor(h1/3)] += entryFish;
+      if(!isNaN(h1)) byHourBucket[Math.floor(h1/3)] += myEntryFish;
     }
-    (e.bait||[]).forEach(b=>{ byBait[b] = (byBait[b]||0) + entryFish; });
+    (e.bait||[]).forEach(b=>{ byBait[b] = (byBait[b]||0) + myEntryFish; });
 
     const month = new Date(e.date+'T12:00:00').getMonth();
-    byMonth[month] += entryFish;
+    byMonth[month] += myEntryFish;
 
     const ph = moonPhase(e.date);
     if(ph !== null){
       const [,label] = moonLabel(ph);
-      byMoonPhase[label] = (byMoonPhase[label]||0) + entryFish;
+      byMoonPhase[label] = (byMoonPhase[label]||0) + myEntryFish;
     }
 
     if(e.weather){
@@ -2474,7 +2569,7 @@ function renderStats(){
       byWindDir[getWindDirText(e.weather)] = (byWindDir[getWindDirText(e.weather)]||0) + 1;
       if(e.weather.pressure != null){
         const pb = pressureBucket(e.weather.pressure);
-        byPressure[pb] = (byPressure[pb]||0) + entryFish;
+        byPressure[pb] = (byPressure[pb]||0) + myEntryFish;
       }
       if(!byLocation[loc].weatherCounts) byLocation[loc].weatherCounts = {};
       if(!byLocation[loc].windCounts) byLocation[loc].windCounts = {};
@@ -2497,7 +2592,7 @@ function renderStats(){
         });
         if(minDiff !== null){
           const tb = tideBucket(minDiff);
-          byTide[tb] = (byTide[tb]||0) + entryFish;
+          byTide[tb] = (byTide[tb]||0) + myEntryFish;
         }
       }
     }
@@ -2515,6 +2610,8 @@ function renderStats(){
       ${bestSpecies ? `<div>🏆 ${tr("Καλύτερο είδος:")} <strong>${tr(bestSpecies[0])}</strong></div>` : ''}
       ${topCatches.length ? `<div>⭐ ${tr("Καλύτερη εξόρμηση:")} <strong>${topCatches[0].fish} ${tr("ψάρια")}</strong></div>` : ''}
     </div>
+    ${primaryAngler ? `<p class="hint" style="margin-top:8px;">${tr('Τα παραπάνω δείχνουν μόνο τα ψάρια του/της')} <strong>${primaryAngler}</strong> ${tr('(ρύθμιση «Ποιος είσαι εσύ» στις Ρυθμίσεις).')}</p>` : ''}
+    ${hasUnassignedForMe ? `<p class="hint" style="margin-top:4px;">${tr('Σε κάποιες κοινές εξορμήσεις δεν έχει δηλωθεί ποιος έπιασε τι — δεν προσμετρώνται ακόμα εδώ.')}</p>` : ''}
   </div>`;
 
   const kpi = `<div class="kpi-grid">
@@ -2570,8 +2667,17 @@ function renderStats(){
 
   const anglerHtml = Object.keys(byAngler).length
     ? Object.entries(byAngler).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<div class="bar-row"><div class="bar-label" style="width:auto; flex:1;">${n}</div><div class="bar-val" style="width:auto;">${v} ${tr('ψάρια')}</div></div>`).join('')
-      + (hasUnassignedMultiAngler ? `<p class="hint" style="margin-top:8px;">${tr('Σε εξορμήσεις με πάνω από έναν ψαρά χωρίς ανάθεση ποιος έπιασε τι, τα ψάρια δεν προσμετρώνται εδώ ανά άτομο.')}</p>` : '')
+      + `<p class="hint" style="margin-top:8px;">${tr('Σύνολο κάθε ψαρά σε όλες τις εξορμήσεις του — μόνος του και μαζί με άλλους.')}</p>`
+      + (hasUnassignedMultiAngler ? `<p class="hint" style="margin-top:4px;">${tr('Σε εξορμήσεις με πάνω από έναν ψαρά χωρίς ανάθεση ποιος έπιασε τι, τα ψάρια δεν προσμετρώνται εδώ ανά άτομο.')}</p>` : '')
     : `<div class="hint">${tr('Δεν υπάρχουν ακόμα καταγεγραμμένοι ψαράδες')}</div>`;
+
+  const jointHtml = jointTrips === 0
+    ? `<div class="hint">${tr('Δεν υπάρχουν ακόμα κοινές εξορμήσεις (με 2+ ψαράδες).')}</div>`
+    : (Object.keys(byAnglerJoint).length
+        ? Object.entries(byAnglerJoint).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<div class="bar-row"><div class="bar-label" style="width:auto; flex:1;">${n}</div><div class="bar-val" style="width:auto;">${v} ${tr('ψάρια')}</div></div>`).join('')
+        : '')
+      + `<p class="hint" style="margin-top:8px;">${jointTrips} ${tr('κοινές εξορμήσεις συνολικά — μόνο αυτές μετράνε εδώ, ώστε να φαίνεται καθαρά ποιος πιάνει περισσότερα όταν ψαρεύετε μαζί.')}</p>`
+      + (hasUnassignedMultiAngler ? `<p class="hint" style="margin-top:4px;">${tr('Σε κάποιες από αυτές δεν έχει δηλωθεί ποιος έπιασε τι — δεν προσμετρώνται ακόμα.')}</p>` : '');
 
   const locRowsAll = Object.entries(byLocation).sort((a,b)=>b[1].fish-a[1].fish).map(([n,d])=>{
     const perHour = d.hours > 0 ? (d.fish/d.hours).toFixed(2)+' '+tr('ψάρια/ώρα') : '';
@@ -2635,6 +2741,7 @@ function renderStats(){
     byHour: `<div class="stat-block"><h3>${tr("Επιτυχία ανά ώρα")}</h3>${hourRows}</div>`,
     byBait: `<div class="stat-block"><h3>${tr("Επιτυχία ανά δόλωμα")}</h3>${baitHtml}</div>`,
     byAngler: `<div class="stat-block"><h3>${tr("Ψάρια ανά ψαρά")}</h3>${anglerHtml}</div>`,
+    byAnglerJoint: `<div class="stat-block"><h3>${tr("Σύγκριση σε κοινές εξορμήσεις")}</h3>${jointHtml}</div>`,
     byMoon: barBlock('Ψάρια ανά φάση σελήνης', byMoonPhase, null, currentLang === 'en'
       ? ['New Moon','Waxing Crescent','First Quarter','Waxing Gibbous','Full Moon','Waning Gibbous','Last Quarter','Waning Crescent']
       : ['Νέα Σελήνη','Αύξων Μηνίσκος','Πρώτο Τέταρτο','Αύξων Αμφίκυρτος','Πανσέληνος','Φθίνων Αμφίκυρτος','Τελευταίο Τέταρτο','Φθίνων Μηνίσκος']),
@@ -2652,7 +2759,7 @@ function renderStats(){
     </div>`
   };
 
-  const defaultOrder = ['summary','topCatches','bySpecies','byAngler','speciesConditions','byMonth','byMoon','byPressure','byTide','byWindDir','byWeather','byBait','byHour','byLocationWeather','byLocation','bestSpots'];
+  const defaultOrder = ['summary','topCatches','bySpecies','byAngler','byAnglerJoint','speciesConditions','byMonth','byMoon','byPressure','byTide','byWindDir','byWeather','byBait','byHour','byLocationWeather','byLocation','bestSpots'];
   let order = LS.get('psarema_stats_order', defaultOrder);
   defaultOrder.forEach(k=>{ if(!order.includes(k)) order.push(k); });
   order = order.filter(k=>sections[k] !== undefined);
@@ -2667,7 +2774,7 @@ function renderStats(){
     </div>`).join('');
 }
 function moveStatsSection(key, direction){
-  const defaultOrder = ['summary','topCatches','bySpecies','byAngler','speciesConditions','byMonth','byMoon','byPressure','byTide','byWindDir','byWeather','byBait','byHour','byLocationWeather','byLocation','bestSpots'];
+  const defaultOrder = ['summary','topCatches','bySpecies','byAngler','byAnglerJoint','speciesConditions','byMonth','byMoon','byPressure','byTide','byWindDir','byWeather','byBait','byHour','byLocationWeather','byLocation','bestSpots'];
   let order = LS.get('psarema_stats_order', defaultOrder);
   defaultOrder.forEach(k=>{ if(!order.includes(k)) order.push(k); });
   const idx = order.indexOf(key);
@@ -2698,11 +2805,12 @@ async function predictBestTime(){
 
   successEntries.forEach(e=>{
     const totalFish = Object.values(e.fish).reduce((a,b)=>a+b,0);
+    const weight = rateWeight(totalFish, e); // fish/hour when duration is known, so a quick big catch outweighs a slow trickle
     const d = new Date(e.date+'T12:00:00').getDay();
-    weekdayCounts[d] += totalFish;
-    if(e.timeIn){ const h=parseInt(e.timeIn.split(':')[0]); if(!isNaN(h)) hourBuckets[Math.floor(h/3)] += totalFish; }
+    weekdayCounts[d] += weight;
+    if(e.timeIn){ const h=parseInt(e.timeIn.split(':')[0]); if(!isNaN(h)) hourBuckets[Math.floor(h/3)] += weight; }
     if(e.weather){
-      windDirCounts[getWindDirText(e.weather)] = (windDirCounts[getWindDirText(e.weather)]||0) + totalFish;
+      windDirCounts[getWindDirText(e.weather)] = (windDirCounts[getWindDirText(e.weather)]||0) + weight;
       if(e.weather.beaufort != null){
         beaufortMin = beaufortMin===null ? e.weather.beaufort : Math.min(beaufortMin, e.weather.beaufort);
         beaufortMax = beaufortMax===null ? e.weather.beaufort : Math.max(beaufortMax, e.weather.beaufort);
@@ -2710,7 +2818,7 @@ async function predictBestTime(){
     }
     const loc = e.locName || 'Άγνωστη τοποθεσία';
     if(!locFish[loc]) locFish[loc] = { fish:0, coords:e.coords, species:{} };
-    locFish[loc].fish += totalFish;
+    locFish[loc].fish += totalFish; // raw total here: picking which spot has the richest history, not "when" conditions are best
     locFish[loc].coords = e.coords;
     Object.entries(e.fish).forEach(([n,q])=>{ if(q>0) locFish[loc].species[n] = (locFish[loc].species[n]||0) + q; });
   });
@@ -2733,7 +2841,7 @@ async function predictBestTime(){
     const ph = moonPhase(e.date);
     if(ph !== null){
       const [,label] = moonLabel(ph);
-      moonPhaseCounts[label] = (moonPhaseCounts[label]||0) + totalFish;
+      moonPhaseCounts[label] = (moonPhaseCounts[label]||0) + rateWeight(totalFish, e);
     }
   });
   const bestMoonLabel = Object.entries(moonPhaseCounts).sort((a,b)=>b[1]-a[1])[0];
