@@ -287,9 +287,10 @@
       </div>
 
       <label id="i18n-locname-label">Τοποθεσία (όνομα)</label>
-      <input type="text" id="f-locname" placeholder="Συμπληρώνεται αυτόματα από τις συντεταγμένες">
+      <input type="text" id="f-locname" placeholder="Συμπληρώνεται αυτόματα από τις συντεταγμένες" list="location-names-list">
       <label id="i18n-locnote-label">Σημείωση τοποθεσίας</label>
       <input type="text" id="f-locnote" placeholder="π.χ. βραχάκι με φύκια, καλό τα ξημερώματα">
+      <datalist id="location-names-list"></datalist>
 
       <label id="i18n-weather-label">Καιρός & θάλασσα (αυτόματα)</label>
       <div class="weather-box" id="f-weather-box">
@@ -413,6 +414,14 @@
       <select id="primary-angler-select"></select>
     </div>
 
+    <div class="card" id="locations-card">
+      <h2 class="i18n-plain">Τοποθεσίες</h2>
+      <p class="hint i18n-plain">Δες και επεξεργάσου τις σημειώσεις όλων των τοποθεσιών σου, ή ένωσε δύο ονόματα που είναι στην ουσία το ίδιο σημείο.</p>
+      <div class="footer-tools">
+        <button type="button" id="btn-open-locations" class="i18n-plain">📍 Διαχείριση τοποθεσιών</button>
+      </div>
+    </div>
+
     <div class="card">
       <h2 id="i18n-data-header">Δεδομένα</h2>
       <p class="hint" id="i18n-beta-notice" style="background:#fdf1ec; border:1px solid #f0c8b4; border-radius:8px; padding:8px 10px;"><strong>Δοκιμαστική έκδοση (beta)</strong> — προσθέτουμε συνεχώς νέα στοιχεία και τη βελτιώνουμε.</p>
@@ -520,7 +529,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.8 · 20 Σεπ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.9 · 20 Σεπ 2026</p>
     </div>
   </div>
 
@@ -553,7 +562,7 @@
     </div>
 
     <label id="i18n-e-locname-label">Τοποθεσία (όνομα)</label>
-    <input type="text" id="e-locname">
+    <input type="text" id="e-locname" list="location-names-list">
     <label id="i18n-e-locnote-label">Σημείωση τοποθεσίας</label>
     <input type="text" id="e-locnote" placeholder="π.χ. βραχάκι με φύκια, καλό τα ξημερώματα">
 
@@ -711,6 +720,19 @@
 </div>
 
 
+<div class="map-picker-overlay" id="locations-overlay">
+  <div class="map-picker-sheet" style="max-width:460px;">
+    <div class="map-picker-head">
+      <h2 class="i18n-plain">Τοποθεσίες</h2>
+      <button type="button" class="modal-close" id="locations-mgr-close">✕</button>
+    </div>
+    <div style="padding:0 16px 16px; overflow-y:auto;">
+      <p class="hint i18n-plain" style="margin-top:0;">Μία σημείωση ανά τοποθεσία, ίδια σε όλες τις εξορμήσεις εκεί. Αν δύο ονόματα είναι στην ουσία το ίδιο σημείο, πάτα 🔗 για να τα ενώσεις.</p>
+      <div id="locations-mgr-list"></div>
+    </div>
+  </div>
+</div>
+
 <div class="map-picker-overlay" id="map-picker-overlay">
   <div class="map-picker-sheet">
     <div class="map-picker-head">
@@ -772,6 +794,13 @@ const GR_TO_EN = {
   "Ψάρια ανά παλίρροια":"Fish by tide","Καιρικές συνθήκες κατά την ψαριά":"Weather during the trip",
   "Ψάρια ανά καιρική συνθήκη":"Fish by weather condition","Ψάρια ανά κατεύθυνση ανέμου":"Fish by wind direction",
   "Πάτα ξανά πίσω για έξοδο":"Press back again to exit",
+  "Τοποθεσίες":"Locations",
+  "Μία σημείωση ανά τοποθεσία, ίδια σε όλες τις εξορμήσεις εκεί. Αν δύο ονόματα είναι στην ουσία το ίδιο σημείο, πάτα 🔗 για να τα ενώσεις.":"One note per location, shared by every trip there. If two names are really the same spot, tap 🔗 to merge them.",
+  "Δεν υπάρχουν ακόμα τοποθεσίες — θα εμφανιστούν εδώ μόλις καταγράψεις μια εξόρμηση.":"No locations yet — they'll show up here as soon as you log a trip.",
+  "Σημείωση...":"Note...","Συγχώνευση με...":"Merge with...","Διαχείριση":"Manage",
+  "Αποθηκεύτηκε ✓":"Saved ✓","Οι τοποθεσίες συγχωνεύθηκαν ✓":"Locations merged ✓",
+  "Δες και επεξεργάσου τις σημειώσεις όλων των τοποθεσιών σου, ή ένωσε δύο ονόματα που είναι στην ουσία το ίδιο σημείο.":"View and edit the notes for all your locations, or merge two names that are really the same spot.",
+  "📍 Διαχείριση τοποθεσιών":"📍 Manage locations",
   "Κατεύθυνση ανέμου":"Wind direction","Εξορμήσεις":"Trips","Ψάρια συνολικά":"Total fish",
   "Μ.Ο. ψάρια/εξόρμηση":"Avg. fish/trip","Συνολικά κιλά":"Total weight","Επιλέξτε είδος":"Select species",
   // toasts / messages
@@ -942,6 +971,22 @@ if(!LS.get('psarema_equip_v2_migrated', false)){
   equips = LS.get('psarema_equip', DEFAULTS.equip.slice());
 }
 let entries = LS.get('psarema_entries', []);
+
+// One canonical note per location name, independent of any single entry — lets a note survive
+// even if you retype/rename that location later, and is what the "Τοποθεσίες" manager edits.
+// Seeded once from whatever locName/locNote pairs already exist in past entries.
+let locations = LS.get('psarema_locations', null);
+if(!locations){
+  const seen = {};
+  entries.forEach(e=>{
+    const name = (e.locName||'').trim();
+    if(!name) return;
+    if(!seen[name]) seen[name] = { name, note:'', _date:'' };
+    if(e.locNote && (e.date||'') >= seen[name]._date){ seen[name].note = e.locNote; seen[name]._date = e.date||''; }
+  });
+  locations = Object.values(seen).map(l=>({ name:l.name, note:l.note||'' }));
+  LS.set('psarema_locations', locations);
+}
 let anglers = LS.get('psarema_anglers', []);
 let selAngler = new Set();
 let eSelAngler = new Set();
@@ -1083,7 +1128,7 @@ async function buildBackupData(){
       if(!photos[key]){ try{ const d = await idbGet(key); if(d) photos[key] = d; }catch(err){} }
     }
   }
-  return { entries, species, baits, equips, anglers, photos, exportedAt: new Date().toISOString() };
+  return { entries, species, baits, equips, anglers, locations, photos, exportedAt: new Date().toISOString() };
 }
 async function writeBackupToSharedFolder(silent){
   const root = await sharedBackupHandleGet('root');
@@ -1133,9 +1178,11 @@ async function restoreFromSharedBackupFile(fileHandle){
     if(data.baits) { baits = data.baits; LS.set('psarema_bait', baits); }
     if(data.equips) { equips = data.equips; LS.set('psarema_equip', equips); }
     if(data.anglers) { anglers = data.anglers; LS.set('psarema_anglers', anglers); }
+    if(data.locations) { locations = data.locations; LS.set('psarema_locations', locations); }
     if(data.photos){ for(const [key, dataUrl] of Object.entries(data.photos)){ try{ await idbPut(key, dataUrl); }catch(err){} } }
     refreshPickers();
     refreshAnglerPicker();
+    refreshLocationNamesDatalist();
     renderEntries();
     toast(tr('Τα δεδομένα επαναφέρθηκαν ✓'));
     const overlay = document.getElementById('backup-restore-overlay');
@@ -1642,18 +1689,50 @@ async function autoFillLocationName(parsed, locNameId){
 wireCoordField('f-coords', 'coord-preview', 'f-locname', 'f');
 wireCoordField('e-coords', 'e-coord-preview', 'e-locname', 'e');
 
+// ---------- Τοποθεσίες: one canonical note per location, editable from its own manager ----------
+function findLocationName(name){
+  if(!name) return null;
+  const n = name.trim().toLowerCase();
+  return locations.find(l => l.name.trim().toLowerCase() === n) || null;
+}
+function findLocationNote(name){
+  const loc = findLocationName(name);
+  if(loc && loc.note) return loc.note;
+  // fall back to the most recent entry's own note, for locations not yet in the canonical list
+  const match = entries
+    .filter(e => e.locNote && e.locName && e.locName.trim().toLowerCase() === (name||'').trim().toLowerCase())
+    .sort((a,b)=> (b.date||'').localeCompare(a.date||''))[0];
+  return match ? match.locNote : null;
+}
+// Makes sure every location name that's ever been typed ends up in the canonical list, so it shows
+// up in the manager and the autocomplete even before it has a note of its own.
+function ensureLocationTracked(name, note){
+  const trimmed = (name||'').trim();
+  if(!trimmed) return;
+  const existing = findLocationName(trimmed);
+  if(existing){
+    if(note && !existing.note) existing.note = note;
+  } else {
+    locations.push({ name:trimmed, note: note||'' });
+  }
+  LS.set('psarema_locations', locations);
+  refreshLocationNamesDatalist();
+}
+function refreshLocationNamesDatalist(){
+  const dl = document.getElementById('location-names-list');
+  if(!dl) return;
+  dl.innerHTML = locations.map(l=>`<option value="${escapeAttr(l.name)}">`).join('');
+}
+refreshLocationNamesDatalist();
+
 // If you've already left a note about this location before, offer it again next time you fish there —
 // only ever fills an EMPTY note field, never overwrites what's typed for this trip.
 function maybeAutofillLocNote(locNameId, locNoteId){
   const nameEl = document.getElementById(locNameId);
   const noteEl = document.getElementById(locNoteId);
   if(!nameEl || !noteEl || noteEl.value.trim()) return;
-  const name = nameEl.value.trim();
-  if(!name) return;
-  const match = entries
-    .filter(e => e.locNote && e.locName && e.locName.trim().toLowerCase() === name.toLowerCase())
-    .sort((a,b)=> (b.date||'').localeCompare(a.date||''))[0];
-  if(match) noteEl.value = match.locNote;
+  const note = findLocationNote(nameEl.value.trim());
+  if(note) noteEl.value = note;
 }
 function wireLocNoteAutofill(locNameId, locNoteId){
   const nameEl = document.getElementById(locNameId);
@@ -1662,6 +1741,75 @@ function wireLocNoteAutofill(locNameId, locNoteId){
 }
 wireLocNoteAutofill('f-locname', 'f-locnote');
 wireLocNoteAutofill('e-locname', 'e-locnote');
+
+/* ---------- Τοποθεσίες manager: edit each location's note, merge duplicate spots ---------- */
+function renderLocationsManager(){
+  const wrap = document.getElementById('locations-mgr-list');
+  if(!wrap) return;
+  if(!locations.length){
+    wrap.innerHTML = `<div class="hint">${tr('Δεν υπάρχουν ακόμα τοποθεσίες — θα εμφανιστούν εδώ μόλις καταγράψεις μια εξόρμηση.')}</div>`;
+    return;
+  }
+  const sorted = [...locations].sort((a,b)=>a.name.localeCompare(b.name, 'el'));
+  wrap.innerHTML = sorted.map(loc=>{
+    const otherOptions = sorted.filter(l=>l.name!==loc.name)
+      .map(l=>`<option value="${escapeAttr(l.name)}">${l.name}</option>`).join('');
+    return `<div class="stat-block" style="padding:10px; margin-top:8px;" data-loc="${escapeAttr(loc.name)}">
+      <div style="font-weight:700; margin-bottom:6px;">${loc.name}</div>
+      <input type="text" class="loc-mgr-note" data-loc="${escapeAttr(loc.name)}" value="${escapeAttr(loc.note||'')}" placeholder="${tr('Σημείωση...')}" style="margin-bottom:8px;">
+      ${sorted.length > 1 ? `
+      <div style="display:flex; gap:6px; align-items:center;">
+        <span style="font-size:0.8rem; opacity:0.75;">🔗</span>
+        <select class="loc-mgr-merge-target" data-loc="${escapeAttr(loc.name)}" style="flex:1;">
+          <option value="">${tr('Συγχώνευση με...')}</option>
+          ${otherOptions}
+        </select>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+  wrap.querySelectorAll('.loc-mgr-note').forEach(input=>{
+    input.addEventListener('change', ()=>{
+      const loc = findLocationName(input.dataset.loc);
+      if(loc){ loc.note = input.value.trim(); LS.set('psarema_locations', locations); toast('Αποθηκεύτηκε ✓'); }
+    });
+  });
+  wrap.querySelectorAll('.loc-mgr-merge-target').forEach(sel=>{
+    sel.addEventListener('change', ()=>{
+      const from = sel.dataset.loc, into = sel.value;
+      if(!into) return;
+      if(!confirm(currentLang==='en' ? `Merge "${from}" into "${into}"? All trips at "${from}" will be moved to "${into}".` : `Συγχώνευση «${from}» μέσα στο «${into}»; Όλες οι εξορμήσεις στο «${from}» θα μεταφερθούν στο «${into}».`)){
+        sel.value = '';
+        return;
+      }
+      mergeLocationsInto(from, into);
+    });
+  });
+}
+function mergeLocationsInto(fromName, intoName){
+  entries.forEach(e=>{ if((e.locName||'') === fromName) e.locName = intoName; });
+  LS.set('psarema_entries', entries);
+  const into = findLocationName(intoName);
+  const from = findLocationName(fromName);
+  if(into && from && !into.note && from.note) into.note = from.note;
+  locations = locations.filter(l=>l.name !== fromName);
+  LS.set('psarema_locations', locations);
+  refreshLocationNamesDatalist();
+  renderLocationsManager();
+  renderEntries();
+  if(document.getElementById('view-stats').classList.contains('active')) renderStats();
+  toast('Οι τοποθεσίες συγχωνεύθηκαν ✓');
+}
+document.getElementById('locations-mgr-close').addEventListener('click', ()=>{
+  document.getElementById('locations-overlay').classList.remove('show');
+});
+document.getElementById('locations-overlay').addEventListener('click', (ev)=>{
+  if(ev.target.id === 'locations-overlay') document.getElementById('locations-overlay').classList.remove('show');
+});
+function openLocationsManager(){
+  renderLocationsManager();
+  document.getElementById('locations-overlay').classList.add('show');
+}
+document.getElementById('btn-open-locations').addEventListener('click', openLocationsManager);
 document.getElementById('btn-geo').addEventListener('click', ()=>{
   if(!navigator.geolocation){ toast('Η συσκευή δεν υποστηρίζει τοποθεσία'); return; }
   toast('Λήψη τοποθεσίας...');
@@ -2279,6 +2427,7 @@ document.getElementById('btn-save').addEventListener('click', async ()=>{
   entries.push(entry);
   LS.set('psarema_last_equip', entry.equip);
   LS.set('psarema_entries', entries);
+  ensureLocationTracked(entry.locName, entry.locNote);
   toast('Η καταχώρηση αποθηκεύτηκε ✓');
   maybeSendAutoBackup();
   maybeWriteSharedBackup();
@@ -2469,6 +2618,7 @@ document.getElementById('e-btn-save').addEventListener('click', async ()=>{
     photos: photoKeys
   };
   LS.set('psarema_entries', entries);
+  ensureLocationTracked(entries[idx].locName, entries[idx].locNote);
   toast('Οι αλλαγές αποθηκεύτηκαν ✓');
   maybeWriteSharedBackup();
   closeModal();
@@ -2544,12 +2694,8 @@ function renderStats(){
 
   entries.forEach(e=>{
     const loc = e.locName || 'Άγνωστη τοποθεσία';
-    if(!byLocation[loc]) byLocation[loc] = {trips:0, fish:0, hours:0, weight:0, tripsWithFish:0, note:null, noteDate:null};
+    if(!byLocation[loc]) byLocation[loc] = {trips:0, fish:0, hours:0, weight:0, tripsWithFish:0, note: findLocationNote(loc)};
     byLocation[loc].trips++;
-    if(e.locNote && (!byLocation[loc].noteDate || (e.date||'') > byLocation[loc].noteDate)){
-      byLocation[loc].note = e.locNote;
-      byLocation[loc].noteDate = e.date || '';
-    }
 
     let entryFish = 0; // whole-trip total (every angler present) — used only for the per-angler comparisons below
     Object.entries(e.fish||{}).forEach(([n,q])=>{ if(q>0){ entryFish += q; } });
@@ -2793,7 +2939,7 @@ function renderStats(){
     byMonth: `<div class="stat-block"><h3>${tr("Εποχικότητα (ψάρια ανά μήνα)")}</h3>${monthBars}</div>`,
     byWeather: barBlock('Ψάρια ανά καιρική συνθήκη', byWeather),
     byWindDir: barBlock('Ψάρια ανά κατεύθυνση ανέμου', byWindDir),
-    byLocation: `<div class="stat-block"><h3>${tr("Ανά τοποθεσία")}</h3>${locRows}</div>`,
+    byLocation: `<div class="stat-block"><h3 style="display:flex; align-items:center; justify-content:space-between; gap:8px;">${tr("Ανά τοποθεσία")}<button type="button" onclick="openLocationsManager()" style="font-size:0.75rem; padding:4px 8px;">📍 ${tr('Διαχείριση')}</button></h3>${locRows}</div>`,
     bestSpots: `<div class="stat-block"><h3>${tr("📍 Τα καλύτερα σημεία μου")}</h3>${bestSpotsHtml}</div>`,
     byLocationWeather: `<div class="stat-block"><h3>${tr("Τοποθεσίες ανά καιρό")}</h3>${locWeatherHtml}</div>`,
     speciesConditions: `<div class="stat-block"><h3>${tr("🎯 Καλύτερες συνθήκες ανά είδος")}</h3>
@@ -3290,7 +3436,7 @@ window.showLocationConditions = function(locName){
   if(!resultEl) return;
   const relevant = entries.filter(e => (e.locName || '') === locName);
   if(!relevant.length){ resultEl.innerHTML = ''; return; }
-  const notedEntry = relevant.filter(e=>e.locNote).sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0];
+  const locationNote = findLocationNote(locName);
   const weatherCounts = {}, windCounts = {}, hourBuckets = new Array(8).fill(0);
   relevant.forEach(e=>{
     const fish = Object.values(e.fish||{}).reduce((a,b)=>a+b,0) || 1;
@@ -3316,7 +3462,7 @@ window.showLocationConditions = function(locName){
     : `Βάσει ${relevant.length} εξόρμηση${relevant.length===1?'ς':'σεων'} εδώ${relevant.length < 3 ? ' — ακόμα λίγα δεδομένα' : ''}`;
   resultEl.innerHTML = `<div class="condition-card">
     <div class="condition-title">📍 ${locName}</div>
-    ${notedEntry ? `<div class="condition-line" style="font-style:italic; opacity:0.85;">📝 ${notedEntry.locNote}</div>` : ''}
+    ${locationNote ? `<div class="condition-line" style="font-style:italic; opacity:0.85;">📝 ${locationNote}</div>` : ''}
     ${lines.map(l=>`<div class="condition-line">${l}</div>`).join('')}
     <div class="condition-line" style="opacity:0.7; font-size:0.78rem;">${sampleNote}</div>
   </div>`;
@@ -3330,7 +3476,7 @@ document.getElementById('btn-export').addEventListener('click', async ()=>{
       if(!photos[key]){ try{ const d = await idbGet(key); if(d) photos[key] = d; }catch(err){} }
     }
   }
-  const data = { entries, species, baits, equips, anglers, photos, exportedAt: new Date().toISOString() };
+  const data = { entries, species, baits, equips, anglers, locations, photos, exportedAt: new Date().toISOString() };
   const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -3630,9 +3776,11 @@ document.getElementById('file-import').addEventListener('change', (ev)=>{
       if(data.baits) { baits = data.baits; LS.set('psarema_bait', baits); }
       if(data.equips) { equips = data.equips; LS.set('psarema_equip', equips); }
       if(data.anglers) { anglers = data.anglers; LS.set('psarema_anglers', anglers); }
+      if(data.locations) { locations = data.locations; LS.set('psarema_locations', locations); }
       if(data.photos){ for(const [key, dataUrl] of Object.entries(data.photos)){ try{ await idbPut(key, dataUrl); }catch(err){} } }
       refreshPickers();
       refreshAnglerPicker();
+      refreshLocationNamesDatalist();
       toast('Τα δεδομένα εισήχθησαν ✓');
       maybeWriteSharedBackup();
     }catch(e){ toast('Μη έγκυρο αρχείο'); }
@@ -3643,6 +3791,9 @@ document.getElementById('btn-clear').addEventListener('click', ()=>{
   if(!confirm(tr('Σίγουρα θέλεις να διαγράψεις ΟΛΑ τα δεδομένα; Δεν αναιρείται.'))) return;
   entries = [];
   LS.set('psarema_entries', entries);
+  locations = [];
+  LS.set('psarema_locations', locations);
+  refreshLocationNamesDatalist();
   toast('Όλα τα δεδομένα διαγράφηκαν');
   renderEntries();
   maybeWriteSharedBackup();
@@ -4194,6 +4345,18 @@ if('serviceWorker' in navigator){
   });
 
   pushBackEntry(); // safety-net entry so the very first back press is caught here, not by the OS
+
+  // Android can silently reload the page while it's backgrounded (low memory) or the wrapped app's
+  // back handling can drop our pushed history state outside our control — if we ever come back to a
+  // visible page without our marker on top of history, assume our stack is stale and re-arm cleanly
+  // rather than leaving the user with no safety net at all.
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.visibilityState === 'visible' && (!history.state || !history.state.fishiqNav)){
+      navStack.length = 0;
+      tabAway = false;
+      pushBackEntry();
+    }
+  });
 })();
 </script>
 </body>
