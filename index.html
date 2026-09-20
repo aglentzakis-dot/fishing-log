@@ -3123,15 +3123,16 @@ function computeBestConditions(name){
 
   relevant.forEach(e=>{
     const qty = e.fish[name] || 1;
+    const weight = rateWeight(qty, e); // fish/hour for this species, so a fast catch counts for more than a slow one
     const d = new Date(e.date+'T12:00:00').getDay();
-    weekdayCounts[d] += qty;
+    weekdayCounts[d] += weight;
 
     if(e.timeIn){
       const h = parseInt(e.timeIn.split(':')[0]);
-      if(!isNaN(h)) hourBuckets[Math.floor(h/3)] += qty;
+      if(!isNaN(h)) hourBuckets[Math.floor(h/3)] += weight;
     }
     if(e.weather){
-      windDirCounts[getWindDirText(e.weather)] = (windDirCounts[getWindDirText(e.weather)]||0) + qty;
+      windDirCounts[getWindDirText(e.weather)] = (windDirCounts[getWindDirText(e.weather)]||0) + weight;
       if(e.weather.beaufort != null){
         beaufortMin = beaufortMin===null ? e.weather.beaufort : Math.min(beaufortMin, e.weather.beaufort);
         beaufortMax = beaufortMax===null ? e.weather.beaufort : Math.max(beaufortMax, e.weather.beaufort);
@@ -3141,7 +3142,7 @@ function computeBestConditions(name){
         waveMax = waveMax===null ? e.weather.wave : Math.max(waveMax, e.weather.wave);
       }
     }
-    (e.bait||[]).forEach(b=>{ baitCounts[b] = (baitCounts[b]||0) + qty; });
+    (e.bait||[]).forEach(b=>{ baitCounts[b] = (baitCounts[b]||0) + weight; });
 
     if(e.timeIn){
       const info = computeMoonInfo(e.date);
