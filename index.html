@@ -288,6 +288,8 @@
 
       <label id="i18n-locname-label">Τοποθεσία (όνομα)</label>
       <input type="text" id="f-locname" placeholder="Συμπληρώνεται αυτόματα από τις συντεταγμένες">
+      <label id="i18n-locnote-label">Σημείωση τοποθεσίας</label>
+      <input type="text" id="f-locnote" placeholder="π.χ. βραχάκι με φύκια, καλό τα ξημερώματα">
 
       <label id="i18n-weather-label">Καιρός & θάλασσα (αυτόματα)</label>
       <div class="weather-box" id="f-weather-box">
@@ -518,7 +520,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.7 · 20 Σεπ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.8 · 20 Σεπ 2026</p>
     </div>
   </div>
 
@@ -552,6 +554,8 @@
 
     <label id="i18n-e-locname-label">Τοποθεσία (όνομα)</label>
     <input type="text" id="e-locname">
+    <label id="i18n-e-locnote-label">Σημείωση τοποθεσίας</label>
+    <input type="text" id="e-locnote" placeholder="π.χ. βραχάκι με φύκια, καλό τα ξημερώματα">
 
     <label id="i18n-e-weather-label">Καιρός & θάλασσα (αυτόματα)</label>
     <div class="weather-box" id="e-weather-box">
@@ -767,6 +771,7 @@ const GR_TO_EN = {
   "Ψάρια ανά φάση σελήνης":"Fish by moon phase","Ψάρια ανά πίεση":"Fish by pressure","Ψάρια ανά είδος":"Fish by species",
   "Ψάρια ανά παλίρροια":"Fish by tide","Καιρικές συνθήκες κατά την ψαριά":"Weather during the trip",
   "Ψάρια ανά καιρική συνθήκη":"Fish by weather condition","Ψάρια ανά κατεύθυνση ανέμου":"Fish by wind direction",
+  "Πάτα ξανά πίσω για έξοδο":"Press back again to exit",
   "Κατεύθυνση ανέμου":"Wind direction","Εξορμήσεις":"Trips","Ψάρια συνολικά":"Total fish",
   "Μ.Ο. ψάρια/εξόρμηση":"Avg. fish/trip","Συνολικά κιλά":"Total weight","Επιλέξτε είδος":"Select species",
   // toasts / messages
@@ -1623,7 +1628,11 @@ async function autoFillLocationName(parsed, locNameId){
     const data = await res.json();
     const a = data.address || {};
     const name = a.village || a.town || a.suburb || a.municipality || a.city || a.county || data.display_name;
-    if(name && !locInput.value.trim()) locInput.value = name.split(',')[0];
+    if(name && !locInput.value.trim()){
+      locInput.value = name.split(',')[0];
+      const locNoteId = locNameId === 'f-locname' ? 'f-locnote' : 'e-locnote';
+      if(typeof maybeAutofillLocNote === 'function') maybeAutofillLocNote(locNameId, locNoteId);
+    }
   }catch(e){
     console.error('reverse geocode failed', e);
     const st = document.getElementById(statusId);
@@ -1632,6 +1641,27 @@ async function autoFillLocationName(parsed, locNameId){
 }
 wireCoordField('f-coords', 'coord-preview', 'f-locname', 'f');
 wireCoordField('e-coords', 'e-coord-preview', 'e-locname', 'e');
+
+// If you've already left a note about this location before, offer it again next time you fish there —
+// only ever fills an EMPTY note field, never overwrites what's typed for this trip.
+function maybeAutofillLocNote(locNameId, locNoteId){
+  const nameEl = document.getElementById(locNameId);
+  const noteEl = document.getElementById(locNoteId);
+  if(!nameEl || !noteEl || noteEl.value.trim()) return;
+  const name = nameEl.value.trim();
+  if(!name) return;
+  const match = entries
+    .filter(e => e.locNote && e.locName && e.locName.trim().toLowerCase() === name.toLowerCase())
+    .sort((a,b)=> (b.date||'').localeCompare(a.date||''))[0];
+  if(match) noteEl.value = match.locNote;
+}
+function wireLocNoteAutofill(locNameId, locNoteId){
+  const nameEl = document.getElementById(locNameId);
+  if(!nameEl) return;
+  nameEl.addEventListener('blur', ()=>maybeAutofillLocNote(locNameId, locNoteId));
+}
+wireLocNoteAutofill('f-locname', 'f-locnote');
+wireLocNoteAutofill('e-locname', 'e-locnote');
 document.getElementById('btn-geo').addEventListener('click', ()=>{
   if(!navigator.geolocation){ toast('Η συσκευή δεν υποστηρίζει τοποθεσία'); return; }
   toast('Λήψη τοποθεσίας...');
@@ -2235,6 +2265,7 @@ document.getElementById('btn-save').addEventListener('click', async ()=>{
     timeOut: fTimeOut,
     timeOutAuto: fTimeOutAuto,
     locName: document.getElementById('f-locname').value.trim(),
+    locNote: document.getElementById('f-locnote').value.trim(),
     coords: document.getElementById('f-coords').value.trim(),
     weather: fWeatherData,
     fish: fishQty,
@@ -2263,6 +2294,7 @@ function resetForm(){
   document.getElementById('f-timeout').value = '';
   updateTimeoutHighlight('f');
   document.getElementById('f-locname').value = '';
+  document.getElementById('f-locnote').value = '';
   document.getElementById('f-coords').value = '';
   document.getElementById('coord-preview').innerHTML = '';
   document.getElementById('f-notes').value = '';
@@ -2314,9 +2346,10 @@ function entryCardHtml(e){
   const weightTag = e.weight ? `<span class="tag weight">⚖️ ${e.weight} kg</span>` : '';
   const anglerArr = Array.isArray(e.angler) ? e.angler : (e.angler ? [e.angler] : []);
   const anglerLine = anglerArr.length ? `<div class="entry-loc">🎣 ${anglerArr.join(', ')}</div>` : '';
+  const locNoteLine = e.locNote ? `<div class="entry-loc" style="font-style:italic; opacity:0.7;">📝 ${e.locNote}</div>` : '';
   return `<div class="entry" onclick="openDetail(${e.id})">
     <div class="entry-top">
-      <div><div class="entry-date">${formatDate(e.date)}</div><div class="entry-loc">${e.locName || '—'}</div>${anglerLine}</div>
+      <div><div class="entry-date">${formatDate(e.date)}</div><div class="entry-loc">${e.locName || '—'}</div>${locNoteLine}${anglerLine}</div>
     </div>
     <div class="entry-tags">${wxTag}${fishTags}${weightTag}${photoTag}${otherTags}</div>
   </div>`;
@@ -2338,6 +2371,7 @@ async function openDetail(id){
   eAnglerFish = JSON.parse(JSON.stringify(e.anglerFish || {}));
   bindDeletableWithLine('e-angler-chip-list', anglers, eSelAngler, 'e-angler-count-sum', ()=>{ updatePickerSummaryText('e-angler-count-sum', eSelAngler, 'Επίλεξε ψαρά(-άδες)'); renderAnglerFishBreakdown('e'); }, 'psarema_anglers', 'Επίλεξε ψαρά(-άδες)');
   document.getElementById('e-locname').value = e.locName || '';
+  document.getElementById('e-locnote').value = e.locNote || '';
   document.getElementById('e-notes').value = e.notes || '';
   document.getElementById('e-weight').value = e.weight || '';
 
@@ -2424,6 +2458,7 @@ document.getElementById('e-btn-save').addEventListener('click', async ()=>{
     timeOutAuto: eTimeOutAutoFinal,
     coords: document.getElementById('e-coords').value.trim(),
     locName: document.getElementById('e-locname').value.trim(),
+    locNote: document.getElementById('e-locnote').value.trim(),
     weather: eWeatherData,
     fish: fishQty,
     anglerFish: anglerArrE.length >= 2 ? JSON.parse(JSON.stringify(eAnglerFish)) : undefined,
@@ -2509,8 +2544,12 @@ function renderStats(){
 
   entries.forEach(e=>{
     const loc = e.locName || 'Άγνωστη τοποθεσία';
-    if(!byLocation[loc]) byLocation[loc] = {trips:0, fish:0, hours:0, weight:0, tripsWithFish:0};
+    if(!byLocation[loc]) byLocation[loc] = {trips:0, fish:0, hours:0, weight:0, tripsWithFish:0, note:null, noteDate:null};
     byLocation[loc].trips++;
+    if(e.locNote && (!byLocation[loc].noteDate || (e.date||'') > byLocation[loc].noteDate)){
+      byLocation[loc].note = e.locNote;
+      byLocation[loc].noteDate = e.date || '';
+    }
 
     let entryFish = 0; // whole-trip total (every angler present) — used only for the per-angler comparisons below
     Object.entries(e.fish||{}).forEach(([n,q])=>{ if(q>0){ entryFish += q; } });
@@ -2541,7 +2580,7 @@ function renderStats(){
     byLocation[loc].fish += entryFish;
     byLocation[loc].weight += (e.weight || 0);
     if(entryFish > 0) byLocation[loc].tripsWithFish++;
-    entryTotals.push({ date: e.date, loc, fish: myEntryFish });
+    entryTotals.push({ id: e.id, date: e.date, loc, fish: myEntryFish });
 
     if(e.timeIn && e.timeOut){
       const [h1,m1] = e.timeIn.split(':').map(Number);
@@ -2625,7 +2664,7 @@ function renderStats(){
   </div>`;
 
   const topCatchesHtml = topCatches.length ? topCatches.slice(0,3).map((t,i)=>`
-    <div class="bar-row" style="align-items:flex-start;">
+    <div class="bar-row" style="align-items:flex-start; cursor:pointer;" onclick="openDetail(${t.id})">
       <div class="bar-label" style="width:24px; font-weight:800; color:var(--coral);">#${i+1}</div>
       <div class="bar-label" style="width:auto; flex:1;">${formatDate(t.date)}<br><span style="font-weight:400; color:#7c8f95; font-size:0.75rem;">${t.loc}</span></div>
       <div class="bar-val" style="width:auto;">${t.fish} ${tr('ψάρια')}</div>
@@ -2686,8 +2725,9 @@ function renderStats(){
     const perHour = d.hours > 0 ? (d.fish/d.hours).toFixed(2)+' '+tr('ψάρια/ώρα') : '';
     const successPct = d.trips > 0 ? Math.round((d.tripsWithFish / d.trips) * 100) : 0;
     const pctStyle = successPct === 0 ? 'background:rgba(200,60,60,0.12); color:#a33;' : 'background:rgba(60,140,110,0.12); color:#2c7a5e;';
+    const noteLine = d.note ? `<br><span style="font-style:italic; opacity:0.75; font-size:0.75rem;">📝 ${d.note}</span>` : '';
     return `<div class="bar-row" style="align-items:flex-start;">
-      <div class="bar-label" style="width:auto; flex:1;">${n}<br><span style="font-weight:400; color:#7c8f95; font-size:0.75rem;">${d.trips} ${tr('εξορμήσεις')} · ${d.fish} ${tr('ψάρια')}${perHour ? ' · '+perHour : ''}</span></div>
+      <div class="bar-label" style="width:auto; flex:1;">${n}<br><span style="font-weight:400; color:#7c8f95; font-size:0.75rem;">${d.trips} ${tr('εξορμήσεις')} · ${d.fish} ${tr('ψάρια')}${perHour ? ' · '+perHour : ''}</span>${noteLine}</div>
       <span style="font-size:0.78rem; font-weight:700; padding:3px 8px; border-radius:10px; white-space:nowrap; ${pctStyle}">${successPct}%</span>
     </div>`;
   });
@@ -3250,6 +3290,7 @@ window.showLocationConditions = function(locName){
   if(!resultEl) return;
   const relevant = entries.filter(e => (e.locName || '') === locName);
   if(!relevant.length){ resultEl.innerHTML = ''; return; }
+  const notedEntry = relevant.filter(e=>e.locNote).sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0];
   const weatherCounts = {}, windCounts = {}, hourBuckets = new Array(8).fill(0);
   relevant.forEach(e=>{
     const fish = Object.values(e.fish||{}).reduce((a,b)=>a+b,0) || 1;
@@ -3275,6 +3316,7 @@ window.showLocationConditions = function(locName){
     : `Βάσει ${relevant.length} εξόρμηση${relevant.length===1?'ς':'σεων'} εδώ${relevant.length < 3 ? ' — ακόμα λίγα δεδομένα' : ''}`;
   resultEl.innerHTML = `<div class="condition-card">
     <div class="condition-title">📍 ${locName}</div>
+    ${notedEntry ? `<div class="condition-line" style="font-style:italic; opacity:0.85;">📝 ${notedEntry.locNote}</div>` : ''}
     ${lines.map(l=>`<div class="condition-line">${l}</div>`).join('')}
     <div class="condition-line" style="opacity:0.7; font-size:0.78rem;">${sampleNote}</div>
   </div>`;
@@ -3820,6 +3862,7 @@ const I18N = {
     'nav-new': 'New entry', 'nav-list': 'Entries', 'nav-stats': 'Statistics', 'nav-predictions': 'Predictions', 'nav-settings': 'Settings',
     'i18n-trip-details': 'Trip details', 'i18n-angler-label': 'Angler', 'i18n-date-label': 'Date',
     'i18n-timein-label': 'Arrival time', 'i18n-timeout-label': 'Departure time', 'i18n-locname-label': 'Location (name)',
+    'i18n-locnote-label': 'Location note',
     'i18n-weather-label': 'Weather & sea (automatic)', 'i18n-species-label': 'Fish species', 'i18n-weight-label': 'Total catch weight',
     'i18n-bait-label': 'Bait', 'i18n-technique-label': 'Fishing technique', 'i18n-notes-label': 'Notes', 'i18n-photos-label': 'Photos (up to 3)',
     'i18n-entries-header': 'Entries', 'i18n-stats-header': 'Statistics',
@@ -3851,7 +3894,7 @@ function applyLanguage(lang){
     btn.textContent = lang === 'en' ? I18N.en[key] : I18N.el[key];
   });
   const idKeys = ['i18n-trip-details','i18n-angler-label','i18n-date-label','i18n-timein-label','i18n-timeout-label',
-    'i18n-locname-label','i18n-weather-label','i18n-species-label','i18n-weight-label','i18n-bait-label','i18n-technique-label',
+    'i18n-locname-label','i18n-locnote-label','i18n-weather-label','i18n-species-label','i18n-weight-label','i18n-bait-label','i18n-technique-label',
     'i18n-notes-label','i18n-photos-label','i18n-entries-header','i18n-stats-header','i18n-pred1-header','i18n-pred2-header',
     'i18n-pred3-header','i18n-data-header','i18n-modal-title','i18n-pred1-hint','i18n-pred2-hint','i18n-pred3-hint',
     'i18n-contact-header','i18n-contact-hint','i18n-contact-name-label','i18n-contact-email-label','i18n-contact-message-label','i18n-today-header','i18n-contact-rating-label',
@@ -3865,7 +3908,7 @@ function applyLanguage(lang){
   // duplicate-content elements (edit modal + predictions card 3) mapped to the same translation keys
   const aliasKeys = {
     'i18n-e-angler-label':'i18n-angler-label','i18n-e-date-label':'i18n-date-label','i18n-e-timein-label':'i18n-timein-label',
-    'i18n-e-timeout-label':'i18n-timeout-label','i18n-e-locname-label':'i18n-locname-label','i18n-e-weather-label':'i18n-weather-label',
+    'i18n-e-timeout-label':'i18n-timeout-label','i18n-e-locname-label':'i18n-locname-label','i18n-e-locnote-label':'i18n-locnote-label','i18n-e-weather-label':'i18n-weather-label',
     'i18n-e-species-label':'i18n-species-label','i18n-e-weight-label':'i18n-weight-label','i18n-e-bait-label':'i18n-bait-label',
     'i18n-e-technique-label':'i18n-technique-label','i18n-e-notes-label':'i18n-notes-label','i18n-e-photos-label':'i18n-photos-label',
     'i18n-pred3-date-label':'i18n-date-label'
@@ -3941,6 +3984,8 @@ function applyLanguage(lang){
   ['pred-coords','pred-date-coords'].forEach(id=>{ const el = document.getElementById(id); if(el) el.placeholder = coordsPlaceholderShort; });
   const locnameEl = document.getElementById('f-locname');
   if(locnameEl) locnameEl.placeholder = lang === 'en' ? 'Fills in automatically from coordinates' : 'Συμπληρώνεται αυτόματα από τις συντεταγμένες';
+  const locnotePlaceholder = lang === 'en' ? 'e.g. rocky spot with seaweed, good at dawn' : 'π.χ. βραχάκι με φύκια, καλό τα ξημερώματα';
+  ['f-locnote','e-locnote'].forEach(id=>{ const el = document.getElementById(id); if(el) el.placeholder = locnotePlaceholder; });
   const explainSummary = document.getElementById('i18n-explain-summary');
   if(explainSummary) explainSummary.textContent = lang === 'en' ? 'ℹ️ How predictions are calculated' : 'ℹ️ Πώς υπολογίζονται οι προβλέψεις';
   const explainBody = document.getElementById('i18n-explain-body');
@@ -4069,6 +4114,87 @@ renderPhotoGrid('f-photo-grid');
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
+
+/* ---------- Android/browser back button: never let a single back press throw you out of the app ----------
+   Generic, works for any current and future overlay that follows the existing .show toggle convention
+   (modal-overlay / map-picker-overlay / photo-viewer), plus non-default tabs. Watches the DOM instead of
+   the many scattered open/close call sites, so nothing else needs to change when an overlay opens or closes. */
+(function(){
+  const DEFAULT_TAB = 'new';
+  const navStack = []; // entries: {type:'overlay', el} or the shared TAB_MARKER
+  const TAB_MARKER = { type:'tab' };
+  let ignorePopstate = false;
+  let tabAway = false; // true while the active tab is not the default one
+
+  function pushBackEntry(){
+    history.pushState({ fishiqNav:true }, '');
+  }
+  function switchToTab(tab){
+    const btn = document.querySelector(`nav.tabs button[data-view="${tab}"]`);
+    if(btn) btn.click();
+  }
+
+  // Overlays: watch class changes instead of touching every open()/close() call site.
+  document.querySelectorAll('.modal-overlay, .map-picker-overlay, .photo-viewer').forEach(el=>{
+    const observer = new MutationObserver(()=>{
+      const isOpen = el.classList.contains('show');
+      const idx = navStack.findIndex(n => n.type === 'overlay' && n.el === el);
+      if(isOpen && idx === -1){
+        navStack.push({ type:'overlay', el });
+        pushBackEntry();
+      } else if(!isOpen && idx !== -1){
+        // Closed some other way (×, tap-outside, save) — drop it from the stack and
+        // consume the matching history entry so a later back press doesn't "re-close" it.
+        navStack.splice(idx, 1);
+        ignorePopstate = true;
+        history.back();
+      }
+    });
+    observer.observe(el, { attributes:true, attributeFilter:['class'] });
+  });
+
+  // Tabs: one back press from any non-default tab returns to the default tab.
+  document.querySelectorAll('nav.tabs button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const tab = btn.dataset.view;
+      if(tab === DEFAULT_TAB){
+        if(tabAway){
+          tabAway = false;
+          const idx = navStack.indexOf(TAB_MARKER);
+          if(idx !== -1) navStack.splice(idx, 1);
+          ignorePopstate = true;
+          history.back();
+        }
+      } else if(!tabAway){
+        tabAway = true;
+        navStack.push(TAB_MARKER);
+        pushBackEntry();
+      }
+    });
+  });
+
+  window.addEventListener('popstate', ()=>{
+    if(ignorePopstate){ ignorePopstate = false; return; }
+    if(!navStack.length){
+      // Nothing left to undo in-app — this was our safety-net entry.
+      // Don't re-arm it, so a second back press exits normally instead of trapping the user forever.
+      toast('Πάτα ξανά πίσω για έξοδο');
+      return;
+    }
+    const top = navStack.pop();
+    if(top === TAB_MARKER){
+      tabAway = false;
+      switchToTab(DEFAULT_TAB);
+    } else if(top.type === 'overlay'){
+      // modal-overlay (entry detail/edit) needs its own close function to also clear editingId —
+      // every other overlay here is a plain show/hide with no extra state to reset.
+      if(top.el.id === 'modal-overlay' && typeof closeModal === 'function') closeModal();
+      else top.el.classList.remove('show');
+    }
+  });
+
+  pushBackEntry(); // safety-net entry so the very first back press is caught here, not by the OS
+})();
 </script>
 </body>
 </html>
