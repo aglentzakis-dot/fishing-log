@@ -412,6 +412,10 @@
       <h2 class="i18n-plain">Ποιος είσαι εσύ</h2>
       <p class="hint i18n-plain">Όταν πηγαίνεις ψάρεμα με άλλον ψαρά, χρησιμοποιείται ώστε τα γενικά στατιστικά (σύνολο ψαριών, καλύτερο είδος, καλύτερη εξόρμηση κ.λπ.) να δείχνουν μόνο τα δικά σου ψάρια — όχι αυτά που έπιασε ο άλλος.</p>
       <select id="primary-angler-select"></select>
+      <div class="addrow" style="margin-top:8px;">
+        <input type="text" id="primary-angler-new" placeholder="Πρόσθεσε το όνομά σου">
+        <button type="button" id="primary-angler-add">+</button>
+      </div>
     </div>
 
     <div class="card" id="locations-card">
@@ -529,7 +533,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.9 · 20 Σεπ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.10 · 25 Σεπ 2026</p>
     </div>
   </div>
 
@@ -798,7 +802,7 @@ const GR_TO_EN = {
   "Μία σημείωση ανά τοποθεσία, ίδια σε όλες τις εξορμήσεις εκεί. Αν δύο ονόματα είναι στην ουσία το ίδιο σημείο, πάτα 🔗 για να τα ενώσεις.":"One note per location, shared by every trip there. If two names are really the same spot, tap 🔗 to merge them.",
   "Δεν υπάρχουν ακόμα τοποθεσίες — θα εμφανιστούν εδώ μόλις καταγράψεις μια εξόρμηση.":"No locations yet — they'll show up here as soon as you log a trip.",
   "Σημείωση...":"Note...","Συγχώνευση με...":"Merge with...","Διαχείριση":"Manage",
-  "Αποθηκεύτηκε ✓":"Saved ✓","Οι τοποθεσίες συγχωνεύθηκαν ✓":"Locations merged ✓",
+  "Αποθηκεύτηκε ✓":"Saved ✓","Οι τοποθεσίες συγχωνεύθηκαν ✓":"Locations merged ✓","Προστέθηκες ✓":"Added ✓",
   "Δες και επεξεργάσου τις σημειώσεις όλων των τοποθεσιών σου, ή ένωσε δύο ονόματα που είναι στην ουσία το ίδιο σημείο.":"View and edit the notes for all your locations, or merge two names that are really the same spot.",
   "📍 Διαχείριση τοποθεσιών":"📍 Manage locations",
   "Κατεύθυνση ανέμου":"Wind direction","Εξορμήσεις":"Trips","Ψάρια συνολικά":"Total fish",
@@ -1606,6 +1610,21 @@ document.getElementById('primary-angler-select').addEventListener('change', (ev)
   renderStats();
 });
 renderPrimaryAnglerSelect();
+// Lets a brand-new user type their own name right here, before they've ever filled in an entry —
+// otherwise this dropdown stays empty and unusable until they first add an angler from the entry form.
+document.getElementById('primary-angler-add').addEventListener('click', ()=>{
+  const inp = document.getElementById('primary-angler-new');
+  const val = inp.value.trim();
+  if(!val) return;
+  const wasEmpty = anglers.length === 0;
+  if(!anglers.includes(val)){ anglers.push(val); LS.set('psarema_anglers', anglers); }
+  if(wasEmpty) selAngler.add(val); // pre-select them for their very first entry too
+  LS.set('psarema_primary_angler', val);
+  inp.value = '';
+  refreshAnglerPicker();
+  if(document.getElementById('view-stats').classList.contains('active')) renderStats();
+  toast('Προστέθηκες ✓');
+});
 
 /* ---------- coordinate parsing ---------- */
 function parseCoords(raw){
