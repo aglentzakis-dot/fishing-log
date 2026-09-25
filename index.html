@@ -533,7 +533,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.10 · 25 Σεπ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.11 · 25 Σεπ 2026</p>
     </div>
   </div>
 
@@ -803,6 +803,7 @@ const GR_TO_EN = {
   "Δεν υπάρχουν ακόμα τοποθεσίες — θα εμφανιστούν εδώ μόλις καταγράψεις μια εξόρμηση.":"No locations yet — they'll show up here as soon as you log a trip.",
   "Σημείωση...":"Note...","Συγχώνευση με...":"Merge with...","Διαχείριση":"Manage",
   "Αποθηκεύτηκε ✓":"Saved ✓","Οι τοποθεσίες συγχωνεύθηκαν ✓":"Locations merged ✓","Προστέθηκες ✓":"Added ✓",
+  "Πρόσθεσε το όνομά σου":"Add your name","Πρόσθεσε άλλον ψαρά":"Add another angler",
   "Δες και επεξεργάσου τις σημειώσεις όλων των τοποθεσιών σου, ή ένωσε δύο ονόματα που είναι στην ουσία το ίδιο σημείο.":"View and edit the notes for all your locations, or merge two names that are really the same spot.",
   "📍 Διαχείριση τοποθεσιών":"📍 Manage locations",
   "Κατεύθυνση ανέμου":"Wind direction","Εξορμήσεις":"Trips","Ψάρια συνολικά":"Total fish",
@@ -1599,6 +1600,10 @@ function getPrimaryAngler(){
 }
 function renderPrimaryAnglerSelect(){
   const sel = document.getElementById('primary-angler-select');
+  const addInput = document.getElementById('primary-angler-new');
+  // Before you've added yourself, this button's job is "tell me who you are"; after that,
+  // it's for adding companions you fish with — the wording needs to say which one it is.
+  if(addInput) addInput.placeholder = anglers.length ? tr('Πρόσθεσε άλλον ψαρά') : tr('Πρόσθεσε το όνομά σου');
   if(!sel) return;
   if(!anglers.length){ sel.innerHTML = `<option value="">—</option>`; sel.disabled = true; return; }
   sel.disabled = false;
