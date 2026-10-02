@@ -445,6 +445,7 @@
       <div class="footer-tools">
         <button type="button" id="btn-export">⬇ Εξαγωγή JSON</button>
         <button type="button" id="btn-import">⬆ Εισαγωγή JSON</button>
+        <button type="button" id="btn-paste-restore" class="i18n-plain">📋 Επαναφορά από κείμενο (email)</button>
       </div>
       <input type="file" id="file-import" accept="application/json" style="display:none">
       <label id="i18n-delete-all-label" style="margin-top:18px;">Διαγραφή όλων</label>
@@ -533,7 +534,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.11 · 25 Σεπ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.12 · 2 Οκτ 2026</p>
     </div>
   </div>
 
@@ -723,6 +724,21 @@
   </div>
 </div>
 
+<div class="map-picker-overlay" id="paste-restore-overlay">
+  <div class="map-picker-sheet" style="max-width:460px;">
+    <div class="map-picker-head">
+      <h2 class="i18n-plain">Επαναφορά από κείμενο (email)</h2>
+      <button type="button" class="modal-close" id="paste-restore-close">✕</button>
+    </div>
+    <div style="padding:0 16px 16px; overflow-y:auto;">
+      <p class="hint i18n-plain" style="margin-top:0;">Άνοιξε το email με το αντίγραφο ασφαλείας, αντέγραψε όλο το κείμενο μέσα στο κουτάκι του backup και επικόλλησέ το εδώ.</p>
+      <textarea id="paste-restore-input" rows="8" placeholder='{"entries": [...], ...}'></textarea>
+      <div class="footer-tools" style="margin-top:10px;">
+        <button type="button" class="save-btn i18n-plain" id="paste-restore-confirm">Επαναφορά</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="map-picker-overlay" id="locations-overlay">
   <div class="map-picker-sheet" style="max-width:460px;">
@@ -804,6 +820,11 @@ const GR_TO_EN = {
   "Σημείωση...":"Note...","Συγχώνευση με...":"Merge with...","Διαχείριση":"Manage",
   "Αποθηκεύτηκε ✓":"Saved ✓","Οι τοποθεσίες συγχωνεύθηκαν ✓":"Locations merged ✓","Προστέθηκες ✓":"Added ✓",
   "Πρόσθεσε το όνομά σου":"Add your name","Πρόσθεσε άλλον ψαρά":"Add another angler",
+  "Επαναφορά από κείμενο (email)":"Restore from text (email)","📋 Επαναφορά από κείμενο (email)":"📋 Restore from text (email)",
+  "Άνοιξε το email με το αντίγραφο ασφαλείας, αντέγραψε όλο το κείμενο μέσα στο κουτάκι του backup και επικόλλησέ το εδώ.":"Open the backup email, copy all the text inside the backup box, and paste it here.",
+  "Επαναφορά":"Restore","Επικόλλησε πρώτα το κείμενο του backup":"Paste the backup text first",
+  "Δεν αναγνωρίστηκε έγκυρο κείμενο αντιγράφου — έλεγξε ότι αντέγραψες όλο το κουτάκι":"That doesn't look like valid backup text — make sure you copied the whole box",
+  "Η επαναφορά θα αντικαταστήσει ΟΛΑ τα τρέχοντα δεδομένα σου (καταχωρήσεις, λίστες). Θέλεις σίγουρα να συνεχίσεις;":"This will replace ALL your current data (entries, lists). Are you sure you want to continue?",
   "Δες και επεξεργάσου τις σημειώσεις όλων των τοποθεσιών σου, ή ένωσε δύο ονόματα που είναι στην ουσία το ίδιο σημείο.":"View and edit the notes for all your locations, or merge two names that are really the same spot.",
   "📍 Διαχείριση τοποθεσιών":"📍 Manage locations",
   "Κατεύθυνση ανέμου":"Wind direction","Εξορμήσεις":"Trips","Ψάρια συνολικά":"Total fish",
@@ -1172,24 +1193,29 @@ async function listSharedBackupFiles(){
     return files.slice(0,10);
   }catch(e){ console.error(e); return []; }
 }
+// Shared by every restore path (shared-folder file, JSON file import, pasted email text) so they
+// all apply a backup the same way instead of three slightly-different copies of this logic.
+async function applyRestoredData(data){
+  if(data.entries) { entries = data.entries; LS.set('psarema_entries', entries); }
+  if(data.species) { species = data.species; LS.set('psarema_species', species); }
+  if(data.baits) { baits = data.baits; LS.set('psarema_bait', baits); }
+  if(data.equips) { equips = data.equips; LS.set('psarema_equip', equips); }
+  if(data.anglers) { anglers = data.anglers; LS.set('psarema_anglers', anglers); }
+  if(data.locations) { locations = data.locations; LS.set('psarema_locations', locations); }
+  if(data.photos){ for(const [key, dataUrl] of Object.entries(data.photos)){ try{ await idbPut(key, dataUrl); }catch(err){} } }
+  refreshPickers();
+  refreshAnglerPicker();
+  refreshLocationNamesDatalist();
+  renderEntries();
+  toast(tr('Τα δεδομένα επαναφέρθηκαν ✓'));
+}
 async function restoreFromSharedBackupFile(fileHandle){
   if(!confirm(tr('Η επαναφορά από αυτό το αρχείο θα αντικαταστήσει ΟΛΑ τα τρέχοντα δεδομένα σου (καταχωρήσεις, λίστες, φωτογραφίες). Θέλεις σίγουρα να συνεχίσεις;'))) return;
   try{
     const file = await fileHandle.getFile();
     const text = await file.text();
     const data = JSON.parse(text);
-    if(data.entries) { entries = data.entries; LS.set('psarema_entries', entries); }
-    if(data.species) { species = data.species; LS.set('psarema_species', species); }
-    if(data.baits) { baits = data.baits; LS.set('psarema_bait', baits); }
-    if(data.equips) { equips = data.equips; LS.set('psarema_equip', equips); }
-    if(data.anglers) { anglers = data.anglers; LS.set('psarema_anglers', anglers); }
-    if(data.locations) { locations = data.locations; LS.set('psarema_locations', locations); }
-    if(data.photos){ for(const [key, dataUrl] of Object.entries(data.photos)){ try{ await idbPut(key, dataUrl); }catch(err){} } }
-    refreshPickers();
-    refreshAnglerPicker();
-    refreshLocationNamesDatalist();
-    renderEntries();
-    toast(tr('Τα δεδομένα επαναφέρθηκαν ✓'));
+    await applyRestoredData(data);
     const overlay = document.getElementById('backup-restore-overlay');
     if(overlay) overlay.classList.remove('show');
   }catch(e){ console.error(e); toast(tr('Αποτυχία επαναφοράς — μη έγκυρο αρχείο')); }
@@ -3533,7 +3559,7 @@ async function maybeSendAutoBackup(){
     console.warn('EmailJS δεν έχει ρυθμιστεί ακόμα — backup παραλείπεται.');
     return;
   }
-  const data = { entries, species, baits, equips, anglers, exportedAt: new Date().toISOString() };
+  const data = { entries, species, baits, equips, anglers, locations, exportedAt: new Date().toISOString() };
   try{
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
       user_email: email,
@@ -3795,21 +3821,33 @@ document.getElementById('file-import').addEventListener('change', (ev)=>{
   reader.onload = async ()=>{
     try{
       const data = JSON.parse(reader.result);
-      if(data.entries) { entries = data.entries; LS.set('psarema_entries', entries); }
-      if(data.species) { species = data.species; LS.set('psarema_species', species); }
-      if(data.baits) { baits = data.baits; LS.set('psarema_bait', baits); }
-      if(data.equips) { equips = data.equips; LS.set('psarema_equip', equips); }
-      if(data.anglers) { anglers = data.anglers; LS.set('psarema_anglers', anglers); }
-      if(data.locations) { locations = data.locations; LS.set('psarema_locations', locations); }
-      if(data.photos){ for(const [key, dataUrl] of Object.entries(data.photos)){ try{ await idbPut(key, dataUrl); }catch(err){} } }
-      refreshPickers();
-      refreshAnglerPicker();
-      refreshLocationNamesDatalist();
-      toast('Τα δεδομένα εισήχθησαν ✓');
+      await applyRestoredData(data);
       maybeWriteSharedBackup();
     }catch(e){ toast('Μη έγκυρο αρχείο'); }
   };
   reader.readAsText(file);
+});
+document.getElementById('btn-paste-restore').addEventListener('click', ()=>{
+  document.getElementById('paste-restore-input').value = '';
+  document.getElementById('paste-restore-overlay').classList.add('show');
+});
+document.getElementById('paste-restore-close').addEventListener('click', ()=>{
+  document.getElementById('paste-restore-overlay').classList.remove('show');
+});
+document.getElementById('paste-restore-overlay').addEventListener('click', (ev)=>{
+  if(ev.target.id === 'paste-restore-overlay') document.getElementById('paste-restore-overlay').classList.remove('show');
+});
+document.getElementById('paste-restore-confirm').addEventListener('click', async ()=>{
+  const raw = document.getElementById('paste-restore-input').value.trim();
+  if(!raw){ toast(tr('Επικόλλησε πρώτα το κείμενο του backup')); return; }
+  let data;
+  try{ data = JSON.parse(raw); }
+  catch(e){ toast(tr('Δεν αναγνωρίστηκε έγκυρο κείμενο αντιγράφου — έλεγξε ότι αντέγραψες όλο το κουτάκι')); return; }
+  if(!data.entries){ toast(tr('Δεν αναγνωρίστηκε έγκυρο κείμενο αντιγράφου — έλεγξε ότι αντέγραψες όλο το κουτάκι')); return; }
+  if(!confirm(tr('Η επαναφορά θα αντικαταστήσει ΟΛΑ τα τρέχοντα δεδομένα σου (καταχωρήσεις, λίστες). Θέλεις σίγουρα να συνεχίσεις;'))) return;
+  await applyRestoredData(data);
+  maybeWriteSharedBackup();
+  document.getElementById('paste-restore-overlay').classList.remove('show');
 });
 document.getElementById('btn-clear').addEventListener('click', ()=>{
   if(!confirm(tr('Σίγουρα θέλεις να διαγράψεις ΟΛΑ τα δεδομένα; Δεν αναιρείται.'))) return;
