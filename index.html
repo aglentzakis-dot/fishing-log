@@ -440,6 +440,7 @@
         <option value="5" selected data-i18n-key="5 καταχωρήσεις">5 καταχωρήσεις</option>
         <option value="10" data-i18n-key="10 καταχωρήσεις">10 καταχωρήσεις</option>
       </select>
+      <p class="hint" id="email-backup-status" style="margin-top:8px;">—</p>
       <p class="hint" id="i18n-disclaimer-text" style="margin-top:8px;">Η εφαρμογή παρέχεται όπως είναι (χωρίς εγγύηση), χωρίς καμία ευθύνη για τυχόν απώλεια δεδομένων, από οποιαδήποτε αιτία (διαγραφή browser, βλάβη συσκευής, τεχνικό πρόβλημα κ.ά.). Συνιστάται τακτική εξαγωγή/αποθήκευση από τον ίδιο τον χρήστη.</p>
       <p class="hint" id="i18n-chrome-tip" style="margin-top:8px;">💡 Αν κάποια λειτουργία δεν φορτώνει σωστά (π.χ. καιρός, χάρτης, τοποθεσία), δοκίμασε να ανοίξεις την εφαρμογή σε άλλο browser (π.χ. <strong>Chrome</strong>) — μερικοί browsers περιορίζουν αυτού του τύπου τις λειτουργίες.</p>
       <div class="footer-tools">
@@ -534,7 +535,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.12 · 2 Οκτ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.13 · 2 Οκτ 2026</p>
     </div>
   </div>
 
@@ -825,6 +826,13 @@ const GR_TO_EN = {
   "Επαναφορά":"Restore","Επικόλλησε πρώτα το κείμενο του backup":"Paste the backup text first",
   "Δεν αναγνωρίστηκε έγκυρο κείμενο αντιγράφου — έλεγξε ότι αντέγραψες όλο το κουτάκι":"That doesn't look like valid backup text — make sure you copied the whole box",
   "Η επαναφορά θα αντικαταστήσει ΟΛΑ τα τρέχοντα δεδομένα σου (καταχωρήσεις, λίστες). Θέλεις σίγουρα να συνεχίσεις;":"This will replace ALL your current data (entries, lists). Are you sure you want to continue?",
+  "✓ Τελευταίο αντίγραφο μέσω email στάλθηκε επιτυχώς":"✓ Last email backup sent successfully",
+  "✗ Τα δεδομένα σου έγιναν πολύ μεγάλα για αποστολή με email — χρησιμοποίησε \"Εξαγωγή JSON\" ή τον \"Φάκελο αντιγράφων\" παρακάτω.":"✗ Your data got too large to send by email — use \"Export JSON\" or the \"Backup folder\" below.",
+  "✗ Η αποστολή του τελευταίου αντιγράφου μέσω email απέτυχε":"✗ The last email backup failed to send",
+  "δοκίμασε \"Εξαγωγή JSON\" ή τον \"Φάκελο αντιγράφων\" παρακάτω.":"try \"Export JSON\" or the \"Backup folder\" below.",
+  "Δεν έχει σταλεί ακόμα αντίγραφο μέσω email.":"No email backup has been sent yet.",
+  "Το email backup έγινε πολύ μεγάλο για να σταλεί — χρησιμοποίησε \"Εξαγωγή JSON\" ή τον \"Φάκελο αντιγράφων\" στις Ρυθμίσεις":"The email backup got too large to send — use \"Export JSON\" or the \"Backup folder\" in Settings",
+  "Η αποστολή του αντιγράφου μέσω email απέτυχε — δες τις Ρυθμίσεις":"The email backup failed to send — check Settings",
   "Δες και επεξεργάσου τις σημειώσεις όλων των τοποθεσιών σου, ή ένωσε δύο ονόματα που είναι στην ουσία το ίδιο σημείο.":"View and edit the notes for all your locations, or merge two names that are really the same spot.",
   "📍 Διαχείριση τοποθεσιών":"📍 Manage locations",
   "Κατεύθυνση ανέμου":"Wind direction","Εξορμήσεις":"Trips","Ψάρια συνολικά":"Total fish",
@@ -3545,10 +3553,39 @@ document.getElementById('backup-email-input').value = LS.get('psarema_backup_ema
 document.getElementById('backup-freq-select').value = String(LS.get('psarema_backup_freq', 5));
 document.getElementById('backup-email-input').addEventListener('change', (ev)=>{
   LS.set('psarema_backup_email', ev.target.value.trim());
+  renderEmailBackupStatus();
 });
 document.getElementById('backup-freq-select').addEventListener('change', (ev)=>{
   LS.set('psarema_backup_freq', parseInt(ev.target.value));
 });
+// EmailJS enforces a hard ~50KB limit on the total size of the variables sent in one email
+// (https://www.emailjs.com/docs/user-guide/dynamic-variables-templates/) — requests over that
+// are simply rejected. As a logbook grows (more entries, weather data, notes), the JSON payload
+// can grow past this limit, and the old code swallowed that failure with just a console.error,
+// so the user saw the backup "box" silently stop showing up in their emails with no explanation.
+const EMAILJS_MAX_VARS_BYTES = 50000;
+function renderEmailBackupStatus(){
+  const el = document.getElementById('email-backup-status');
+  if(!el) return;
+  const email = LS.get('psarema_backup_email', '').trim();
+  if(!email){ el.textContent = '—'; return; }
+  const status = LS.get('psarema_backup_last_status', null);
+  const when = LS.get('psarema_backup_last_attempt', null);
+  const dateStr = when ? new Date(when).toLocaleDateString('el-GR', {day:'numeric', month:'short', year:'numeric'}) : '';
+  if(status === 'ok'){
+    el.textContent = tr('✓ Τελευταίο αντίγραφο μέσω email στάλθηκε επιτυχώς') + (dateStr ? ' (' + dateStr + ')' : '');
+    el.style.color = '';
+  } else if(status === 'toolarge'){
+    el.textContent = tr('✗ Τα δεδομένα σου έγιναν πολύ μεγάλα για αποστολή με email — χρησιμοποίησε "Εξαγωγή JSON" ή τον "Φάκελο αντιγράφων" παρακάτω.');
+    el.style.color = 'var(--danger)';
+  } else if(status === 'error'){
+    el.textContent = tr('✗ Η αποστολή του τελευταίου αντιγράφου μέσω email απέτυχε') + (dateStr ? ' (' + dateStr + ')' : '') + ' — ' + tr('δοκίμασε "Εξαγωγή JSON" ή τον "Φάκελο αντιγράφων" παρακάτω.');
+    el.style.color = 'var(--danger)';
+  } else {
+    el.textContent = tr('Δεν έχει σταλεί ακόμα αντίγραφο μέσω email.');
+    el.style.color = '';
+  }
+}
 async function maybeSendAutoBackup(){
   const email = LS.get('psarema_backup_email', '').trim();
   if(!email) return;
@@ -3560,15 +3597,32 @@ async function maybeSendAutoBackup(){
     return;
   }
   const data = { entries, species, baits, equips, anglers, locations, exportedAt: new Date().toISOString() };
+  const payload = JSON.stringify(data);
+  const payloadBytes = new TextEncoder().encode(payload).length;
+  LS.set('psarema_backup_last_attempt', new Date().toISOString());
+  if(payloadBytes > EMAILJS_MAX_VARS_BYTES){
+    LS.set('psarema_backup_last_status', 'toolarge');
+    renderEmailBackupStatus();
+    toast(tr('Το email backup έγινε πολύ μεγάλο για να σταλεί — χρησιμοποίησε "Εξαγωγή JSON" ή τον "Φάκελο αντιγράφων" στις Ρυθμίσεις'));
+    return;
+  }
   try{
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
       user_email: email,
       entry_count: entries.length,
-      backup_data: JSON.stringify(data)
+      backup_data: payload
     });
     LS.set('psarema_backup_last_count', entries.length);
-  }catch(err){ console.error('Auto backup email failed:', err); }
+    LS.set('psarema_backup_last_status', 'ok');
+    renderEmailBackupStatus();
+  }catch(err){
+    console.error('Auto backup email failed:', err);
+    LS.set('psarema_backup_last_status', 'error');
+    renderEmailBackupStatus();
+    toast(tr('Η αποστολή του αντιγράφου μέσω email απέτυχε — δες τις Ρυθμίσεις'));
+  }
 }
+renderEmailBackupStatus();
 
 const WEATHER_ITEM_LABELS_EL = { weather:'Καιρός', temp:'Θερμοκρασία αέρα', seatemp:'Θερμοκρασία θάλασσας', pressure:'Πίεση',
   pressuretrend:'Τάση πίεσης', wind:'Άνεμος (μποφόρ)', windgusts:'Ριπές ανέμου', winddir:'Κατεύθυνση ανέμου',
