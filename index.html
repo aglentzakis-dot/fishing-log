@@ -139,7 +139,7 @@
   .toast{
     position: fixed; left:50%; bottom: 24px; transform: translateX(-50%); background: var(--deep); color:#fff;
     padding: 12px 20px; border-radius: 30px; font-size:0.88rem; font-weight:600; opacity:0; pointer-events:none;
-    transition: opacity 0.25s ease, bottom 0.25s ease; z-index: 999;
+    transition: opacity 0.25s ease, bottom 0.25s ease; z-index: 3000;
   }
   .toast.show{ opacity:1; bottom: 34px; }
   .month-folder{ margin-bottom: 12px; }
@@ -535,7 +535,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.13 · 2 Οκτ 2026</p>
+      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.14 · 5 Οκτ 2026</p>
     </div>
   </div>
 
@@ -733,7 +733,11 @@
     </div>
     <div style="padding:0 16px 16px; overflow-y:auto;">
       <p class="hint i18n-plain" style="margin-top:0;">Άνοιξε το email με το αντίγραφο ασφαλείας, αντέγραψε όλο το κείμενο μέσα στο κουτάκι του backup και επικόλλησέ το εδώ.</p>
-      <textarea id="paste-restore-input" rows="8" placeholder='{"entries": [...], ...}'></textarea>
+      <div class="footer-tools" style="margin-bottom:8px;">
+        <button type="button" id="paste-restore-paste" class="i18n-plain">📋 Επικόλληση</button>
+      </div>
+      <textarea id="paste-restore-input" rows="8" placeholder='{"entries": [...], ...}' spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+      <p class="hint" id="paste-restore-msg" style="margin-top:6px;">—</p>
       <div class="footer-tools" style="margin-top:10px;">
         <button type="button" class="save-btn i18n-plain" id="paste-restore-confirm">Επαναφορά</button>
       </div>
@@ -823,6 +827,11 @@ const GR_TO_EN = {
   "Πρόσθεσε το όνομά σου":"Add your name","Πρόσθεσε άλλον ψαρά":"Add another angler",
   "Επαναφορά από κείμενο (email)":"Restore from text (email)","📋 Επαναφορά από κείμενο (email)":"📋 Restore from text (email)",
   "Άνοιξε το email με το αντίγραφο ασφαλείας, αντέγραψε όλο το κείμενο μέσα στο κουτάκι του backup και επικόλλησέ το εδώ.":"Open the backup email, copy all the text inside the backup box, and paste it here.",
+  "Επικολλήθηκαν":"Pasted","χαρακτήρες":"characters","📋 Επικόλληση":"📋 Paste","Επικόλληση":"Paste",
+  "Το πρόχειρο είναι άδειο — αντέγραψε πρώτα το κείμενο από το email":"Clipboard is empty — copy the text from the email first",
+  "Δεν επιτράπηκε η αυτόματη επικόλληση — πάτησε παρατεταμένα μέσα στο πλαίσιο και διάλεξε Επικόλληση":"Automatic paste was not allowed — long-press inside the box and choose Paste",
+  "Το κείμενο δεν περιέχει δεδομένα αντιγράφου — αντέγραψες το σωστό κουτάκι από το email;":"The text has no backup data — did you copy the right box from the email?",
+  "Το κείμενο φαίνεται κομμένο ή αλλοιωμένο — αντέγραψε ολόκληρο το κουτάκι, από την πρώτη { ως την τελευταία }":"The text looks cut off or altered — copy the whole box, from the first { to the last }",
   "Επαναφορά":"Restore","Επικόλλησε πρώτα το κείμενο του backup":"Paste the backup text first",
   "Δεν αναγνωρίστηκε έγκυρο κείμενο αντιγράφου — έλεγξε ότι αντέγραψες όλο το κουτάκι":"That doesn't look like valid backup text — make sure you copied the whole box",
   "Η επαναφορά θα αντικαταστήσει ΟΛΑ τα τρέχοντα δεδομένα σου (καταχωρήσεις, λίστες). Θέλεις σίγουρα να συνεχίσεις;":"This will replace ALL your current data (entries, lists). Are you sure you want to continue?",
@@ -3881,9 +3890,42 @@ document.getElementById('file-import').addEventListener('change', (ev)=>{
   };
   reader.readAsText(file);
 });
+// Εξάγει το JSON από κείμενο που αντιγράφηκε από email: δέχεται HTML οντότητες, "έξυπνα" εισαγωγικά,
+// κρυφούς χαρακτήρες και αλλαγές γραμμής μέσα στο κείμενο.
+function parseBackupText(raw){
+  let t = String(raw)
+    .replace(/&quot;/g,'"').replace(/&#34;/g,'"').replace(/&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')
+    .replace(/[\u201C\u201D\u201E\u201F]/g,'"')
+    .replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/\u00A0/g,' ');
+  const a = t.indexOf('{'), b = t.lastIndexOf('}');
+  if(a === -1 || b <= a) return { error: 'noBraces', length: t.length };
+  t = t.slice(a, b+1);
+  try{ return { data: JSON.parse(t) }; }catch(e1){}
+  try{ return { data: JSON.parse(t.replace(/[\r\n\t]+/g,'')) }; }catch(e2){ return { error: 'badJson', length: t.length }; }
+}
+function updatePasteRestoreMsg(){
+  const v = document.getElementById('paste-restore-input').value;
+  const el = document.getElementById('paste-restore-msg');
+  el.style.color = '';
+  el.textContent = v.length ? tr('Επικολλήθηκαν') + ' ' + v.length + ' ' + tr('χαρακτήρες') : '—';
+}
+document.getElementById('paste-restore-input').addEventListener('input', updatePasteRestoreMsg);
 document.getElementById('btn-paste-restore').addEventListener('click', ()=>{
   document.getElementById('paste-restore-input').value = '';
+  updatePasteRestoreMsg();
   document.getElementById('paste-restore-overlay').classList.add('show');
+});
+document.getElementById('paste-restore-paste').addEventListener('click', async ()=>{
+  const el = document.getElementById('paste-restore-msg');
+  try{
+    const text = await navigator.clipboard.readText();
+    if(!text){ el.textContent = tr('Το πρόχειρο είναι άδειο — αντέγραψε πρώτα το κείμενο από το email'); el.style.color = 'var(--danger)'; return; }
+    document.getElementById('paste-restore-input').value = text;
+    updatePasteRestoreMsg();
+  }catch(err){
+    el.textContent = tr('Δεν επιτράπηκε η αυτόματη επικόλληση — πάτησε παρατεταμένα μέσα στο πλαίσιο και διάλεξε Επικόλληση');
+    el.style.color = 'var(--danger)';
+  }
 });
 document.getElementById('paste-restore-close').addEventListener('click', ()=>{
   document.getElementById('paste-restore-overlay').classList.remove('show');
@@ -3892,12 +3934,15 @@ document.getElementById('paste-restore-overlay').addEventListener('click', (ev)=
   if(ev.target.id === 'paste-restore-overlay') document.getElementById('paste-restore-overlay').classList.remove('show');
 });
 document.getElementById('paste-restore-confirm').addEventListener('click', async ()=>{
+  const el = document.getElementById('paste-restore-msg');
   const raw = document.getElementById('paste-restore-input').value.trim();
-  if(!raw){ toast(tr('Επικόλλησε πρώτα το κείμενο του backup')); return; }
-  let data;
-  try{ data = JSON.parse(raw); }
-  catch(e){ toast(tr('Δεν αναγνωρίστηκε έγκυρο κείμενο αντιγράφου — έλεγξε ότι αντέγραψες όλο το κουτάκι')); return; }
-  if(!data.entries){ toast(tr('Δεν αναγνωρίστηκε έγκυρο κείμενο αντιγράφου — έλεγξε ότι αντέγραψες όλο το κουτάκι')); return; }
+  const fail = (msg)=>{ el.textContent = tr(msg); el.style.color = 'var(--danger)'; toast(tr(msg)); };
+  if(!raw){ fail('Επικόλλησε πρώτα το κείμενο του backup'); return; }
+  const res = parseBackupText(raw);
+  if(res.error === 'noBraces'){ fail('Το κείμενο δεν περιέχει δεδομένα αντιγράφου — αντέγραψες το σωστό κουτάκι από το email;'); return; }
+  if(res.error === 'badJson'){ fail('Το κείμενο φαίνεται κομμένο ή αλλοιωμένο — αντέγραψε ολόκληρο το κουτάκι, από την πρώτη { ως την τελευταία }'); return; }
+  const data = res.data;
+  if(!data || !Array.isArray(data.entries)){ fail('Δεν αναγνωρίστηκε έγκυρο κείμενο αντιγράφου — έλεγξε ότι αντέγραψες όλο το κουτάκι'); return; }
   if(!confirm(tr('Η επαναφορά θα αντικαταστήσει ΟΛΑ τα τρέχοντα δεδομένα σου (καταχωρήσεις, λίστες). Θέλεις σίγουρα να συνεχίσεις;'))) return;
   await applyRestoredData(data);
   maybeWriteSharedBackup();
