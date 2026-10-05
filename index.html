@@ -538,7 +538,11 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.15 · 5 Οκτ 2026</p>
+      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.16 · 5 Οκτ 2026</p>
+      <p class="hint" id="update-status" style="margin:6px 0 0;"></p>
+      <div class="footer-tools" style="margin-top:8px;">
+        <button type="button" id="btn-check-update" class="i18n-plain">🔄 Έλεγχος αναβάθμισης</button>
+      </div>
     </div>
   </div>
 
@@ -836,6 +840,9 @@ const GR_TO_EN = {
   "Το κείμενο δεν περιέχει δεδομένα αντιγράφου — αντέγραψες το σωστό κουτάκι από το email;":"The text has no backup data — did you copy the right box from the email?",
   "Το κείμενο φαίνεται κομμένο ή αλλοιωμένο — αντέγραψε ολόκληρο το κουτάκι, από την πρώτη { ως την τελευταία }":"The text looks cut off or altered — copy the whole box, from the first { to the last }",
   "Κάτι δεν πήγε καλά":"Something went wrong","👆 Πάτα εδώ για να το στείλεις στον διαχειριστή":"👆 Tap here to send it to the administrator",
+  "🔄 Έλεγχος αναβάθμισης":"🔄 Check for update","Έλεγχος αναβάθμισης":"Check for update","Έλεγχος...":"Checking...",
+  "Βρέθηκε νέα έκδοση":"New version found","γίνεται ενημέρωση...":"updating...","Έχεις ήδη την τελευταία έκδοση":"You already have the latest version",
+  "Δεν ήταν δυνατός ο έλεγχος — έλεγξε τη σύνδεσή σου":"Could not check — check your connection",
   "Επαναφορά":"Restore","Επικόλλησε πρώτα το κείμενο του backup":"Paste the backup text first",
   "Δεν αναγνωρίστηκε έγκυρο κείμενο αντιγράφου — έλεγξε ότι αντέγραψες όλο το κουτάκι":"That doesn't look like valid backup text — make sure you copied the whole box",
   "Η επαναφορά θα αντικαταστήσει ΟΛΑ τα τρέχοντα δεδομένα σου (καταχωρήσεις, λίστες). Θέλεις σίγουρα να συνεχίσεις;":"This will replace ALL your current data (entries, lists). Are you sure you want to continue?",
@@ -4491,6 +4498,55 @@ refreshPickers();
 renderFishQty();
 renderEntries();
 renderPhotoGrid('f-photo-grid');
+
+/* ---------- έλεγχος και εφαρμογή αναβάθμισης ---------- */
+function versionToNum(v){ const m = String(v).match(/(\d+)\.(\d+)/); return m ? parseInt(m[1])*1000 + parseInt(m[2]) : 0; }
+async function fetchLatestVersion(){
+  // cache:'reload' παρακάμπτει την προσωρινή μνήμη και την ανανεώνει με το φρέσκο αρχείο
+  const res = await fetch(location.pathname, { cache: 'reload' });
+  const text = await res.text();
+  const m = text.match(/Fish IQ\s*·\s*έκδοση\s+(\d+\.\d+)/);
+  return m ? m[1] : null;
+}
+async function applyUpdateAndReload(){
+  try{
+    if('serviceWorker' in navigator){
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for(const r of regs) await r.unregister();
+    }
+    if(window.caches){
+      const keys = await caches.keys();
+      for(const k of keys) await caches.delete(k);
+    }
+  }catch(e){}
+  location.reload();
+}
+async function checkForUpdate(manual){
+  const statusEl = document.getElementById('update-status');
+  const btn = document.getElementById('btn-check-update');
+  if(manual){ btn.disabled = true; statusEl.textContent = tr('Έλεγχος...'); }
+  try{
+    const latest = await fetchLatestVersion();
+    const current = appVersion();
+    if(latest && versionToNum(latest) > versionToNum(current)){
+      statusEl.textContent = tr('Βρέθηκε νέα έκδοση') + ' ' + latest + ' — ' + tr('γίνεται ενημέρωση...');
+      // Σύνδεση με τη δεύτερη φόρτωση: αποφεύγει ατέρμονο ξανα-φόρτωμα αν ο διακομιστής αργεί να ενημερωθεί
+      if(manual || sessionStorage.getItem('fishiq_update_tried') !== latest){
+        try{ sessionStorage.setItem('fishiq_update_tried', latest); }catch(e){}
+        await applyUpdateAndReload();
+        return;
+      }
+    } else if(manual){
+      statusEl.textContent = tr('Έχεις ήδη την τελευταία έκδοση') + ' ✓ (' + current + ')';
+    } else { statusEl.textContent = ''; }
+  }catch(err){
+    if(manual) statusEl.textContent = tr('Δεν ήταν δυνατός ο έλεγχος — έλεγξε τη σύνδεσή σου');
+  }
+  if(manual) btn.disabled = false;
+}
+document.getElementById('btn-check-update').addEventListener('click', ()=> checkForUpdate(true));
+// Αυτόματος έλεγχος λίγο μετά το άνοιγμα (πριν προλάβει ο χρήστης να γράψει κάτι)
+setTimeout(()=>{ if(navigator.onLine) checkForUpdate(false); }, 2500);
 
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
