@@ -142,6 +142,9 @@
     transition: opacity 0.25s ease, bottom 0.25s ease; z-index: 3000;
   }
   .toast.show{ opacity:1; bottom: 34px; }
+  .toast.report{ pointer-events:auto; cursor:pointer; max-width:90vw; text-align:center; white-space:pre-line; border-radius:18px; line-height:1.4; }
+  .toast.report small{ display:block; font-weight:500; opacity:0.85; margin-top:3px; font-size:0.78rem; }
+  #contact-modal-overlay{ z-index:2500; }
   .month-folder{ margin-bottom: 12px; }
   .month-folder summary{
     list-style:none; cursor:pointer; display:flex; justify-content:space-between; align-items:center;
@@ -535,7 +538,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.14 · 5 Οκτ 2026</p>
+      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.15 · 5 Οκτ 2026</p>
     </div>
   </div>
 
@@ -832,6 +835,7 @@ const GR_TO_EN = {
   "Δεν επιτράπηκε η αυτόματη επικόλληση — πάτησε παρατεταμένα μέσα στο πλαίσιο και διάλεξε Επικόλληση":"Automatic paste was not allowed — long-press inside the box and choose Paste",
   "Το κείμενο δεν περιέχει δεδομένα αντιγράφου — αντέγραψες το σωστό κουτάκι από το email;":"The text has no backup data — did you copy the right box from the email?",
   "Το κείμενο φαίνεται κομμένο ή αλλοιωμένο — αντέγραψε ολόκληρο το κουτάκι, από την πρώτη { ως την τελευταία }":"The text looks cut off or altered — copy the whole box, from the first { to the last }",
+  "Κάτι δεν πήγε καλά":"Something went wrong","👆 Πάτα εδώ για να το στείλεις στον διαχειριστή":"👆 Tap here to send it to the administrator",
   "Επαναφορά":"Restore","Επικόλλησε πρώτα το κείμενο του backup":"Paste the backup text first",
   "Δεν αναγνωρίστηκε έγκυρο κείμενο αντιγράφου — έλεγξε ότι αντέγραψες όλο το κουτάκι":"That doesn't look like valid backup text — make sure you copied the whole box",
   "Η επαναφορά θα αντικαταστήσει ΟΛΑ τα τρέχοντα δεδομένα σου (καταχωρήσεις, λίστες). Θέλεις σίγουρα να συνεχίσεις;":"This will replace ALL your current data (entries, lists). Are you sure you want to continue?",
@@ -1407,11 +1411,76 @@ document.querySelectorAll('nav.tabs button').forEach(btn=>{
   });
 });
 
-function toast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = tr(msg); t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 1800);
+// Μηνύματα που δείχνουν πρόβλημα γίνονται πατήσιμα: ένα άγγιγμα ανοίγει την «Επικοινωνία με διαχειριστή»
+// με έτοιμο κείμενο, ώστε ο χρήστης να στείλει το πρόβλημα αμέσως (η αποστολή γίνεται μόνο αν πατήσει «Αποστολή»).
+const TOAST_PROBLEM_RE = /Αποτυχία|απέτυχε|Μη έγκυρο|μη έγκυρο|Δεν αναγνωρίστηκε|Δεν ήταν δυνατ|πήγε στραβά|πολύ μεγάλο|Δεν δόθηκε άδεια|Δεν υπάρχει άδεια|δεν υποστηρίζ|κομμένο ή αλλοιωμένο|fail|invalid|not supported|too large|went wrong|not allowed|could not|no write permission/i;
+let toastTimer = null, toastMsgForReport = '';
+function appVersion(){
+  const el = document.getElementById('app-version-line');
+  const m = el && el.textContent.match(/(\d+\.\d+)/);
+  return m ? m[1] : '?';
 }
+function buildReportText(problem){
+  let log = [];
+  try{ log = LS.get('psarema_error_log', []); }catch(e){}
+  const lines = [
+    'Πρόβλημα που εμφανίστηκε: «' + problem + '»',
+    '',
+    '(Αν θέλεις, γράψε εδώ τι έκανες πριν εμφανιστεί:)',
+    '',
+    '--- τεχνικά στοιχεία (στέλνονται μόνο αν πατήσεις Αποστολή) ---',
+    'Έκδοση εφαρμογής: ' + appVersion(),
+    'Συσκευή: ' + navigator.userAgent,
+    'Γλώσσα: ' + (typeof currentLang !== 'undefined' ? currentLang : '?')
+  ];
+  if(log.length) lines.push('Τελευταία σφάλματα: ' + log.map(e=>e.t.slice(0,16) + ' ' + e.m + (e.w ? ' (' + e.w + ')' : '')).join(' | '));
+  return lines.join('\n');
+}
+function openContactWithReport(problem){
+  document.getElementById('contact-message').value = buildReportText(problem);
+  document.getElementById('contact-modal-overlay').classList.add('show');
+  document.getElementById('toast').classList.remove('show');
+}
+function toast(msg, opts){
+  const t = document.getElementById('toast');
+  const text = tr(msg);
+  const contactOpen = document.getElementById('contact-modal-overlay').classList.contains('show');
+  const report = !contactOpen && ((opts && opts.report !== undefined) ? opts.report : TOAST_PROBLEM_RE.test(text));
+  if(toastTimer) clearTimeout(toastTimer);
+  t.classList.toggle('report', !!report);
+  if(report){
+    toastMsgForReport = text;
+    t.textContent = '';
+    t.appendChild(document.createTextNode(text));
+    const hint = document.createElement('small');
+    hint.textContent = tr('👆 Πάτα εδώ για να το στείλεις στον διαχειριστή');
+    t.appendChild(hint);
+  } else {
+    t.textContent = text;
+  }
+  t.classList.add('show');
+  toastTimer = setTimeout(()=>t.classList.remove('show'), report ? 6500 : 1800);
+}
+document.getElementById('toast').addEventListener('click', ()=>{
+  const t = document.getElementById('toast');
+  if(t.classList.contains('report') && t.classList.contains('show')) openContactWithReport(toastMsgForReport);
+});
+// Απρόσμενα σφάλματα του κώδικα: κρατιούνται τοπικά (τελευταία 5) και προσφέρεται αναφορά με ένα άγγιγμα.
+let lastErrorToastAt = 0;
+function logUnexpectedError(msg, where, showToast){
+  msg = String(msg || '');
+  if(!msg || /ResizeObserver|Script error/i.test(msg)) return;
+  try{
+    const log = LS.get('psarema_error_log', []);
+    log.push({ t: new Date().toISOString(), m: msg.slice(0,200), w: where || '' });
+    while(log.length > 5) log.shift();
+    LS.set('psarema_error_log', log);
+  }catch(e){}
+  const now = Date.now();
+  if(showToast && now - lastErrorToastAt > 20000){ lastErrorToastAt = now; toast('Κάτι δεν πήγε καλά', {report:true}); }
+}
+window.addEventListener('error', (ev)=> logUnexpectedError(ev.message, (ev.filename||'').split('/').pop() + ':' + ev.lineno, true));
+window.addEventListener('unhandledrejection', (ev)=> logUnexpectedError(ev.reason && ev.reason.message || ev.reason, 'promise', false));
 
 /* ---------- chip pickers ---------- */
 function renderChipList(listId, items, selSet, countId, onToggle, deleteCtx){
@@ -3842,7 +3911,7 @@ document.getElementById('btn-contact-send').addEventListener('click', ()=>{
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     body: JSON.stringify({
       access_key: WEB3FORMS_ACCESS_KEY,
-      subject: 'Fish IQ - Μήνυμα από χρήστη' + (name ? (' - ' + name) : ''),
+      subject: (message.indexOf('Πρόβλημα που εμφανίστηκε') === 0 ? 'Fish IQ - Αναφορά προβλήματος' : 'Fish IQ - Μήνυμα από χρήστη') + (name ? (' - ' + name) : ''),
       from_name: name || 'Χρήστης Fish IQ',
       name: name || '(δεν δόθηκε)',
       email: email || '(δεν δόθηκε)',
