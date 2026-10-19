@@ -435,6 +435,9 @@
       <p class="hint" id="i18n-retention-text">Αν δηλώσεις email παρακάτω, η εφαρμογή σου στέλνει αυτόματα αντίγραφο ασφαλείας (backup) στο δικό σου email — δεν κρατάμε κανένα αντίγραφο των δεδομένων σου εμείς.</p>
       <label id="i18n-backup-email-label" style="margin-top:14px;">Email για αυτόματο backup (προαιρετικό)</label>
       <input type="email" id="backup-email-input" placeholder="π.χ. onoma@gmail.com">
+      <label class="i18n-plain" style="margin-top:10px;">Κωδικός κρυπτογράφησης του αντιγράφου email</label>
+      <input type="password" id="backup-pass-input" autocomplete="new-password" placeholder="τουλάχιστον 6 χαρακτήρες">
+      <p class="hint i18n-plain" style="margin-top:6px;">Το αντίγραφο που φεύγει με email κρυπτογραφείται με αυτόν τον κωδικό, ώστε να μην διαβάζεται από κανέναν στη διαδρομή (υπηρεσία αποστολής, εταιρεία email) — ούτε τα σημεία που ψαρεύεις. Ο κωδικός μένει μόνο σε αυτή τη συσκευή. Αν τον ξεχάσεις, το αντίγραφο δεν ανακτάται. Χωρίς κωδικό δεν στέλνεται αντίγραφο με email. Στο email φαίνεται μόνο ο αριθμός των καταχωρήσεων.</p>
       <label id="i18n-backup-freq-label" style="margin-top:10px;">Στείλε backup κάθε</label>
       <select id="backup-freq-select">
         <option value="1" data-i18n-key="1 καταχώρηση">1 καταχώρηση</option>
@@ -538,7 +541,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.17 · 19 Οκτ 2026</p>
+      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.18 · 19 Οκτ 2026</p>
       <p class="hint" id="update-status" style="margin:6px 0 0;"></p>
       <div class="footer-tools" style="margin-top:8px;">
         <button type="button" id="btn-check-update" class="i18n-plain">🔄 Έλεγχος αναβάθμισης</button>
@@ -743,6 +746,8 @@
       <div class="footer-tools" style="margin-bottom:8px;">
         <button type="button" id="paste-restore-paste" class="i18n-plain">📋 Επικόλληση</button>
       </div>
+      <label class="i18n-plain" style="margin-top:4px;">Κωδικός (μόνο αν το αντίγραφο είναι κρυπτογραφημένο)</label>
+      <input type="password" id="paste-restore-pass" autocomplete="off" placeholder="κωδικός κρυπτογράφησης">
       <textarea id="paste-restore-input" rows="8" placeholder='{"entries": [...], ...}' spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
       <p class="hint" id="paste-restore-msg" style="margin-top:6px;">—</p>
       <div class="footer-tools" style="margin-top:10px;">
@@ -793,6 +798,16 @@ const DEFAULTS = {
 let currentLang = LS.get('psarema_lang', 'el');
 /* ---------- literal-text dictionary: bait/species/technique/weather/wind/moon/tide/pressure/toasts/titles ---------- */
 const GR_TO_EN = {
+  "Κωδικός κρυπτογράφησης του αντιγράφου email":"Encryption password for the email backup",
+  "Το αντίγραφο που φεύγει με email κρυπτογραφείται με αυτόν τον κωδικό, ώστε να μην διαβάζεται από κανέναν στη διαδρομή (υπηρεσία αποστολής, εταιρεία email) — ούτε τα σημεία που ψαρεύεις. Ο κωδικός μένει μόνο σε αυτή τη συσκευή. Αν τον ξεχάσεις, το αντίγραφο δεν ανακτάται. Χωρίς κωδικό δεν στέλνεται αντίγραφο με email. Στο email φαίνεται μόνο ο αριθμός των καταχωρήσεων.":"The backup sent by email is encrypted with this password, so nobody along the way (sending service, email provider) can read it — including your fishing spots. The password stays only on this device. If you forget it, the backup cannot be recovered. Without a password no backup is sent by email. The email only shows the number of entries.",
+  "Κωδικός (μόνο αν το αντίγραφο είναι κρυπτογραφημένο)":"Password (only if the backup is encrypted)",
+  "✗ Δεν στάλθηκε αντίγραφο με email: ορίσε πρώτα κωδικό κρυπτογράφησης παραπάνω.":"✗ No email backup sent: set an encryption password above first.",
+  "Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες":"The password must be at least 6 characters",
+  "Ορίσε κωδικό κρυπτογράφησης στις Ρυθμίσεις για να σταλεί το αντίγραφο με email":"Set an encryption password in Settings to send the backup by email",
+  "Η κρυπτογράφηση του αντιγράφου απέτυχε — το email δεν στάλθηκε":"Backup encryption failed — the email was not sent",
+  "Το αντίγραφο είναι κρυπτογραφημένο — γράψε τον κωδικό που είχες ορίσει":"The backup is encrypted — enter the password you set",
+  "Λάθος κωδικός (ή το κείμενο αλλοιώθηκε) — δοκίμασε ξανά":"Wrong password (or the text was altered) — try again",
+  "Το κρυπτογραφημένο κείμενο φαίνεται κομμένο ή αλλοιωμένο — αντέγραψε ολόκληρο το κουτάκι":"The encrypted text looks cut off or altered — copy the whole box",
   // default species
   "Τσιπούρα":"Gilt-head bream","Λαβράκι":"Sea bass","Γόπα":"Bogue","Μπαρμπούνι":"Red mullet",
   "Σαργός":"White seabream","Σκορπίνα":"Scorpionfish","Κέφαλος":"Grey mullet",
@@ -3736,6 +3751,13 @@ document.getElementById('backup-email-input').addEventListener('change', (ev)=>{
   LS.set('psarema_backup_email', ev.target.value.trim());
   renderEmailBackupStatus();
 });
+document.getElementById('backup-pass-input').value = LS.get('psarema_backup_pass', '');
+document.getElementById('backup-pass-input').addEventListener('change', (ev)=>{
+  const v = ev.target.value;
+  if(v && v.length < 6){ toast(tr('Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες')); return; }
+  LS.set('psarema_backup_pass', v);
+  renderEmailBackupStatus();
+});
 document.getElementById('backup-freq-select').addEventListener('change', (ev)=>{
   LS.set('psarema_backup_freq', parseInt(ev.target.value));
 });
@@ -3745,17 +3767,75 @@ document.getElementById('backup-freq-select').addEventListener('change', (ev)=>{
 // can grow past this limit, and the old code swallowed that failure with just a console.error,
 // so the user saw the backup "box" silently stop showing up in their emails with no explanation.
 const EMAILJS_MAX_VARS_BYTES = 50000;
+// ---- Κρυπτογράφηση αντιγράφου email: AES-GCM 256 με κλειδί από PBKDF2-SHA256 (200.000 επαναλήψεις) ----
+// Μορφή: "FIQENC1:" + base64( αλάτι 16 | iv 12 | σημαία συμπίεσης 1 | κρυπτογραφημένο κείμενο ) + "~" (τέλος).
+const BACKUP_ENC_PREFIX = 'FIQENC1:';
+const BACKUP_PBKDF2_ITER = 200000;
+function bytesToB64(u8){
+  let bin = ''; const CH = 0x8000;
+  for(let i=0;i<u8.length;i+=CH) bin += String.fromCharCode.apply(null, u8.subarray(i,i+CH));
+  return btoa(bin);
+}
+function b64ToBytes(b64){
+  const bin = atob(b64); const u8 = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) u8[i] = bin.charCodeAt(i);
+  return u8;
+}
+async function streamBytes(u8, TransformCtor, kind){
+  const stream = new Blob([u8]).stream().pipeThrough(new TransformCtor(kind));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+async function deriveBackupKey(password, salt, usage){
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name:'PBKDF2', salt, iterations:BACKUP_PBKDF2_ITER, hash:'SHA-256' },
+    base, { name:'AES-GCM', length:256 }, false, [usage]);
+}
+async function encryptBackupText(plain, password){
+  if(!window.crypto || !crypto.subtle) throw new Error('nocrypto');
+  let bytes = new TextEncoder().encode(plain);
+  let flag = 0;
+  if(typeof CompressionStream !== 'undefined'){
+    try{ bytes = await streamBytes(bytes, CompressionStream, 'gzip'); flag = 1; }catch(e){ flag = 0; bytes = new TextEncoder().encode(plain); }
+  }
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveBackupKey(password, salt, 'encrypt');
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, bytes));
+  const out = new Uint8Array(16+12+1+ct.length);
+  out.set(salt,0); out.set(iv,16); out[28] = flag; out.set(ct,29);
+  return BACKUP_ENC_PREFIX + bytesToB64(out) + '~';
+}
+// Επιστρέφει το αρχικό κείμενο ή ρίχνει σφάλμα 'badpass' / 'badformat'
+async function decryptBackupText(text, password){
+  const m = String(text).match(/FIQENC1:([A-Za-z0-9+\/=\s]+?)(?:~|$)/);
+  if(!m) throw new Error('badformat');
+  let raw;
+  try{ raw = b64ToBytes(m[1].replace(/\s+/g,'')); }catch(e){ throw new Error('badformat'); }
+  if(raw.length < 30) throw new Error('badformat');
+  const salt = raw.slice(0,16), iv = raw.slice(16,28), flag = raw[28], ct = raw.slice(29);
+  const key = await deriveBackupKey(password, salt, 'decrypt');
+  let bytes;
+  try{ bytes = new Uint8Array(await crypto.subtle.decrypt({ name:'AES-GCM', iv }, key, ct)); }
+  catch(e){ throw new Error('badpass'); }
+  if(flag === 1) bytes = await streamBytes(bytes, DecompressionStream, 'gzip');
+  return new TextDecoder().decode(bytes);
+}
+const BACKUP_MIN_PASS = 6;
 function renderEmailBackupStatus(){
   const el = document.getElementById('email-backup-status');
   if(!el) return;
   const email = LS.get('psarema_backup_email', '').trim();
   if(!email){ el.textContent = '—'; return; }
-  const status = LS.get('psarema_backup_last_status', null);
+  let status = LS.get('psarema_backup_last_status', null);
+  if(!LS.get('psarema_backup_pass', '')) status = 'nopass';
   const when = LS.get('psarema_backup_last_attempt', null);
   const dateStr = when ? new Date(when).toLocaleDateString('el-GR', {day:'numeric', month:'short', year:'numeric'}) : '';
   if(status === 'ok'){
     el.textContent = tr('✓ Τελευταίο αντίγραφο μέσω email στάλθηκε επιτυχώς') + (dateStr ? ' (' + dateStr + ')' : '');
     el.style.color = '';
+  } else if(status === 'nopass'){
+    el.textContent = tr('✗ Δεν στάλθηκε αντίγραφο με email: ορίσε πρώτα κωδικό κρυπτογράφησης παραπάνω.');
+    el.style.color = 'var(--danger)';
   } else if(status === 'toolarge'){
     el.textContent = tr('✗ Τα δεδομένα σου έγιναν πολύ μεγάλα για αποστολή με email — χρησιμοποίησε "Εξαγωγή JSON" ή τον "Φάκελο αντιγράφων" παρακάτω.');
     el.style.color = 'var(--danger)';
@@ -3777,10 +3857,25 @@ async function maybeSendAutoBackup(){
     console.warn('EmailJS δεν έχει ρυθμιστεί ακόμα — backup παραλείπεται.');
     return;
   }
-  const data = { entries, species, baits, equips, anglers, locations, exportedAt: new Date().toISOString() };
-  const payload = JSON.stringify(data);
-  const payloadBytes = new TextEncoder().encode(payload).length;
   LS.set('psarema_backup_last_attempt', new Date().toISOString());
+  const pass = LS.get('psarema_backup_pass', '');
+  if(!pass || pass.length < BACKUP_MIN_PASS){
+    LS.set('psarema_backup_last_status', 'nopass');
+    renderEmailBackupStatus();
+    toast(tr('Ορίσε κωδικό κρυπτογράφησης στις Ρυθμίσεις για να σταλεί το αντίγραφο με email'));
+    return;
+  }
+  const data = { entries, species, baits, equips, anglers, locations, exportedAt: new Date().toISOString() };
+  let payload;
+  try{ payload = await encryptBackupText(JSON.stringify(data), pass); }
+  catch(err){
+    console.error('Backup encryption failed:', err);
+    LS.set('psarema_backup_last_status', 'error');
+    renderEmailBackupStatus();
+    toast(tr('Η κρυπτογράφηση του αντιγράφου απέτυχε — το email δεν στάλθηκε'));
+    return;
+  }
+  const payloadBytes = new TextEncoder().encode(payload).length;
   if(payloadBytes > EMAILJS_MAX_VARS_BYTES){
     LS.set('psarema_backup_last_status', 'toolarge');
     renderEmailBackupStatus();
@@ -4084,6 +4179,7 @@ function updatePasteRestoreMsg(){
 document.getElementById('paste-restore-input').addEventListener('input', updatePasteRestoreMsg);
 document.getElementById('btn-paste-restore').addEventListener('click', ()=>{
   document.getElementById('paste-restore-input').value = '';
+  document.getElementById('paste-restore-pass').value = '';
   updatePasteRestoreMsg();
   document.getElementById('paste-restore-overlay').classList.add('show');
 });
@@ -4110,7 +4206,18 @@ document.getElementById('paste-restore-confirm').addEventListener('click', async
   const raw = document.getElementById('paste-restore-input').value.trim();
   const fail = (msg)=>{ el.textContent = tr(msg); el.style.color = 'var(--danger)'; toast(tr(msg)); };
   if(!raw){ fail('Επικόλλησε πρώτα το κείμενο του backup'); return; }
-  const res = parseBackupText(raw);
+  let rawText = raw;
+  if(raw.indexOf(BACKUP_ENC_PREFIX) !== -1){
+    const pw = document.getElementById('paste-restore-pass').value;
+    if(!pw){ fail('Το αντίγραφο είναι κρυπτογραφημένο — γράψε τον κωδικό που είχες ορίσει'); return; }
+    try{ rawText = await decryptBackupText(raw, pw); }
+    catch(err){
+      if(err.message === 'badpass') fail('Λάθος κωδικός (ή το κείμενο αλλοιώθηκε) — δοκίμασε ξανά');
+      else fail('Το κρυπτογραφημένο κείμενο φαίνεται κομμένο ή αλλοιωμένο — αντέγραψε ολόκληρο το κουτάκι');
+      return;
+    }
+  }
+  const res = parseBackupText(rawText);
   if(res.error === 'noBraces'){ fail('Το κείμενο δεν περιέχει δεδομένα αντιγράφου — αντέγραψες το σωστό κουτάκι από το email;'); return; }
   if(res.error === 'badJson'){ fail('Το κείμενο φαίνεται κομμένο ή αλλοιωμένο — αντέγραψε ολόκληρο το κουτάκι, από την πρώτη { ως την τελευταία }'); return; }
   const data = res.data;
