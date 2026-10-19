@@ -11,9 +11,9 @@
 <meta name="theme-color" content="#0B3B4C">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bitter:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4.4.1/dist/email.min.js" integrity="sha256-BS9pFqIbpb4UA2ZDnoG4StETY8hN+6KgbyCMe0pvbV8=" crossorigin="anonymous"></script>
 <style>
   :root{
     --deep: #0B3B4C; --teal: #1C7A85; --foam: #F2ECDD; --sand: #E4D5B7;
@@ -528,7 +528,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.19 · 20 Οκτ 2026</p>
+      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.20 · 20 Οκτ 2026</p>
       <p class="hint" id="update-status" style="margin:6px 0 0;"></p>
       <div class="footer-tools" style="margin-top:8px;">
         <button type="button" id="btn-check-update" class="i18n-plain">🔄 Έλεγχος αναβάθμισης</button>
@@ -3842,7 +3842,10 @@ async function maybeSendAutoBackup(){
   const lastCount = LS.get('psarema_backup_last_count', 0);
   if(entries.length - lastCount < freq) return;
   if(!window.emailjs || EMAILJS_PUBLIC_KEY.indexOf('ΒΑΛΕ') !== -1){
-    console.warn('EmailJS δεν έχει ρυθμιστεί ακόμα — backup παραλείπεται.');
+    console.warn('EmailJS δεν φορτώθηκε ή δεν έχει ρυθμιστεί — backup παραλείπεται.');
+    LS.set('psarema_backup_last_attempt', new Date().toISOString());
+    LS.set('psarema_backup_last_status', 'error');
+    renderEmailBackupStatus();
     return;
   }
   LS.set('psarema_backup_last_attempt', new Date().toISOString());
