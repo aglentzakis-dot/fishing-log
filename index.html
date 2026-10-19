@@ -36,13 +36,6 @@
   header h1{ font-size: 1.5rem; letter-spacing: 0.3px; margin: 0; text-shadow: 0 1px 4px rgba(0,0,0,0.35); }
   header h1 a.brand-link{ color: inherit; text-decoration: none; display:inline-flex; align-items:center; }
   header h1 a.brand-link:active{ opacity: 0.75; }
-  .equip-link{
-    position:absolute; top:56px; right:16px; z-index:10;
-    background: rgba(255,255,255,0.14); color:#fff; text-decoration:none;
-    font-size:0.75rem; font-weight:700; padding:7px 12px; border-radius:20px;
-    border:1px solid rgba(255,255,255,0.3); letter-spacing:0.2px;
-  }
-  .equip-link:active{ background: rgba(255,255,255,0.24); }
   .lang-toggle-btn{
     position:absolute; top:18px; right:16px; z-index:10;
     background: rgba(255,255,255,0.14); border:1px solid rgba(255,255,255,0.3);
@@ -247,7 +240,6 @@
 <body>
 
 <header id="app-header">
-  <a href="https://miserlis-fishing.gr/" target="_blank" rel="noopener" class="equip-link" id="equip-link">e-shop</a>
   <button type="button" id="lang-toggle" class="lang-toggle-btn" aria-label="Language">🇬🇷</button>
   <h1 id="app-title">Fish IQ</h1>
 </header>
@@ -447,6 +439,7 @@
         <option value="10" data-i18n-key="10 καταχωρήσεις">10 καταχωρήσεις</option>
       </select>
       <p class="hint" id="email-backup-status" style="margin-top:8px;">—</p>
+      <p class="hint" style="margin-top:8px;"><span class="i18n-plain">Πηγές δεδομένων:</span> <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0) · © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></p>
       <p class="hint" id="i18n-disclaimer-text" style="margin-top:8px;">Η εφαρμογή παρέχεται όπως είναι (χωρίς εγγύηση), χωρίς καμία ευθύνη για τυχόν απώλεια δεδομένων, από οποιαδήποτε αιτία (διαγραφή browser, βλάβη συσκευής, τεχνικό πρόβλημα κ.ά.). Συνιστάται τακτική εξαγωγή/αποθήκευση από τον ίδιο τον χρήστη.</p>
       <p class="hint" id="i18n-chrome-tip" style="margin-top:8px;">💡 Αν κάποια λειτουργία δεν φορτώνει σωστά (π.χ. καιρός, χάρτης, τοποθεσία), δοκίμασε να ανοίξεις την εφαρμογή σε άλλο browser (π.χ. <strong>Chrome</strong>) — μερικοί browsers περιορίζουν αυτού του τύπου τις λειτουργίες.</p>
       <div class="footer-tools">
@@ -532,16 +525,10 @@
         <div class="chip i18n-plain" data-pos="bottom" id="i18n-pos-bottom">Κάτω</div>
       </div>
 
-      <label style="margin-top:18px;" id="i18n-equip-btn-label" class="i18n-plain">Κουμπί πάνω-δεξιά</label>
-      <div class="footer-tools">
-        <button type="button" class="ghost-btn-sm" id="btn-toggle-equip" style="margin-top:0;">👁️ <span id="i18n-equip-toggle-text" class="i18n-plain">Απόκρυψη/Εμφάνιση</span> <span class="visibility-dot" id="equip-visibility-dot"></span></button>
-      </div>
-      <input type="text" id="equip-btn-text-input" placeholder="Κείμενο κουμπιού (π.χ. Εξοπλισμός)" style="margin-top:8px;">
-      <input type="text" id="equip-btn-url-input" placeholder="Σύνδεσμος (π.χ. https://miserlis-fishing.gr/)" style="margin-top:8px;">
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.18 · 19 Οκτ 2026</p>
+      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.19 · 20 Οκτ 2026</p>
       <p class="hint" id="update-status" style="margin:6px 0 0;"></p>
       <div class="footer-tools" style="margin-top:8px;">
         <button type="button" id="btn-check-update" class="i18n-plain">🔄 Έλεγχος αναβάθμισης</button>
@@ -798,6 +785,7 @@ const DEFAULTS = {
 let currentLang = LS.get('psarema_lang', 'el');
 /* ---------- literal-text dictionary: bait/species/technique/weather/wind/moon/tide/pressure/toasts/titles ---------- */
 const GR_TO_EN = {
+  "Πηγές δεδομένων:":"Data sources:",
   "Κωδικός κρυπτογράφησης του αντιγράφου email":"Encryption password for the email backup",
   "Το αντίγραφο που φεύγει με email κρυπτογραφείται με αυτόν τον κωδικό, ώστε να μην διαβάζεται από κανέναν στη διαδρομή (υπηρεσία αποστολής, εταιρεία email) — ούτε τα σημεία που ψαρεύεις. Ο κωδικός μένει μόνο σε αυτή τη συσκευή. Αν τον ξεχάσεις, το αντίγραφο δεν ανακτάται. Χωρίς κωδικό δεν στέλνεται αντίγραφο με email. Στο email φαίνεται μόνο ο αριθμός των καταχωρήσεων.":"The backup sent by email is encrypted with this password, so nobody along the way (sending service, email provider) can read it — including your fishing spots. The password stays only on this device. If you forget it, the backup cannot be recovered. Without a password no backup is sent by email. The email only shows the number of entries.",
   "Κωδικός (μόνο αν το αντίγραφο είναι κρυπτογραφημένο)":"Password (only if the backup is encrypted)",
@@ -2090,7 +2078,7 @@ function openMapPicker(prefix){
       mapPickerInstance = L.map('map-picker-map').setView(center, zoom);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        attribution: '© OpenStreetMap'
+        attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">συνεργάτες του OpenStreetMap</a>'
       }).addTo(mapPickerInstance);
       mapPickerInstance.on('click', (ev)=>{
         mapPickerLatLng = ev.latlng;
@@ -4408,43 +4396,12 @@ document.querySelectorAll('#title-pos-options .chip').forEach(chip=>{
   });
 });
 
-/* ---------- equip button: hide / rename / relink ---------- */
-function applyEquipButton(){
-  const link = document.getElementById('equip-link');
-  const hidden = LS.get('psarema_equip_btn_hidden', false);
-  const text = LS.get('psarema_equip_btn_text', 'e-shop');
-  const url = LS.get('psarema_equip_btn_url', 'https://miserlis-fishing.gr/');
-  link.style.display = hidden ? 'none' : '';
-  link.textContent = text;
-  link.href = url;
-  document.getElementById('equip-btn-text-input').value = text;
-  document.getElementById('equip-btn-url-input').value = url;
-  const dot = document.getElementById('equip-visibility-dot');
-  if(dot) dot.classList.toggle('on', !hidden);
-}
-document.getElementById('btn-toggle-equip').addEventListener('click', ()=>{
-  const hidden = LS.get('psarema_equip_btn_hidden', false);
-  LS.set('psarema_equip_btn_hidden', !hidden);
-  applyEquipButton();
-  toast(!hidden ? 'Το κουμπί κρύφτηκε' : 'Το κουμπί εμφανίστηκε');
-});
-document.getElementById('equip-btn-text-input').addEventListener('input', (ev)=>{
-  const val = ev.target.value.trim() || 'Εξοπλισμός';
-  LS.set('psarema_equip_btn_text', val);
-  document.getElementById('equip-link').textContent = val;
-});
-document.getElementById('equip-btn-url-input').addEventListener('input', (ev)=>{
-  const val = ev.target.value.trim() || 'https://miserlis-fishing.gr/';
-  LS.set('psarema_equip_btn_url', val);
-  document.getElementById('equip-link').href = val;
-});
 
 /* ---------- init ---------- */
 applyTheme();
 applyHeaderTitle();
 applyHeaderPhoto();
 applyHeaderTitlePos();
-applyEquipButton();
 maybeWriteSharedBackup();
 
 /* ---------- language toggle (partial translation of core UI) ---------- */
@@ -4469,8 +4426,7 @@ const I18N = {
     'i18n-data-header': 'Data', 'i18n-modal-title': 'Entry details',
     'btn-save': 'Save entry', 'btn-geo': '📍 Current location', 'btn-map-f': '🗺️ Pick on map',
     'btn-export': '⬇ Export JSON', 'btn-import': '⬆ Import JSON', 'btn-clear': '🗑 Delete all data',
-    'e-btn-save': 'Save changes', 'e-btn-delete': 'Delete entry',
-    'equip-link': 'Equipment'
+    'e-btn-save': 'Save changes', 'e-btn-delete': 'Delete entry'
   },
   el: {} // filled at runtime from the current (Greek) textContent, so "Reset to Greek" always works
 };
