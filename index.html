@@ -538,7 +538,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.16 · 5 Οκτ 2026</p>
+      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.17 · 19 Οκτ 2026</p>
       <p class="hint" id="update-status" style="margin:6px 0 0;"></p>
       <div class="footer-tools" style="margin-top:8px;">
         <button type="button" id="btn-check-update" class="i18n-plain">🔄 Έλεγχος αναβάθμισης</button>
@@ -843,6 +843,7 @@ const GR_TO_EN = {
   "🔄 Έλεγχος αναβάθμισης":"🔄 Check for update","Έλεγχος αναβάθμισης":"Check for update","Έλεγχος...":"Checking...",
   "Βρέθηκε νέα έκδοση":"New version found","γίνεται ενημέρωση...":"updating...","Έχεις ήδη την τελευταία έκδοση":"You already have the latest version",
   "Δεν ήταν δυνατός ο έλεγχος — έλεγξε τη σύνδεσή σου":"Could not check — check your connection",
+  "άκυρες καταχωρήσεις παραλείφθηκαν":"invalid entries skipped",
   "Επαναφορά":"Restore","Επικόλλησε πρώτα το κείμενο του backup":"Paste the backup text first",
   "Δεν αναγνωρίστηκε έγκυρο κείμενο αντιγράφου — έλεγξε ότι αντέγραψες όλο το κουτάκι":"That doesn't look like valid backup text — make sure you copied the whole box",
   "Η επαναφορά θα αντικαταστήσει ΟΛΑ τα τρέχοντα δεδομένα σου (καταχωρήσεις, λίστες). Θέλεις σίγουρα να συνεχίσεις;":"This will replace ALL your current data (entries, lists). Are you sure you want to continue?",
@@ -1223,7 +1224,88 @@ async function listSharedBackupFiles(){
 }
 // Shared by every restore path (shared-folder file, JSON file import, pasted email text) so they
 // all apply a backup the same way instead of three slightly-different copies of this logic.
-async function applyRestoredData(data){
+/* ---------- έλεγχος και καθάρισμα αντιγράφου πριν μπει στην εφαρμογή ----------
+   Το αντίγραφο μπορεί να έρθει από email, αρχείο ή φάκελο — άρα το αντιμετωπίζουμε ως ξένο δεδομένο:
+   τα πεδία παίρνουν τον τύπο που περιμένει η εφαρμογή (κείμενο, αριθμός, λίστα) και ό,τι δεν ταιριάζει πετιέται.
+   Δεύτερη γραμμή άμυνας· η πρώτη είναι η esc() σε κάθε σημείο εμφάνισης. */
+const BAD_KEYS = ['__proto__','constructor','prototype'];
+function cleanText(v, max){ return typeof v === 'string' ? v.slice(0, max || 500) : ''; }
+function cleanNumOrNull(v){ if(v == null) return null; const n = Number(v); return Number.isFinite(n) ? n : null; }
+function cleanTextList(a, max){ return Array.isArray(a) ? a.filter(x=>typeof x === 'string' && x.trim()).map(x=>x.slice(0, max || 120)) : []; }
+function cleanCountMap(o){
+  const out = {};
+  if(o && typeof o === 'object' && !Array.isArray(o)){
+    Object.keys(o).forEach(k=>{
+      const n = Number(o[k]);
+      if(!BAD_KEYS.includes(k) && Number.isFinite(n) && n >= 0) out[k.slice(0,120)] = n;
+    });
+  }
+  return out;
+}
+function cleanWeather(w){
+  if(!w || typeof w !== 'object' || Array.isArray(w)) return null;
+  const out = { ...w };
+  ['pressure','beaufort','windKmh','windGustsKmh','wave','wavePeriod','temperature','seaTemp','weathercode','windDirDeg','waveDirDeg','pressureTrendVal','sunrise','sunset']
+    .forEach(k=>{ if(k in out) out[k] = cleanNumOrNull(out[k]); });
+  ['weatherText','windDirText'].forEach(k=>{ if(k in out) out[k] = cleanText(out[k], 80); });
+  if('waveEstimated' in out) out.waveEstimated = !!out.waveEstimated;
+  if('windTrend' in out){
+    out.windTrend = Array.isArray(out.windTrend)
+      ? out.windTrend.filter(t=>t && typeof t === 'object').map(t=>({ hoursAhead: cleanNumOrNull(t.hoursAhead), beaufort: cleanNumOrNull(t.beaufort), dirText: cleanText(t.dirText, 40) }))
+      : [];
+  }
+  return out;
+}
+function sanitizeBackupData(data){
+  if(!data || typeof data !== 'object' || !Array.isArray(data.entries)) return null;
+  const out = { skipped: 0 };
+  const usedIds = new Set();
+  out.entries = [];
+  data.entries.forEach((e, i)=>{
+    if(!e || typeof e !== 'object' || Array.isArray(e) || typeof e.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(e.date)){ out.skipped++; return; }
+    let id = Number(e.id);
+    if(!Number.isFinite(id) || usedIds.has(id)) id = Date.now() + i + Math.floor(Math.random()*1000);
+    usedIds.add(id);
+    const clean = { ...e, id, date: e.date };
+    clean.angler = Array.isArray(e.angler) ? cleanTextList(e.angler) : cleanText(e.angler, 120);
+    clean.timeIn = /^\d{1,2}:\d{2}$/.test(e.timeIn || '') ? e.timeIn : '';
+    clean.timeOut = /^\d{1,2}:\d{2}$/.test(e.timeOut || '') ? e.timeOut : '';
+    clean.timeOutAuto = !!e.timeOutAuto;
+    clean.locName = cleanText(e.locName, 200);
+    clean.locNote = cleanText(e.locNote, 1000);
+    clean.coords = cleanText(e.coords, 200);
+    clean.notes = cleanText(e.notes, 5000);
+    clean.weather = cleanWeather(e.weather);
+    clean.fish = cleanCountMap(e.fish);
+    if(e.anglerFish && typeof e.anglerFish === 'object' && !Array.isArray(e.anglerFish)){
+      clean.anglerFish = {};
+      Object.keys(e.anglerFish).forEach(sp=>{ if(!BAD_KEYS.includes(sp)) clean.anglerFish[sp.slice(0,120)] = cleanCountMap(e.anglerFish[sp]); });
+    } else { delete clean.anglerFish; }
+    const w = Number(e.weight); clean.weight = Number.isFinite(w) && w >= 0 ? w : 0;
+    clean.bait = cleanTextList(e.bait);
+    clean.equip = cleanTextList(e.equip);
+    clean.photos = Array.isArray(e.photos) ? e.photos.filter(k=>typeof k === 'string' && /^[\w.\-]{1,100}$/.test(k)) : [];
+    out.entries.push(clean);
+  });
+  out.species = Array.isArray(data.species) ? cleanTextList(data.species) : null;
+  out.baits = Array.isArray(data.baits) ? cleanTextList(data.baits) : null;
+  out.equips = Array.isArray(data.equips) ? cleanTextList(data.equips) : null;
+  out.anglers = Array.isArray(data.anglers) ? cleanTextList(data.anglers) : null;
+  out.locations = Array.isArray(data.locations)
+    ? data.locations.filter(l=>l && typeof l === 'object' && typeof l.name === 'string' && l.name.trim()).map(l=>({ name: l.name.slice(0,200), note: cleanText(l.note, 1000) }))
+    : null;
+  out.photos = {};
+  if(data.photos && typeof data.photos === 'object' && !Array.isArray(data.photos)){
+    Object.keys(data.photos).forEach(k=>{
+      const v = data.photos[k];
+      if(/^[\w.\-]{1,100}$/.test(k) && typeof v === 'string' && /^data:image\/(jpeg|png|webp|gif);base64,[A-Za-z0-9+\/=]+$/.test(v)) out.photos[k] = v;
+    });
+  }
+  return out;
+}
+async function applyRestoredData(rawData){
+  const data = sanitizeBackupData(rawData);
+  if(!data){ toast(tr('Δεν αναγνωρίστηκε έγκυρο κείμενο αντιγράφου — έλεγξε ότι αντέγραψες όλο το κουτάκι')); return; }
   if(data.entries) { entries = data.entries; LS.set('psarema_entries', entries); }
   if(data.species) { species = data.species; LS.set('psarema_species', species); }
   if(data.baits) { baits = data.baits; LS.set('psarema_bait', baits); }
@@ -1235,7 +1317,7 @@ async function applyRestoredData(data){
   refreshAnglerPicker();
   refreshLocationNamesDatalist();
   renderEntries();
-  toast(tr('Τα δεδομένα επαναφέρθηκαν ✓'));
+  toast(tr('Τα δεδομένα επαναφέρθηκαν ✓') + (data.skipped ? ' (' + data.skipped + ' ' + tr('άκυρες καταχωρήσεις παραλείφθηκαν') + ')' : ''));
 }
 async function restoreFromSharedBackupFile(fileHandle){
   if(!confirm(tr('Η επαναφορά από αυτό το αρχείο θα αντικαταστήσει ΟΛΑ τα τρέχοντα δεδομένα σου (καταχωρήσεις, λίστες, φωτογραφίες). Θέλεις σίγουρα να συνεχίσεις;'))) return;
@@ -1286,7 +1368,7 @@ function renderBackupRestoreList(files){
   }
   listEl.innerHTML = files.map((f,i)=>`
     <div class="bar-row" style="align-items:center;">
-      <div class="bar-label" style="width:auto; flex:1;">${f.name}${i===0 ? ' <strong style="color:var(--teal);">(' + tr('νεότερο') + ')</strong>' : ''}</div>
+      <div class="bar-label" style="width:auto; flex:1;">${esc(f.name)}${i===0 ? ' <strong style="color:var(--teal);">(' + tr('νεότερο') + ')</strong>' : ''}</div>
       <button type="button" class="species-cond-btn" data-idx="${i}">♻️</button>
     </div>`).join('');
   listEl.querySelectorAll('button[data-idx]').forEach(btn=>{
@@ -1354,7 +1436,7 @@ const photoState = { 'f-photo-grid': [], 'e-photo-grid': [] };
 function renderPhotoGrid(gridId){
   const arr = photoState[gridId];
   const grid = document.getElementById(gridId);
-  grid.innerHTML = arr.map((p,i)=>`<div class="photo-thumb" data-idx="${i}"><img src="${p.dataUrl}"><button type="button" class="rm" data-idx="${i}">✕</button></div>`).join('');
+  grid.innerHTML = arr.map((p,i)=>`<div class="photo-thumb" data-idx="${i}"><img src="${escapeAttr(p.dataUrl)}"><button type="button" class="rm" data-idx="${i}">✕</button></div>`).join('');
   grid.querySelectorAll('img').forEach((img,i)=>{ img.addEventListener('click', ()=>openPhotoViewer(arr[i].dataUrl)); });
   grid.querySelectorAll('.rm').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
@@ -1547,7 +1629,7 @@ function renderFishQty(){
   [...selFish].forEach(name=>{
     const row = document.createElement('div');
     row.className = 'qty-item'; row.dataset.name = name;
-    row.innerHTML = `<span>${name}</span><div class="stepper"><button type="button" class="stepper-btn" data-dir="-1">−</button><input type="number" min="0" value="${prev[name] || 1}"><button type="button" class="stepper-btn" data-dir="1">+</button></div>`;
+    row.innerHTML = `<span>${esc(name)}</span><div class="stepper"><button type="button" class="stepper-btn" data-dir="-1">−</button><input type="number" min="0" value="${esc(prev[name] || 1)}"><button type="button" class="stepper-btn" data-dir="1">+</button></div>`;
     wrap.appendChild(row);
   });
   wireQtySteppers(wrap, 'f');
@@ -1578,7 +1660,12 @@ function updateFishFollowups(prefix){
   if(hasFish && baitSet.size === 0) picker.classList.add('needs-fill-box'); else picker.classList.remove('needs-fill-box');
   renderAnglerFishBreakdown(prefix);
 }
-function escapeAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+// Κάθε κείμενο που προέρχεται από τον χρήστη ή από αντίγραφο (ονόματα σημείων, σημειώσεις, ψαράδες, είδη κ.λπ.)
+// περνά από την esc() πριν μπει στη σελίδα, ώστε ένα πειραγμένο αντίγραφο να μη μπορεί να τρέξει κώδικα.
+function esc(s){
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function escapeAttr(s){ return esc(s); }
 /* ---------- who-caught-what: per-angler breakdown of fish counts when 2+ anglers are on the same trip ---------- */
 function renderAnglerFishBreakdown(prefix){
   const selAnglerSet = prefix === 'f' ? selAngler : eSelAngler;
@@ -1627,13 +1714,13 @@ function renderAnglerFishBreakdown(prefix){
       const total = totals[sp];
       const row = breakdown[sp];
       return `<div class="angler-fish-species">
-        <span>${tr(sp)} — ${total} ${tr('ψάρια')}</span>
+        <span>${esc(tr(sp))} — ${esc(total)} ${tr('ψάρια')}</span>
         ${anglersArr.map(a=>`
           <div class="stepper angler-fish-row" style="justify-content:space-between;" data-species="${escapeAttr(sp)}" data-angler="${escapeAttr(a)}">
-            <span style="font-size:0.85rem; font-weight:600;">${a}</span>
+            <span style="font-size:0.85rem; font-weight:600;">${esc(a)}</span>
             <span style="display:flex; align-items:center; gap:6px;">
               <button type="button" class="stepper-btn" data-dir="-1">−</button>
-              <input type="number" min="0" max="${total}" value="${row[a]||0}">
+              <input type="number" min="0" max="${esc(total)}" value="${esc(row[a]||0)}">
               <button type="button" class="stepper-btn" data-dir="1">+</button>
             </span>
           </div>`).join('')}
@@ -1727,7 +1814,7 @@ function renderPrimaryAnglerSelect(){
   if(!anglers.length){ sel.innerHTML = `<option value="">—</option>`; sel.disabled = true; return; }
   sel.disabled = false;
   const current = getPrimaryAngler();
-  sel.innerHTML = anglers.map(a=>`<option value="${escapeAttr(a)}" ${a===current?'selected':''}>${a}</option>`).join('');
+  sel.innerHTML = anglers.map(a=>`<option value="${escapeAttr(a)}" ${a===current?'selected':''}>${esc(a)}</option>`).join('');
 }
 document.getElementById('primary-angler-select').addEventListener('change', (ev)=>{
   LS.set('psarema_primary_angler', ev.target.value);
@@ -1896,9 +1983,9 @@ function renderLocationsManager(){
   const sorted = [...locations].sort((a,b)=>a.name.localeCompare(b.name, 'el'));
   wrap.innerHTML = sorted.map(loc=>{
     const otherOptions = sorted.filter(l=>l.name!==loc.name)
-      .map(l=>`<option value="${escapeAttr(l.name)}">${l.name}</option>`).join('');
+      .map(l=>`<option value="${escapeAttr(l.name)}">${esc(l.name)}</option>`).join('');
     return `<div class="stat-block" style="padding:10px; margin-top:8px;" data-loc="${escapeAttr(loc.name)}">
-      <div style="font-weight:700; margin-bottom:6px;">${loc.name}</div>
+      <div style="font-weight:700; margin-bottom:6px;">${esc(loc.name)}</div>
       <input type="text" class="loc-mgr-note" data-loc="${escapeAttr(loc.name)}" value="${escapeAttr(loc.note||'')}" placeholder="${tr('Σημείωση...')}" style="margin-bottom:8px;">
       ${sorted.length > 1 ? `
       <div style="display:flex; gap:6px; align-items:center;">
@@ -2505,7 +2592,7 @@ function paintWeatherGrid(gridId, data, prefix){
     if(!it) return '';
     const rowClass = it.fullWidth ? 'wxg-row wxg-stacked' : 'wxg-row';
     const clsAttr = it.cls ? ' '+it.cls : '';
-    return `<div class="${rowClass}"><span class="wxg-label" data-key="${key}">${tr(it.label)}</span><span class="wxg-value${clsAttr}">${it.value}</span></div>`;
+    return `<div class="${rowClass}"><span class="wxg-label" data-key="${key}">${tr(it.label)}</span><span class="wxg-value${clsAttr}">${it.isHtml ? it.value : esc(it.value)}</span></div>`;
   }).join('');
 }
 async function runFetchWeather(prefix){
@@ -2627,21 +2714,21 @@ function renderEntries(){
   wrap.innerHTML = html;
 }
 function entryCardHtml(e){
-  const fishTags = Object.entries(e.fish||{}).filter(([n,q])=>q>0).map(([n,q])=>`<span class="tag fish">${tr(n)} × ${q}</span>`).join('');
-  const otherTags = [...(e.bait||[]), ...(e.equip||[])].map(t=>`<span class="tag">${tr(t)}</span>`).join('');
+  const fishTags = Object.entries(e.fish||{}).filter(([n,q])=>q>0).map(([n,q])=>`<span class="tag fish">${esc(tr(n))} × ${esc(q)}</span>`).join('');
+  const otherTags = [...(e.bait||[]), ...(e.equip||[])].map(t=>`<span class="tag">${esc(tr(t))}</span>`).join('');
   let wxTag = '';
   if(e.weather){
     const w = e.weather;
-    wxTag = `<span class="tag wx">${getWeatherText(w)} · ${Math.round(w.pressure)}hPa · ${w.beaufort}bf ${getWindDirText(w)}</span>`;
+    wxTag = `<span class="tag wx">${esc(getWeatherText(w))} · ${esc(Math.round(w.pressure))}hPa · ${esc(w.beaufort)}bf ${esc(getWindDirText(w))}</span>`;
   }
-  const photoTag = (e.photos && e.photos.length) ? `<span class="tag">📷 ${e.photos.length}</span>` : '';
-  const weightTag = e.weight ? `<span class="tag weight">⚖️ ${e.weight} kg</span>` : '';
+  const photoTag = (e.photos && e.photos.length) ? `<span class="tag">📷 ${esc(e.photos.length)}</span>` : '';
+  const weightTag = e.weight ? `<span class="tag weight">⚖️ ${esc(e.weight)} kg</span>` : '';
   const anglerArr = Array.isArray(e.angler) ? e.angler : (e.angler ? [e.angler] : []);
-  const anglerLine = anglerArr.length ? `<div class="entry-loc">🎣 ${anglerArr.join(', ')}</div>` : '';
-  const locNoteLine = e.locNote ? `<div class="entry-loc" style="font-style:italic; opacity:0.7;">📝 ${e.locNote}</div>` : '';
-  return `<div class="entry" onclick="openDetail(${e.id})">
+  const anglerLine = anglerArr.length ? `<div class="entry-loc">🎣 ${anglerArr.map(esc).join(', ')}</div>` : '';
+  const locNoteLine = e.locNote ? `<div class="entry-loc" style="font-style:italic; opacity:0.7;">📝 ${esc(e.locNote)}</div>` : '';
+  return `<div class="entry" data-open-detail="${esc(e.id)}">
     <div class="entry-top">
-      <div><div class="entry-date">${formatDate(e.date)}</div><div class="entry-loc">${e.locName || '—'}</div>${locNoteLine}${anglerLine}</div>
+      <div><div class="entry-date">${formatDate(e.date)}</div><div class="entry-loc">${esc(e.locName || '—')}</div>${locNoteLine}${anglerLine}</div>
     </div>
     <div class="entry-tags">${wxTag}${fishTags}${weightTag}${photoTag}${otherTags}</div>
   </div>`;
@@ -2718,7 +2805,7 @@ function renderEditFishQty(existingFish){
     const val = prev[name] !== undefined ? prev[name] : ((existingFish && existingFish[name]) || 1);
     const row = document.createElement('div');
     row.className = 'qty-item'; row.dataset.name = name;
-    row.innerHTML = `<span>${name}</span><div class="stepper"><button type="button" class="stepper-btn" data-dir="-1">−</button><input type="number" min="0" value="${val}"><button type="button" class="stepper-btn" data-dir="1">+</button></div>`;
+    row.innerHTML = `<span>${esc(name)}</span><div class="stepper"><button type="button" class="stepper-btn" data-dir="-1">−</button><input type="number" min="0" value="${esc(val)}"><button type="button" class="stepper-btn" data-dir="1">+</button></div>`;
     wrap.appendChild(row);
   });
   wireQtySteppers(wrap, 'e');
@@ -2841,14 +2928,14 @@ function renderStats(){
     byLocation[loc].trips++;
 
     let entryFish = 0; // whole-trip total (every angler present) — used only for the per-angler comparisons below
-    Object.entries(e.fish||{}).forEach(([n,q])=>{ if(q>0){ entryFish += q; } });
+    Object.entries(e.fish||{}).forEach(([n,q])=>{ if(q>0){ entryFish += Number(q); } });
 
     const myInfo = myFishBySpeciesForEntry(e);
     let myEntryFish = 0;
-    Object.entries(myInfo.species).forEach(([n,q])=>{ if(q>0){ bySpecies[n] = (bySpecies[n]||0) + q; myEntryFish += q; } });
+    Object.entries(myInfo.species).forEach(([n,q])=>{ if(q>0){ bySpecies[n] = (bySpecies[n]||0) + Number(q); myEntryFish += Number(q); } });
     if(myInfo.ambiguous) hasUnassignedForMe = true;
     totalFish += myEntryFish;
-    totalWeight += (e.weight || 0);
+    totalWeight += (Number(e.weight) || 0);
 
     const anglerArrStats = Array.isArray(e.angler) ? e.angler : (e.angler ? [e.angler] : []);
     if(anglerArrStats.length === 1){
@@ -2867,7 +2954,7 @@ function renderStats(){
     }
     // Location stats describe the SPOT, not personal credit — count everyone's fish there, same as before.
     byLocation[loc].fish += entryFish;
-    byLocation[loc].weight += (e.weight || 0);
+    byLocation[loc].weight += (Number(e.weight) || 0);
     if(entryFish > 0) byLocation[loc].tripsWithFish++;
     entryTotals.push({ id: e.id, date: e.date, loc, fish: myEntryFish });
 
@@ -2938,10 +3025,10 @@ function renderStats(){
       <div>🎣 <strong>${entries.length}</strong> ${tr("εξορμήσεις")}</div>
       <div>🐟 <strong>${totalFish}</strong> ${tr("ψάρια")}</div>
       <div>⚖️ <strong>${totalWeight.toFixed(1).replace('.',',')}</strong> ${tr("kg συνολικά")}</div>
-      ${bestSpecies ? `<div>🏆 ${tr("Καλύτερο είδος:")} <strong>${tr(bestSpecies[0])}</strong></div>` : ''}
+      ${bestSpecies ? `<div>🏆 ${tr("Καλύτερο είδος:")} <strong>${esc(tr(bestSpecies[0]))}</strong></div>` : ''}
       ${topCatches.length ? `<div>⭐ ${tr("Καλύτερη εξόρμηση:")} <strong>${topCatches[0].fish} ${tr("ψάρια")}</strong></div>` : ''}
     </div>
-    ${primaryAngler ? `<p class="hint" style="margin-top:8px;">${tr('Τα παραπάνω δείχνουν μόνο τα ψάρια του/της')} <strong>${primaryAngler}</strong> ${tr('(ρύθμιση «Ποιος είσαι εσύ» στις Ρυθμίσεις).')}</p>` : ''}
+    ${primaryAngler ? `<p class="hint" style="margin-top:8px;">${tr('Τα παραπάνω δείχνουν μόνο τα ψάρια του/της')} <strong>${esc(primaryAngler)}</strong> ${tr('(ρύθμιση «Ποιος είσαι εσύ» στις Ρυθμίσεις).')}</p>` : ''}
     ${hasUnassignedForMe ? `<p class="hint" style="margin-top:4px;">${tr('Σε κάποιες κοινές εξορμήσεις δεν έχει δηλωθεί ποιος έπιασε τι — δεν προσμετρώνται ακόμα εδώ.')}</p>` : ''}
   </div>`;
 
@@ -2953,9 +3040,9 @@ function renderStats(){
   </div>`;
 
   const topCatchesHtml = topCatches.length ? topCatches.slice(0,3).map((t,i)=>`
-    <div class="bar-row" style="align-items:flex-start; cursor:pointer;" onclick="openDetail(${t.id})">
+    <div class="bar-row" style="align-items:flex-start; cursor:pointer;" data-open-detail="${esc(t.id)}">
       <div class="bar-label" style="width:24px; font-weight:800; color:var(--coral);">#${i+1}</div>
-      <div class="bar-label" style="width:auto; flex:1;">${formatDate(t.date)}<br><span style="font-weight:400; color:#7c8f95; font-size:0.75rem;">${t.loc}</span></div>
+      <div class="bar-label" style="width:auto; flex:1;">${formatDate(t.date)}<br><span style="font-weight:400; color:#7c8f95; font-size:0.75rem;">${esc(t.loc)}</span></div>
       <div class="bar-val" style="width:auto;">${t.fish} ${tr('ψάρια')}</div>
     </div>`).join('') : `<div class="hint">${tr('Δεν υπάρχουν ακόμα καταγεγραμμένα ψάρια')}</div>`;
 
@@ -2974,7 +3061,7 @@ function renderStats(){
     const max = maxOverride || Math.max(...Object.values(obj), 1);
     const entries = orderKeys ? orderKeys.filter(k=>obj[k]!=null).map(k=>[k,obj[k]]) : Object.entries(obj).sort((a,b)=>b[1]-a[1]);
     const rows = entries.map(([n,v])=>`
-      <div class="bar-row"><div class="bar-label">${tr(n)}</div><div class="bar-track"><div class="bar-fill" style="width:${(v/max*100)}%"></div></div><div class="bar-val">${v}</div></div>`).join('');
+      <div class="bar-row"><div class="bar-label">${esc(tr(n))}</div><div class="bar-track"><div class="bar-fill" style="width:${Number(v/max*100)||0}%"></div></div><div class="bar-val">${esc(v)}</div></div>`).join('');
     return `<div class="stat-block"><h3>${tr(title)}</h3>${rows}</div>`;
   }
 
@@ -2993,11 +3080,11 @@ function renderStats(){
   }).join('');
 
   const baitHtml = Object.keys(byBait).length
-    ? Object.entries(byBait).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<div class="bar-row"><div class="bar-label" style="width:auto; flex:1;">${tr(n)}</div><div class="bar-val" style="width:auto;">${v} ${tr('ψάρια')}</div></div>`).join('')
+    ? Object.entries(byBait).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<div class="bar-row"><div class="bar-label" style="width:auto; flex:1;">${esc(tr(n))}</div><div class="bar-val" style="width:auto;">${esc(v)} ${tr('ψάρια')}</div></div>`).join('')
     : `<div class="hint">${tr('Δεν έχουν καταγραφεί δολώματα ακόμα')}</div>`;
 
   const anglerHtml = Object.keys(byAngler).length
-    ? Object.entries(byAngler).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<div class="bar-row"><div class="bar-label" style="width:auto; flex:1;">${n}</div><div class="bar-val" style="width:auto;">${v} ${tr('ψάρια')}</div></div>`).join('')
+    ? Object.entries(byAngler).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<div class="bar-row"><div class="bar-label" style="width:auto; flex:1;">${esc(n)}</div><div class="bar-val" style="width:auto;">${esc(v)} ${tr('ψάρια')}</div></div>`).join('')
       + `<p class="hint" style="margin-top:8px;">${tr('Σύνολο κάθε ψαρά σε όλες τις εξορμήσεις του — μόνος του και μαζί με άλλους.')}</p>`
       + (hasUnassignedMultiAngler ? `<p class="hint" style="margin-top:4px;">${tr('Σε εξορμήσεις με πάνω από έναν ψαρά χωρίς ανάθεση ποιος έπιασε τι, τα ψάρια δεν προσμετρώνται εδώ ανά άτομο.')}</p>` : '')
     : `<div class="hint">${tr('Δεν υπάρχουν ακόμα καταγεγραμμένοι ψαράδες')}</div>`;
@@ -3005,7 +3092,7 @@ function renderStats(){
   const jointHtml = jointTrips === 0
     ? `<div class="hint">${tr('Δεν υπάρχουν ακόμα κοινές εξορμήσεις (με 2+ ψαράδες).')}</div>`
     : (Object.keys(byAnglerJoint).length
-        ? Object.entries(byAnglerJoint).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<div class="bar-row"><div class="bar-label" style="width:auto; flex:1;">${n}</div><div class="bar-val" style="width:auto;">${v} ${tr('ψάρια')}</div></div>`).join('')
+        ? Object.entries(byAnglerJoint).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<div class="bar-row"><div class="bar-label" style="width:auto; flex:1;">${esc(n)}</div><div class="bar-val" style="width:auto;">${esc(v)} ${tr('ψάρια')}</div></div>`).join('')
         : '')
       + `<p class="hint" style="margin-top:8px;">${jointTrips} ${tr('κοινές εξορμήσεις συνολικά — μόνο αυτές μετράνε εδώ, ώστε να φαίνεται καθαρά ποιος πιάνει περισσότερα όταν ψαρεύετε μαζί.')}</p>`
       + (hasUnassignedMultiAngler ? `<p class="hint" style="margin-top:4px;">${tr('Σε κάποιες από αυτές δεν έχει δηλωθεί ποιος έπιασε τι — δεν προσμετρώνται ακόμα.')}</p>` : '');
@@ -3014,9 +3101,9 @@ function renderStats(){
     const perHour = d.hours > 0 ? (d.fish/d.hours).toFixed(2)+' '+tr('ψάρια/ώρα') : '';
     const successPct = d.trips > 0 ? Math.round((d.tripsWithFish / d.trips) * 100) : 0;
     const pctStyle = successPct === 0 ? 'background:rgba(200,60,60,0.12); color:#a33;' : 'background:rgba(60,140,110,0.12); color:#2c7a5e;';
-    const noteLine = d.note ? `<br><span style="font-style:italic; opacity:0.75; font-size:0.75rem;">📝 ${d.note}</span>` : '';
+    const noteLine = d.note ? `<br><span style="font-style:italic; opacity:0.75; font-size:0.75rem;">📝 ${esc(d.note)}</span>` : '';
     return `<div class="bar-row" style="align-items:flex-start;">
-      <div class="bar-label" style="width:auto; flex:1;">${n}<br><span style="font-weight:400; color:#7c8f95; font-size:0.75rem;">${d.trips} ${tr('εξορμήσεις')} · ${d.fish} ${tr('ψάρια')}${perHour ? ' · '+perHour : ''}</span>${noteLine}</div>
+      <div class="bar-label" style="width:auto; flex:1;">${esc(n)}<br><span style="font-weight:400; color:#7c8f95; font-size:0.75rem;">${esc(d.trips)} ${tr('εξορμήσεις')} · ${esc(d.fish)} ${tr('ψάρια')}${perHour ? ' · '+perHour : ''}</span>${noteLine}</div>
       <span style="font-size:0.78rem; font-weight:700; padding:3px 8px; border-radius:10px; white-space:nowrap; ${pctStyle}">${successPct}%</span>
     </div>`;
   });
@@ -3029,15 +3116,15 @@ function renderStats(){
       const topWx = Object.entries(d.weatherCounts).sort((a,b)=>b[1]-a[1])[0];
       const topWind = Object.entries(d.windCounts).sort((a,b)=>b[1]-a[1])[0];
       return `<div class="bar-row" style="align-items:flex-start;">
-        <div class="bar-label" style="width:auto; flex:1;">${n}<br><span style="font-weight:400; color:#7c8f95; font-size:0.75rem;">${tr(topWx[0])} · ${tr(topWind[0])} (${topWind[1]}/${d.trips})</span></div>
+        <div class="bar-label" style="width:auto; flex:1;">${esc(n)}<br><span style="font-weight:400; color:#7c8f95; font-size:0.75rem;">${esc(tr(topWx[0]))} · ${esc(tr(topWind[0]))} (${esc(topWind[1])}/${esc(d.trips)})</span></div>
       </div>`;
     });
   const locWeatherHtml = locWeatherRowsArr.length ? collapsibleList(locWeatherRowsArr, 'loc-weather') : `<div class="hint">${tr('Δεν υπάρχουν ακόμα αρκετά δεδομένα καιρού ανά τοποθεσία')}</div>`;
 
   const bestSpotsRowsArr = Object.entries(byLocation).sort((a,b)=>b[1].fish-a[1].fish).map(([n,d])=>{
     const kgStr = d.weight ? d.weight.toFixed(1).replace('.',',') + ' kg' : '—';
-    return `<tr onclick="showLocationConditions('${n.replace(/'/g,"\\'")}')" style="cursor:pointer;">
-      <td>${n}</td><td style="text-align:center;">${d.fish}</td><td style="text-align:right;">${kgStr}</td>
+    return `<tr data-loc-cond="${esc(n)}" style="cursor:pointer;">
+      <td>${esc(n)}</td><td style="text-align:center;">${esc(d.fish)}</td><td style="text-align:right;">${esc(kgStr)}</td>
     </tr>`;
   });
   let bestSpotsHtml;
@@ -3063,7 +3150,7 @@ function renderStats(){
   }
 
   const speciesButtons = Object.keys(bySpecies).length
-    ? Object.keys(bySpecies).sort().map(n=>`<button type="button" class="species-cond-btn" onclick="showSpeciesConditions('${n.replace(/'/g,"\\'")}')">${tr(n)}</button>`).join('')
+    ? Object.keys(bySpecies).sort().map(n=>`<button type="button" class="species-cond-btn" data-species-cond="${esc(n)}">${esc(tr(n))}</button>`).join('')
     : `<div class="hint">${tr('Δεν υπάρχουν ακόμα καταγεγραμμένα είδη')}</div>`;
 
   const sections = {
@@ -3117,6 +3204,15 @@ function moveStatsSection(key, direction){
   renderStats();
 }
 window.moveStatsSection = moveStatsSection;
+// Τα πατήματα σε καταχωρήσεις/σημεία/είδη δεν γράφουν πια κώδικα μέσα στο κείμενο της σελίδας·
+// το όνομα ή ο αριθμός μένει ως απλό χαρακτηριστικό (data-) και διαβάζεται εδώ με ασφάλεια.
+document.addEventListener('click', (ev)=>{
+  const t = ev.target.closest && ev.target.closest('[data-open-detail],[data-loc-cond],[data-species-cond]');
+  if(!t) return;
+  if(t.dataset.openDetail !== undefined) openDetail(Number(t.dataset.openDetail));
+  else if(t.dataset.locCond !== undefined) window.showLocationConditions(t.dataset.locCond);
+  else if(t.dataset.speciesCond !== undefined) window.showSpeciesConditions(t.dataset.speciesCond);
+});
 
 /* ---------- prediction: best upcoming time to fish ---------- */
 async function predictBestTime(){
@@ -3225,8 +3321,8 @@ async function predictBestTime(){
     resultEl.innerHTML = `<div class="condition-card">
       <div class="condition-title">🔮 ${tr('Πιθανή καλύτερη στιγμή')}</div>
       <div class="condition-line">${dayName}, ${dateStr} ${currentLang==='en' ? 'around' : 'γύρω στις'} ${hourStr}</div>
-      <div class="condition-line">📍 ${bestLocName}</div>
-      ${bestSpecies ? `<div class="condition-line">🐟 ${tr('Πιθανό είδος:')} ${tr(bestSpecies[0])}</div>` : ''}
+      <div class="condition-line">📍 ${esc(bestLocName)}</div>
+      ${bestSpecies ? `<div class="condition-line">🐟 ${tr('Πιθανό είδος:')} ${esc(tr(bestSpecies[0]))}</div>` : ''}
       ${moonLine}
       <div class="condition-line" style="opacity:0.75; font-size:0.8rem;">${tr('Εκτίμηση βάσει του δικού σου ιστορικού και της πρόγνωσης καιρού — όχι εγγύηση.')}</div>
     </div>`;
@@ -3527,7 +3623,7 @@ function computeBestConditions(name){
 }
 function formatBestConditions(name, info){
   if(!info || info.relevant.length === 0){
-    return `<div class="hint">${currentLang==="en" ? `Not enough data for ${tr(name)}` : `Δεν υπάρχουν αρκετά δεδομένα για ${name}`}</div>`;
+    return `<div class="hint">${currentLang==="en" ? `Not enough data for ${esc(tr(name))}` : `Δεν υπάρχουν αρκετά δεδομένα για ${esc(name)}`}</div>`;
   }
   const dayNamesEL = ['Κυριακή','Δευτέρα','Τρίτη','Τετάρτη','Πέμπτη','Παρασκευή','Σάββατο'];
   const dayNamesEN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -3537,7 +3633,7 @@ function formatBestConditions(name, info){
     const top = info.topDays.slice(0,2).map(d=>d.i).sort((a,b)=>a-b);
     dayStr = top.length === 1 ? dayNames[top[0]] : `${dayNames[top[0]]}–${dayNames[top[top.length-1]]}`;
   }
-  const windStr = info.bestWindDir ? `${tr(info.bestWindDir[0])} ${tr('άνεμος')}${info.beaufortMin!=null ? ' '+info.beaufortMin+'–'+info.beaufortMax+' Bf' : ''}` : null;
+  const windStr = info.bestWindDir ? `${esc(tr(info.bestWindDir[0]))} ${tr('άνεμος')}${info.beaufortMin!=null ? ' '+esc(info.beaufortMin)+'–'+esc(info.beaufortMax)+' Bf' : ''}` : null;
   const waveVal = (v)=> currentLang === 'en' ? v.toFixed(1) : v.toFixed(1).replace('.',',');
   const waveStr = info.waveMin != null ? `${tr('κύμα')} ${waveVal(info.waveMin)}–${waveVal(info.waveMax)} m` : null;
   let tideStr = null;
@@ -3552,7 +3648,7 @@ function formatBestConditions(name, info){
       tideStr = `${numStr} ${roundedMin===1?'ώρα':'ώρες'} ${info.avgTideDiff < 0 ? 'πριν' : 'μετά'} την πλημμυρίδα`;
     }
   }
-  const baitStr = info.bestBait ? `${tr('δόλωμα:')} ${tr(info.bestBait[0])}` : null;
+  const baitStr = info.bestBait ? `${tr('δόλωμα:')} ${esc(tr(info.bestBait[0]))}` : null;
   let weightStr = null;
   if(info.avgWeightPerFish != null){
     const wv = currentLang === 'en' ? info.avgWeightPerFish.toFixed(2) : info.avgWeightPerFish.toFixed(2).replace('.',',');
@@ -3565,7 +3661,7 @@ function formatBestConditions(name, info){
     ? `Based on ${info.relevant.length} trip${info.relevant.length===1?'':'s'}${info.relevant.length < 3 ? ' — still limited data, take with a grain of salt' : ''}`
     : `Βάσει ${info.relevant.length} εξόρμηση${info.relevant.length===1?'ς':'σεων'}${info.relevant.length < 3 ? ' — ακόμα λίγα δεδομένα, πάρ' + "'" + 'το με επιφύλαξη' : ''}`;
   return `<div class="condition-card">
-    <div class="condition-title">🎯 ${currentLang==='en' ? `Your best condition for ${tr(name)}` : `Η καλύτερή σου συνθήκη για ${name}`}</div>
+    <div class="condition-title">🎯 ${currentLang==='en' ? `Your best condition for ${esc(tr(name))}` : `Η καλύτερή σου συνθήκη για ${esc(name)}`}</div>
     ${lines.map(l=>`<div class="condition-line">${l}</div>`).join('')}
     <div class="condition-line" style="opacity:0.7; font-size:0.78rem;">${sampleNote}</div>
   </div>`;
@@ -3596,16 +3692,16 @@ window.showLocationConditions = function(locName){
   const bestBucketIdx = maxBucket > 0 ? hourBuckets.indexOf(maxBucket) : -1;
   const hourLabel = bestBucketIdx >= 0 ? `${String(bestBucketIdx*3).padStart(2,'0')}:00–${String(bestBucketIdx*3+3).padStart(2,'0')}:00` : null;
   const lines = [
-    topWx ? `${tr(topWx[0])}` : null,
-    topWind ? `${tr('Άνεμος')} ${tr(topWind[0])}` : null,
+    topWx ? `${esc(tr(topWx[0]))}` : null,
+    topWind ? `${tr('Άνεμος')} ${esc(tr(topWind[0]))}` : null,
     hourLabel ? `${tr('Καλύτερη ώρα:')} ${hourLabel}` : null
   ].filter(Boolean);
   const sampleNote = currentLang === 'en'
     ? `Based on ${relevant.length} trip${relevant.length===1?'':'s'} here${relevant.length < 3 ? ' — still limited data' : ''}`
     : `Βάσει ${relevant.length} εξόρμηση${relevant.length===1?'ς':'σεων'} εδώ${relevant.length < 3 ? ' — ακόμα λίγα δεδομένα' : ''}`;
   resultEl.innerHTML = `<div class="condition-card">
-    <div class="condition-title">📍 ${locName}</div>
-    ${locationNote ? `<div class="condition-line" style="font-style:italic; opacity:0.85;">📝 ${locationNote}</div>` : ''}
+    <div class="condition-title">📍 ${esc(locName)}</div>
+    ${locationNote ? `<div class="condition-line" style="font-style:italic; opacity:0.85;">📝 ${esc(locationNote)}</div>` : ''}
     ${lines.map(l=>`<div class="condition-line">${l}</div>`).join('')}
     <div class="condition-line" style="opacity:0.7; font-size:0.78rem;">${sampleNote}</div>
   </div>`;
@@ -3795,7 +3891,7 @@ async function loadFishidPhotos(){
 }
 function renderFishidGrid(){
   const grid = document.getElementById('fishid-photo-grid');
-  grid.innerHTML = fishidPhotos.map((p,i)=>`<div class="photo-thumb" data-idx="${i}"><img src="${p.dataUrl}"><button type="button" class="ask-ai" data-idx="${i}">🔎 AI</button><button type="button" class="save-local" data-idx="${i}">💾</button><button type="button" class="rm" data-idx="${i}">✕</button></div>`).join('');
+  grid.innerHTML = fishidPhotos.map((p,i)=>`<div class="photo-thumb" data-idx="${i}"><img src="${escapeAttr(p.dataUrl)}"><button type="button" class="ask-ai" data-idx="${i}">🔎 AI</button><button type="button" class="save-local" data-idx="${i}">💾</button><button type="button" class="rm" data-idx="${i}">✕</button></div>`).join('');
   grid.querySelectorAll('img').forEach((img,i)=>{ img.addEventListener('click', ()=>openPhotoViewer(fishidPhotos[i].dataUrl)); });
   grid.querySelectorAll('.ask-ai').forEach(btn=>{
     btn.addEventListener('click', (ev)=>{
