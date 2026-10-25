@@ -7,13 +7,13 @@
      αποθηκεύονται, πάνε πάντα κατευθείαν στο δίκτυο.
 */
 
-const VERSION = 'fishiq-v1';
+const VERSION = 'fishiq-v2';
 const CORE = VERSION + '-core';
 const ASSETS = VERSION + '-assets';
 
 const PRECACHE = [
   './',
-  './index.html',
+  './index.html','./plaisio.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
