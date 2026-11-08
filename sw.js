@@ -13,7 +13,7 @@ const ASSETS = VERSION + '-assets';
 
 const PRECACHE = [
   './',
-  './index.html','./plaisio.js','./efarmoges-mas.js','./metafora-rythmisi.js?v=5.25','./metafora-lipsi.js?v=5.25',
+  './index.html','./plaisio.js','./efarmoges-mas.js','./metafora-rythmisi.js?v=5.26','./metafora-lipsi.js?v=5.26',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
