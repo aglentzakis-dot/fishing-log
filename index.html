@@ -2,10 +2,10 @@
 <html lang="el">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="5.23">
+<meta name="app-version" content="5.24">
 <script src="plaisio.js"></script>
-<script src="metafora-rythmisi.js?v=5.23"></script>
-<script src="metafora-lipsi.js?v=5.23"></script>
+<script src="metafora-rythmisi.js?v=5.24"></script>
+<script src="metafora-lipsi.js?v=5.24"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Fish IQ</title>
 <link rel="manifest" href="manifest.json">
@@ -239,6 +239,8 @@
   .photo-viewer.show{ display:flex; }
   .photo-viewer img{ max-width:92%; max-height:85%; border-radius:8px; }
   .photo-viewer .pv-close{ position:absolute; top:20px; right:20px; background:none; border:none; color:#fff; font-size:2rem; cursor:pointer; }
+  .efm-newdot{ display:inline-block; width:9px; height:9px; border-radius:50%; background:#FDD117; box-shadow:0 0 0 2px #EF9F0255; margin-left:6px; vertical-align:middle; }
+  .efm-newdot[hidden]{ display:none; }
 </style>
 </head>
 <body>
@@ -531,8 +533,13 @@
 
     </div>
 
+    <div class="card" id="efm-card">
+      <h2>🧩 Οι εφαρμογές μας <i class="efm-newdot" id="efm-newdot" aria-label="νέο" hidden></i></h2>
+      <div id="efm-page"></div>
+    </div>
+
     <div class="card" style="text-align:center;">
-      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.22 · 3 Νοε 2026</p>
+      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.24 · 8 Νοε 2026</p>
       <p class="hint" id="update-status" style="margin:6px 0 0;"></p>
       <div class="footer-tools" style="margin-top:8px;">
         <button type="button" id="btn-check-update" class="i18n-plain">🔄 Έλεγχος αναβάθμισης</button>
@@ -4809,6 +4816,22 @@ if('serviceWorker' in navigator){
       pushBackEntry();
     }
   });
+})();
+</script>
+<script src="efarmoges-mas.js"></script>
+<script>
+/* «Οι εφαρμογές μας» — κοινό efarmoges-mas.js (ίδια σελίδα σε όλες τις εφαρμογές GlenApps) */
+(function(){
+  try{
+    var E=window.EfarmogesMas; if(!E) return;
+    E.init({app:'fishiq', lang:function(){ try{ return typeof currentLang!=='undefined'?currentLang:'el'; }catch(e){ return 'el'; } }});
+    E.page(document.getElementById('efm-page'));
+    var dot=document.getElementById('efm-newdot'), seen=false;
+    try{ seen=localStorage.getItem('efm-new-seen')==='1'; }catch(e){}
+    if(dot && !seen) dot.hidden=false;
+    var tab=document.querySelector('nav.tabs [data-view="settings"]');
+    if(tab) tab.addEventListener('click',function(){ setTimeout(function(){ try{ localStorage.setItem('efm-new-seen','1'); }catch(e){} },4000); });
+  }catch(e){}
 })();
 </script>
 </body>
