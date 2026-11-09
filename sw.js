@@ -7,13 +7,24 @@
      αποθηκεύονται, πάνε πάντα κατευθείαν στο δίκτυο.
 */
 
-const VERSION = 'fishiq-v5.25';
+/* ΚΑΝΟΝΑΣ GlenApps (10/11/2026): η εφαρμογή ανοίγει αμέσως από τη συσκευή· δίκτυο το πολύ 3″ — ΜΗΝ αφαιρεθεί.
+   gaNet(δίκτυο, αποθήκη, συμβάν): αν το δίκτυο δεν απαντήσει σε 3″ και υπάρχει αποθηκευμένο αντίγραφο, δίνεται αυτό
+   (το δίκτυο συνεχίζει στο παρασκήνιο και ενημερώνει την αποθήκη)· μετά από καθυστέρηση, για 30″ όλα κατευθείαν από τη συσκευή.
+   Σφάλμα διακομιστή (5xx) δεν αντικαθιστά το αποθηκευμένο. Οι αναβαθμίσεις έρχονται όπως πριν (νέο όνομα αποθήκης σε κάθε έκδοση). */
+var GA_MS=3000,gaSlow=0;
+function gaNet(net,fromCache,ev){var p=Promise.resolve(net);try{ev&&ev.waitUntil&&ev.waitUntil(p.catch(function(){}))}catch(x){}
+  function fc(){try{return Promise.resolve(fromCache()).catch(function(){})}catch(x){return Promise.resolve()}}
+  if(Date.now()<gaSlow)return fc().then(function(c){return c||p});
+  return new Promise(function(ok){var done=false,t;function fin(r){if(!done){done=true;clearTimeout(t);ok(r)}}
+    t=setTimeout(function(){fc().then(function(c){if(c){gaSlow=Date.now()+30000;fin(c)}})},GA_MS);
+    p.then(function(r){if(r&&r.status>=500)fc().then(function(c){fin(c||r)});else fin(r)},function(){fc().then(function(c){fin(c||Response.error())})});});}
+const VERSION = 'fishiq-v5.27';
 const CORE = VERSION + '-core';
 const ASSETS = VERSION + '-assets';
 
 const PRECACHE = [
   './',
-  './index.html','./plaisio.js','./efarmoges-mas.js','./metafora-rythmisi.js?v=5.26','./metafora-lipsi.js?v=5.26',
+  './index.html','./plaisio.js','./efarmoges-mas.js','./metafora-rythmisi.js?v=5.27','./metafora-lipsi.js?v=5.27',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
@@ -87,17 +98,16 @@ self.addEventListener('fetch', event => {
 
   // Άνοιγμα της εφαρμογής: δίκτυο πρώτα
   if (req.mode === 'navigate') {
-    event.respondWith(
+    event.respondWith(gaNet(
       fetch(req)
         .then(res => {
           const copy = res.clone();
           caches.open(CORE).then(c => c.put('./index.html', copy)).catch(() => {});
           return res;
         })
-        .catch(() =>
+        ,() =>
           caches.match('./index.html').then(hit => hit || caches.match('./'))
-        )
-    );
+        ,event));
     return;
   }
 
