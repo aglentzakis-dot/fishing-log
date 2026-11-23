@@ -2,7 +2,7 @@
 <html lang="el">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="5.29">
+<meta name="app-version" content="5.30">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Fish IQ</title>
 <link rel="manifest" href="manifest.json">
@@ -185,18 +185,18 @@
   .star-picker{ font-size:1.8rem; letter-spacing:4px; cursor:pointer; user-select:none; }
   .star-picker span.filled{ color:#f4c542; }
   .star-picker span{ color:#c9c2b0; }
-  .spots-card{ background:linear-gradient(180deg,#fff,#f7f3e8); border:1px solid var(--sand); }
-  .spot-list{ display:flex; flex-direction:column; gap:8px; margin-top:8px; }
-  .spot-row{ display:flex; align-items:center; gap:10px; background:var(--white); border:1px solid var(--line); border-radius:14px; padding:8px 8px 8px 10px; box-shadow:0 1px 3px rgba(11,59,76,0.08); }
-  .spot-main{ display:flex; align-items:center; gap:10px; flex:1; min-width:0; cursor:pointer; }
-  .spot-rank{ font-size:1.5rem; width:34px; text-align:center; flex:none; }
-  .spot-num{ display:inline-block; width:26px; height:26px; line-height:26px; border-radius:50%; background:var(--foam); color:var(--deep); font-size:0.85rem; font-weight:700; }
+  .spots-card{ background:linear-gradient(180deg,#fff,#f7f3e8); border:1px solid var(--sand); padding-top:10px; padding-bottom:10px; }
+  .spot-list{ display:flex; flex-direction:column; gap:5px; margin-top:6px; }
+  .spot-row{ display:flex; align-items:center; gap:8px; background:var(--white); border:1px solid var(--line); border-radius:10px; padding:4px 6px 4px 8px; box-shadow:0 1px 2px rgba(11,59,76,0.07); }
+  .spot-main{ display:flex; align-items:center; gap:7px; flex:1; min-width:0; cursor:pointer; }
+  .spot-rank{ font-size:1.1rem; width:24px; text-align:center; flex:none; line-height:1; }
+  .spot-num{ display:inline-block; width:20px; height:20px; line-height:20px; border-radius:50%; background:var(--foam); color:var(--deep); font-size:0.72rem; font-weight:700; }
   .spot-info{ flex:1; min-width:0; }
-  .spot-name{ font-weight:700; color:var(--deep); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .spot-bar{ height:6px; border-radius:3px; background:var(--foam); margin:5px 0 4px; overflow:hidden; }
-  .spot-bar i{ display:block; height:100%; border-radius:3px; background:linear-gradient(90deg,var(--teal),var(--coral)); }
-  .spot-sub{ font-size:0.76rem; color:#6d8087; }
-  .spot-pin{ flex:none; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.3rem; text-decoration:none; background:var(--coral); box-shadow:0 2px 6px rgba(226,101,63,0.4); }
+  .spot-name{ font-weight:700; font-size:0.88rem; line-height:1.2; color:var(--deep); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .spot-bar{ height:4px; border-radius:2px; background:var(--foam); margin:2px 0 2px; overflow:hidden; }
+  .spot-bar i{ display:block; height:100%; border-radius:2px; background:linear-gradient(90deg,var(--teal),var(--coral)); }
+  .spot-sub{ font-size:0.7rem; line-height:1.2; color:#6d8087; }
+  .spot-pin{ flex:none; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.9rem; text-decoration:none; background:var(--coral); box-shadow:0 1px 3px rgba(226,101,63,0.4); }
   .spot-pin:active{ transform:scale(0.92); }
   .spot-pin.off{ background:var(--line); box-shadow:none; opacity:0.55; }
   .best-spots-table{ width:100%; border-collapse:collapse; font-size:0.9rem; }
@@ -554,7 +554,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.29 · 23 Νοε 2026</p>
+      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.30 · 23 Νοε 2026</p>
       <p class="hint" id="update-status" style="margin:6px 0 0;"></p>
       <div class="footer-tools" style="margin-top:8px;">
         <button type="button" id="btn-check-update" class="i18n-plain">🔄 Έλεγχος αναβάθμισης</button>
