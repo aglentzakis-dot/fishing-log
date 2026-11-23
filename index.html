@@ -2,7 +2,7 @@
 <html lang="el">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="5.33">
+<meta name="app-version" content="5.34">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Fish IQ</title>
 <link rel="manifest" href="manifest.json">
@@ -555,7 +555,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.33 · 23 Νοε 2026</p>
+      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.34 · 23 Νοε 2026</p>
       <p class="hint" id="update-status" style="margin:6px 0 0;"></p>
       <div class="footer-tools" style="margin-top:8px;">
         <button type="button" id="btn-check-update" class="i18n-plain">🔄 Έλεγχος αναβάθμισης</button>
@@ -1004,6 +1004,7 @@ const GR_TO_EN = {
   "Δοκιμαστική έκδοση (beta)":"Beta version","προσθέτουμε συνεχώς νέα στοιχεία και τη βελτιώνουμε.":"we're continuously adding new features and improving it.",
   "Τα αρχεία (χωρίς τις φωτογραφίες) φυλάσσονται για 3 μήνες μετά το backup, από τον προγραμματιστή της εφαρμογής.":"Files (excluding photos) are kept for 3 months after backup, by the app's developer.",
   "Η εφαρμογή παρέχεται όπως είναι (χωρίς εγγύηση), χωρίς καμία ευθύνη για τυχόν απώλεια δεδομένων, από οποιαδήποτε αιτία (διαγραφή browser, βλάβη συσκευής, τεχνικό πρόβλημα κ.ά.). Συνιστάται τακτική εξαγωγή/αποθήκευση από τον ίδιο τον χρήστη.":"The app is provided as-is (no warranty), with no liability for any data loss, from any cause (browser data clearing, device failure, technical issue, etc.). Regular export/backup by the user is recommended.",
+  "Η εφαρμογή παρέχεται όπως είναι (χωρίς εγγύηση), χωρίς καμία ευθύνη για τυχόν απώλεια δεδομένων, από οποιαδήποτε αιτία (απεγκατάσταση της εφαρμογής, βλάβη συσκευής, τεχνικό πρόβλημα κ.ά.). Συνιστάται τακτική εξαγωγή/αποθήκευση από τον ίδιο τον χρήστη.":"The app is provided as-is (no warranty), with no liability for any data loss, from any cause (uninstalling the app, device failure, technical issue, etc.). Regular export/backup by the user is recommended.",
   "Αν κάποια λειτουργία δεν φορτώνει σωστά (π.χ. καιρός, χάρτης, τοποθεσία), δοκίμασε να ανοίξεις την εφαρμογή σε άλλο browser (π.χ.":"If a feature doesn't load correctly (e.g. weather, map, location), try opening the app in a different browser (e.g.","— μερικοί browsers περιορίζουν αυτού του τύπου τις λειτουργίες.":"— some browsers restrict this type of functionality.",
   "Διαγραφή όλων":"Delete all",
   "Τοποθεσίες ανά καιρό":"Locations by weather","Δεν υπάρχουν ακόμα αρκετά δεδομένα καιρού ανά τοποθεσία":"Not enough weather data per location yet",
@@ -4698,8 +4699,9 @@ function applyLanguage(lang){
   const backupFreqLabelEl = document.getElementById('i18n-backup-freq-label');
   if(backupFreqLabelEl) backupFreqLabelEl.textContent = tr('Στείλε backup κάθε');
   const disclaimerEl = document.getElementById('i18n-disclaimer-text');
-  if(disclaimerEl) disclaimerEl.textContent = tr('Η εφαρμογή παρέχεται όπως είναι (χωρίς εγγύηση), χωρίς καμία ευθύνη για τυχόν απώλεια δεδομένων, από οποιαδήποτε αιτία (διαγραφή browser, βλάβη συσκευής, τεχνικό πρόβλημα κ.ά.). Συνιστάται τακτική εξαγωγή/αποθήκευση από τον ίδιο τον χρήστη.');
+  if(disclaimerEl) disclaimerEl.textContent = tr(IS_NATIVE ? 'Η εφαρμογή παρέχεται όπως είναι (χωρίς εγγύηση), χωρίς καμία ευθύνη για τυχόν απώλεια δεδομένων, από οποιαδήποτε αιτία (απεγκατάσταση της εφαρμογής, βλάβη συσκευής, τεχνικό πρόβλημα κ.ά.). Συνιστάται τακτική εξαγωγή/αποθήκευση από τον ίδιο τον χρήστη.' : 'Η εφαρμογή παρέχεται όπως είναι (χωρίς εγγύηση), χωρίς καμία ευθύνη για τυχόν απώλεια δεδομένων, από οποιαδήποτε αιτία (διαγραφή browser, βλάβη συσκευής, τεχνικό πρόβλημα κ.ά.). Συνιστάται τακτική εξαγωγή/αποθήκευση από τον ίδιο τον χρήστη.');
   const chromeEl = document.getElementById('i18n-chrome-tip');
+  if(chromeEl && IS_NATIVE) chromeEl.style.display = 'none';
   if(chromeEl){
     chromeEl.innerHTML = lang === 'en'
       ? `💡 ${tr('Αν κάποια λειτουργία δεν φορτώνει σωστά (π.χ. καιρός, χάρτης, τοποθεσία), δοκίμασε να ανοίξεις την εφαρμογή σε άλλο browser (π.χ.')} <strong>Chrome</strong>) ${tr('— μερικοί browsers περιορίζουν αυτού του τύπου τις λειτουργίες.')}`
