@@ -57,4 +57,28 @@ if(fs.existsSync(icon)){
   }
 } else console.warn('προειδοποίηση: λείπει το icon-192.png — μένει το εικονίδιο του Capacitor');
 
+// --- σταθερό κλειδί υπογραφής (αν υπάρχει στα μυστικά του GitHub): κάθε νέο APK εγκαθίσταται πάνω στο προηγούμενο ---
+if(process.env.FISHIQ_KS && process.env.FISHIQ_PW){
+  let g2 = fs.readFileSync(gp, 'utf8');
+  g2 += `
+android {
+    signingConfigs {
+        fishiq {
+            storeFile file(System.getenv('FISHIQ_KS'))
+            storePassword System.getenv('FISHIQ_PW')
+            keyAlias 'fishiq'
+            keyPassword System.getenv('FISHIQ_PW')
+        }
+    }
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.fishiq
+        }
+    }
+}
+`;
+  fs.writeFileSync(gp, g2);
+  console.log('Υπογραφή με το σταθερό κλειδί του Fish IQ.');
+} else console.warn('προειδοποίηση: δεν υπάρχει σταθερό κλειδί — προσωρινή υπογραφή (το APK δεν θα εγκαθίσταται πάνω στο παλιό)');
+
 console.log(`Android: έκδοση ${versionName} (κωδικός ${versionCode}), άδειες και εικονίδιο ρυθμίστηκαν.`);
