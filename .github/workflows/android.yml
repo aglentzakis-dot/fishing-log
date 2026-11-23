@@ -46,11 +46,26 @@ jobs:
       - name: Συγχρονισμός
         run: npx cap sync android
 
+      - name: Σταθερό κλειδί υπογραφής
+        env:
+          KS_B64: ${{ secrets.FISHIQ_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KS_B64" ]; then
+            echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/fishiq.jks"
+            echo "FISHIQ_KS=$RUNNER_TEMP/fishiq.jks" >> "$GITHUB_ENV"
+          else
+            echo "Δεν υπάρχει κλειδί — προσωρινή υπογραφή"
+          fi
+
       - name: Άδειες, εικονίδιο, έκδοση
+        env:
+          FISHIQ_PW: ${{ secrets.FISHIQ_KEY_PASSWORD }}
         run: node android-patch.mjs
 
       - name: Μεταγλώττιση APK
         working-directory: android
+        env:
+          FISHIQ_PW: ${{ secrets.FISHIQ_KEY_PASSWORD }}
         run: ./gradlew assembleDebug --no-daemon
 
       - name: Όνομα αρχείου
