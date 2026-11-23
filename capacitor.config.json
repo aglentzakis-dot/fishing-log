@@ -1,0 +1,11 @@
+{
+  "appId": "io.github.aglentzakisdot.fishiq",
+  "appName": "Fish IQ",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

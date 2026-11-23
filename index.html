@@ -2,7 +2,7 @@
 <html lang="el">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="5.27">
+<meta name="app-version" content="5.28">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Fish IQ</title>
 <link rel="manifest" href="manifest.json">
@@ -540,7 +540,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.27 · 10 Νοε 2026</p>
+      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.28 · 23 Νοε 2026</p>
       <p class="hint" id="update-status" style="margin:6px 0 0;"></p>
       <div class="footer-tools" style="margin-top:8px;">
         <button type="button" id="btn-check-update" class="i18n-plain">🔄 Έλεγχος αναβάθμισης</button>
@@ -798,6 +798,22 @@
 </div>
 
 <script>
+/* ---------- λειτουργία εφαρμογής Android (Capacitor) ---------- */
+const IS_NATIVE = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
+function nativePlugin(name){
+  try{ return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins[name]) || null; }catch(e){ return null; }
+}
+// Στην εφαρμογή Android δεν δουλεύουν οι «λήψεις» αρχείων του περιηγητή· το αρχείο γράφεται στην προσωρινή
+// μνήμη και ανοίγει το μενού κοινοποίησης του Android (Αποθήκευση στο Drive, Λήψεις, email κ.λπ.).
+async function saveFileNative(filename, data, opts){
+  const Filesystem = nativePlugin('Filesystem'), Share = nativePlugin('Share');
+  if(!Filesystem || !Share) throw new Error('noplugin');
+  const w = { path: filename, data, directory: 'CACHE' };
+  if(!(opts && opts.base64)) w.encoding = 'utf8';
+  const r = await Filesystem.writeFile(w);
+  await Share.share({ title: filename, url: r.uri, dialogTitle: (opts && opts.dialogTitle) || filename });
+}
+
 /* ---------- storage helpers ---------- */
 const LS = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
@@ -811,6 +827,10 @@ const DEFAULTS = {
 let currentLang = LS.get('psarema_lang', 'el');
 /* ---------- literal-text dictionary: bait/species/technique/weather/wind/moon/tide/pressure/toasts/titles ---------- */
 const GR_TO_EN = {
+  "Αναγνώριση ψαριού":"Fish identification",
+  "Η εξαγωγή απέτυχε — δοκίμασε ξανά":"Export failed — try again",
+  "Αποθήκευση φωτογραφίας":"Save photo",
+  "Αποθήκευση αντιγράφου":"Save backup",
   "Ο χάρτης δεν φορτώθηκε — έλεγξε τη σύνδεσή σου και δοκίμασε ξανά":"The map did not load — check your connection and try again",
   "Οι εφαρμογές μας":"Our apps",
   "Η λίστα φορτώνεται από το διαδίκτυο μόνο όταν ανοίγεις αυτή τη σελίδα. Δεν στέλνουμε κανένα δικό σου δεδομένο.":"The list is loaded from the internet only when you open this page. We send none of your data.",
@@ -3753,10 +3773,18 @@ document.getElementById('btn-export').addEventListener('click', async ()=>{
     }
   }
   const data = { entries, species, baits, equips, anglers, locations, photos, exportedAt: new Date().toISOString() };
+  const fname = 'psarema-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  if(IS_NATIVE){
+    try{ await saveFileNative(fname, JSON.stringify(data, null, 2), { dialogTitle: tr('Αποθήκευση αντιγράφου') }); }
+    catch(err){
+      if(!(err && /cancel/i.test(String(err.message || err)))){ console.error(err); toast(tr('Η εξαγωγή απέτυχε — δοκίμασε ξανά')); }
+    }
+    return;
+  }
   const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'psarema-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.href = url; a.download = fname;
   a.click(); URL.revokeObjectURL(url);
 });
 
@@ -4038,7 +4066,15 @@ function renderFishidGrid(){
     });
   });
 }
-function saveFishidPhotoToGallery(dataUrl){
+async function saveFishidPhotoToGallery(dataUrl){
+  if(IS_NATIVE){
+    try{
+      await saveFileNative('psari_' + Date.now() + '.jpg', String(dataUrl).split(',')[1] || '', { base64:true, dialogTitle: tr('Αποθήκευση φωτογραφίας') });
+    }catch(err){
+      if(!(err && /cancel/i.test(String(err.message || err)))){ console.error(err); toast(tr('Αποτυχία αποθήκευσης στη Συλλογή')); }
+    }
+    return;
+  }
   try{
     const a = document.createElement('a');
     a.href = dataUrl;
@@ -4054,6 +4090,15 @@ async function askAIAboutPhoto(dataUrl){
     ? 'What fish species is this? Tell me the species name and how confident you are.'
     : 'Τι ψάρι είναι αυτό; Πες μου το είδος (ελληνικό όνομα) και πόσο σίγουρος/η είσαι.';
   try{
+    if(IS_NATIVE){
+      // Εφαρμογή Android: το αρχείο γράφεται στην προσωρινή μνήμη και ανοίγει το μενού κοινοποίησης του Android
+      const Filesystem = nativePlugin('Filesystem'), Share = nativePlugin('Share');
+      if(Filesystem && Share){
+        const w = await Filesystem.writeFile({ path: 'psari_' + Date.now() + '.jpg', data: String(dataUrl).split(',')[1] || '', directory: 'CACHE' });
+        await Share.share({ text: promptText, url: w.uri, dialogTitle: tr('Αναγνώριση ψαριού') });
+        return;
+      }
+    }
     const res = await fetch(dataUrl);
     const blob = await res.blob();
     const file = new File([blob], 'psari.jpg', {type:'image/jpeg'});
@@ -4795,11 +4840,17 @@ async function checkForUpdate(manual){
   }
   if(manual) btn.disabled = false;
 }
+if(IS_NATIVE){
+  // Στην εφαρμογή Android οι αναβαθμίσεις έρχονται από το Google Play — κρύβεται ο έλεγχος.
+  const ub = document.getElementById('btn-check-update'); if(ub && ub.parentElement) ub.parentElement.style.display = 'none';
+  const us = document.getElementById('update-status'); if(us) us.style.display = 'none';
+  const sb = document.getElementById('shared-backup-card'); if(sb) sb.style.display = 'none';
+}
 document.getElementById('btn-check-update').addEventListener('click', ()=> checkForUpdate(true));
 // Αυτόματος έλεγχος λίγο μετά το άνοιγμα (πριν προλάβει ο χρήστης να γράψει κάτι)
-setTimeout(()=>{ if(navigator.onLine) checkForUpdate(false); }, 2500);
+setTimeout(()=>{ if(!IS_NATIVE && navigator.onLine) checkForUpdate(false); }, 2500);
 
-if('serviceWorker' in navigator){
+if(!IS_NATIVE && 'serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 
