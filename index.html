@@ -2,7 +2,7 @@
 <html lang="el">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="5.30">
+<meta name="app-version" content="5.31">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Fish IQ</title>
 <link rel="manifest" href="manifest.json">
@@ -554,7 +554,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.30 · 23 Νοε 2026</p>
+      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.31 · 23 Νοε 2026</p>
       <p class="hint" id="update-status" style="margin:6px 0 0;"></p>
       <div class="footer-tools" style="margin-top:8px;">
         <button type="button" id="btn-check-update" class="i18n-plain">🔄 Έλεγχος αναβάθμισης</button>
@@ -3300,7 +3300,7 @@ document.addEventListener('click', (ev)=>{
   const t = ev.target.closest && ev.target.closest('[data-open-detail],[data-loc-cond],[data-species-cond]');
   if(!t) return;
   if(t.dataset.openDetail !== undefined) openDetail(Number(t.dataset.openDetail));
-  else if(t.dataset.locCond !== undefined) window.showLocationConditions(t.dataset.locCond);
+  else if(t.dataset.locCond !== undefined) window.showLocationConditions(t.dataset.locCond, t);
   else if(t.dataset.speciesCond !== undefined) window.showSpeciesConditions(t.dataset.speciesCond);
 });
 
@@ -3760,11 +3760,17 @@ window.showSpeciesConditions = function(name){
   const info = computeBestConditions(name);
   document.getElementById('species-cond-result').innerHTML = formatBestConditions(name, info);
 };
-window.showLocationConditions = function(locName){
-  const resultEl = document.getElementById('location-cond-result');
-  if(!resultEl) return;
+window.showLocationConditions = function(locName, rowEl){
+  // Το πλαίσιο ανοίγει ακριβώς κάτω από τη γραμμή που πατήθηκε· νέο πάτημα στην ίδια γραμμή το κλείνει.
+  const row = rowEl && rowEl.closest ? rowEl.closest('.spot-row') : null;
+  const prev = document.querySelector('.loc-cond-inline');
+  const sameRow = !!(prev && row && prev.previousElementSibling === row);
+  if(prev) prev.remove();
+  if(sameRow) return;
+  const resultEl = document.createElement('div');
+  resultEl.className = 'loc-cond-inline';
   const relevant = entries.filter(e => (e.locName || '') === locName);
-  if(!relevant.length){ resultEl.innerHTML = ''; return; }
+  if(!relevant.length) return;
   const locationNote = findLocationNote(locName);
   const weatherCounts = {}, windCounts = {}, hourBuckets = new Array(8).fill(0);
   relevant.forEach(e=>{
@@ -3795,6 +3801,8 @@ window.showLocationConditions = function(locName){
     ${lines.map(l=>`<div class="condition-line">${l}</div>`).join('')}
     <div class="condition-line" style="opacity:0.7; font-size:0.78rem;">${sampleNote}</div>
   </div>`;
+  if(row && row.parentNode) row.parentNode.insertBefore(resultEl, row.nextSibling);
+  else { const hold = document.getElementById('location-cond-result'); if(hold) hold.appendChild(resultEl); }
 };
 
 /* ---------- export / import / clear ---------- */
