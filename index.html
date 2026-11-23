@@ -2,7 +2,7 @@
 <html lang="el">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="5.35">
+<meta name="app-version" content="5.36">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Fish IQ</title>
 <link rel="manifest" href="manifest.json">
@@ -174,6 +174,17 @@
   .species-cond-btn{ background: var(--foam); border:1.5px solid var(--line); color:var(--deep); border-radius:20px; padding:8px 14px; font-size:0.85rem; font-weight:600; cursor:pointer; }
   .species-cond-btn:active{ background: var(--teal); color:#fff; }
   .condition-card{ background: var(--deep); color:#fff; border-radius:12px; padding:16px; margin-top:6px; }
+  .loc-tabs{ display:flex; gap:6px; margin:6px 0; }
+  .loc-tabs button{ flex:1; padding:8px 6px; border-radius:10px; border:1.5px solid var(--line, #cfd8dc); background:transparent; font:inherit; font-weight:600; color:inherit; cursor:pointer; }
+  .loc-tabs button.on{ background:var(--deep); color:#fff; border-color:var(--deep); }
+  .loc-filters{ display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px; }
+  .loc-filters select{ width:100%; min-width:0; font-size:0.85rem; padding:7px 6px; }
+  .loc-trips-count{ font-size:0.78rem; opacity:0.7; margin:2px 0 4px; }
+  .loc-trips-list{ max-height:60vh; overflow-y:auto; }
+  .merge-hist{ padding:10px; margin-top:8px; }
+  .merge-hist-row{ display:flex; gap:8px; align-items:center; justify-content:space-between; padding:6px 0; border-top:1px solid rgba(0,0,0,0.08); font-size:0.88rem; }
+  .merge-hist-row:first-of-type{ border-top:none; }
+  .merge-hist-row button{ flex:none; padding:6px 10px; border-radius:10px; border:1.5px solid var(--deep); background:transparent; font:inherit; font-weight:600; cursor:pointer; color:var(--deep); }
   .condition-title{ font-family:'Bitter',serif; font-weight:700; font-size:0.95rem; margin-bottom:10px; }
   .condition-line{ font-size:0.92rem; padding:5px 0; border-top:1px solid rgba(255,255,255,0.15); }
   .condition-line:first-of-type{ border-top:none; }
@@ -555,7 +566,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.35 · 24 Νοε 2026</p>
+      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.36 · 24 Νοε 2026</p>
       <p class="hint" id="update-status" style="margin:6px 0 0;"></p>
       <div class="footer-tools" style="margin-top:8px;">
         <button type="button" id="btn-check-update" class="i18n-plain">🔄 Έλεγχος αναβάθμισης</button>
@@ -905,7 +916,7 @@ const GR_TO_EN = {
   "Τοποθεσίες":"Locations",
   "Μία σημείωση ανά τοποθεσία, ίδια σε όλες τις εξορμήσεις εκεί. Αν δύο ονόματα είναι στην ουσία το ίδιο σημείο, πάτα 🔗 για να τα ενώσεις.":"One note per location, shared by every trip there. If two names are really the same spot, tap 🔗 to merge them.",
   "Δεν υπάρχουν ακόμα τοποθεσίες — θα εμφανιστούν εδώ μόλις καταγράψεις μια εξόρμηση.":"No locations yet — they'll show up here as soon as you log a trip.",
-  "Σημείωση...":"Note...","Συγχώνευση με...":"Merge with...","Διαχείριση":"Manage",
+  "Σημείωση...":"Note...","Συνθήκες":"Conditions","Όλα τα είδη":"All species","Όλα τα δολώματα":"All baits","Όλες οι χρονιές":"All years","Πιο πρόσφατες πρώτα":"Newest first","Περισσότερα ψάρια":"Most fish","Μεγαλύτερο βάρος":"Biggest weight","Δεν υπάρχουν εξορμήσεις με αυτά τα φίλτρα":"No trips match these filters","Ιστορικό συγχωνεύσεων":"Merge history","Αναίρεση":"Undo","Η συγχώνευση αναιρέθηκε ✓":"Merge undone ✓","Να αναιρεθεί αυτή η συγχώνευση; Οι εξορμήσεις θα γυρίσουν στο αρχικό όνομα.":"Undo this merge? The trips will go back to the original name.","Εμφανίζονται":"Showing","από":"of","Συγχώνευση με...":"Merge with...","Διαχείριση":"Manage",
   "Αποθηκεύτηκε ✓":"Saved ✓","Οι τοποθεσίες συγχωνεύθηκαν ✓":"Locations merged ✓","Προστέθηκες ✓":"Added ✓",
   "Πρόσθεσε το όνομά σου":"Add your name","Πρόσθεσε άλλον ψαρά":"Add another angler",
   "Επαναφορά από κείμενο (email)":"Restore from text (email)","📋 Επαναφορά από κείμενο (email)":"📋 Restore from text (email)",
@@ -1119,6 +1130,8 @@ if(!locations){
   locations = Object.values(seen).map(l=>({ name:l.name, note:l.note||'' }));
   LS.set('psarema_locations', locations);
 }
+let mergeHistory = LS.get('psarema_merge_history', []);
+if(!Array.isArray(mergeHistory)) mergeHistory = [];
 let anglers = LS.get('psarema_anglers', []);
 let selAngler = new Set();
 let eSelAngler = new Set();
@@ -1260,7 +1273,7 @@ async function buildBackupData(){
       if(!photos[key]){ try{ const d = await idbGet(key); if(d) photos[key] = d; }catch(err){} }
     }
   }
-  return { entries, species, baits, equips, anglers, locations, photos, exportedAt: new Date().toISOString() };
+  return { entries, species, baits, equips, anglers, locations, mergeHistory, photos, exportedAt: new Date().toISOString() };
 }
 async function writeBackupToSharedFolder(silent){
   const root = await sharedBackupHandleGet('root');
@@ -1371,6 +1384,9 @@ function sanitizeBackupData(data){
   out.locations = Array.isArray(data.locations)
     ? data.locations.filter(l=>l && typeof l === 'object' && typeof l.name === 'string' && l.name.trim()).map(l=>({ name: l.name.slice(0,200), note: cleanText(l.note, 1000) }))
     : null;
+  out.mergeHistory = Array.isArray(data.mergeHistory)
+    ? data.mergeHistory.filter(m=>m && typeof m === 'object' && Number.isFinite(Number(m.t)) && typeof m.from === 'string' && typeof m.into === 'string' && Array.isArray(m.ids)).slice(-20).map(m=>({ t:Number(m.t), from:m.from.slice(0,200), into:m.into.slice(0,200), ids:m.ids.map(Number).filter(Number.isFinite).slice(0,5000), note:cleanText(m.note, 1000), noteCopied:!!m.noteCopied }))
+    : null;
   out.photos = {};
   if(data.photos && typeof data.photos === 'object' && !Array.isArray(data.photos)){
     Object.keys(data.photos).forEach(k=>{
@@ -1389,6 +1405,7 @@ async function applyRestoredData(rawData){
   if(data.equips) { equips = data.equips; LS.set('psarema_equip', equips); }
   if(data.anglers) { anglers = data.anglers; LS.set('psarema_anglers', anglers); }
   if(data.locations) { locations = data.locations; LS.set('psarema_locations', locations); }
+  if(data.mergeHistory) { mergeHistory = data.mergeHistory; LS.set('psarema_merge_history', mergeHistory); }
   if(data.photos){ for(const [key, dataUrl] of Object.entries(data.photos)){ try{ await idbPut(key, dataUrl); }catch(err){} } }
   refreshPickers();
   refreshAnglerPicker();
@@ -2065,7 +2082,7 @@ function renderLocationsManager(){
     return;
   }
   const sorted = [...locations].sort((a,b)=>a.name.localeCompare(b.name, 'el'));
-  wrap.innerHTML = sorted.map(loc=>{
+  wrap.innerHTML = mergeHistoryHtml() + sorted.map(loc=>{
     const otherOptions = sorted.filter(l=>l.name!==loc.name)
       .map(l=>`<option value="${escapeAttr(l.name)}">${esc(l.name)}</option>`).join('');
     return `<div class="stat-block" style="padding:10px; margin-top:8px;" data-loc="${escapeAttr(loc.name)}">
@@ -2081,6 +2098,12 @@ function renderLocationsManager(){
       </div>` : ''}
     </div>`;
   }).join('');
+  wrap.querySelectorAll('.loc-undo-merge').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(!confirm(tr('Να αναιρεθεί αυτή η συγχώνευση; Οι εξορμήσεις θα γυρίσουν στο αρχικό όνομα.'))) return;
+      undoMerge(Number(btn.dataset.mh));
+    });
+  });
   wrap.querySelectorAll('.loc-mgr-note').forEach(input=>{
     input.addEventListener('change', ()=>{
       const loc = findLocationName(input.dataset.loc);
@@ -2099,12 +2122,43 @@ function renderLocationsManager(){
     });
   });
 }
+function undoMerge(t){
+  const i = mergeHistory.findIndex(m=>m.t === t);
+  if(i < 0) return;
+  const m = mergeHistory[i];
+  const ids = new Set(m.ids || []);
+  entries.forEach(e=>{ if(ids.has(e.id) && (e.locName||'') === m.into) e.locName = m.from; });
+  LS.set('psarema_entries', entries);
+  if(!findLocationName(m.from)) locations.push({ name: m.from, note: m.note || '' });
+  if(m.noteCopied){ const into = findLocationName(m.into); if(into && into.note === m.note) into.note = ''; }
+  LS.set('psarema_locations', locations);
+  mergeHistory.splice(i, 1);
+  LS.set('psarema_merge_history', mergeHistory);
+  refreshLocationNamesDatalist();
+  renderLocationsManager();
+  renderEntries();
+  if(document.getElementById('view-stats').classList.contains('active')) renderStats();
+  toast('Η συγχώνευση αναιρέθηκε ✓');
+}
+function mergeHistoryHtml(){
+  if(!mergeHistory.length) return '';
+  const rows = mergeHistory.slice().reverse().map(m=>{
+    const d = new Date(m.t).toLocaleDateString(currentLang === 'en' ? 'en-GB' : 'el-GR', {day:'numeric', month:'short'});
+    return `<div class="merge-hist-row"><div>«${esc(m.from)}» → «${esc(m.into)}»<br><span style="opacity:0.65; font-size:0.78rem;">${esc(d)} · ${esc((m.ids||[]).length)} ${tr('εξορμήσεις')}</span></div><button type="button" class="loc-undo-merge" data-mh="${esc(m.t)}">↩ ${tr('Αναίρεση')}</button></div>`;
+  }).join('');
+  return `<div class="stat-block merge-hist"><div style="font-weight:700; margin-bottom:4px;">↩ ${tr('Ιστορικό συγχωνεύσεων')}</div>${rows}</div>`;
+}
 function mergeLocationsInto(fromName, intoName){
+  const movedIds = entries.filter(e=>(e.locName||'') === fromName).map(e=>e.id);
   entries.forEach(e=>{ if((e.locName||'') === fromName) e.locName = intoName; });
   LS.set('psarema_entries', entries);
   const into = findLocationName(intoName);
   const from = findLocationName(fromName);
-  if(into && from && !into.note && from.note) into.note = from.note;
+  let noteCopied = false;
+  if(into && from && !into.note && from.note){ into.note = from.note; noteCopied = true; }
+  mergeHistory.push({ t: Date.now(), from: fromName, into: intoName, ids: movedIds, note: (from && from.note) || '', noteCopied });
+  if(mergeHistory.length > 20) mergeHistory = mergeHistory.slice(-20);
+  LS.set('psarema_merge_history', mergeHistory);
   locations = locations.filter(l=>l.name !== fromName);
   LS.set('psarema_locations', locations);
   refreshLocationNamesDatalist();
@@ -3783,6 +3837,7 @@ window.showLocationConditions = function(locName, rowEl){
   resultEl.className = 'loc-cond-inline';
   const relevant = entries.filter(e => (e.locName || '') === locName);
   if(!relevant.length) return;
+  const tripState = { year:'', sp:'', bait:'', sort:'new' };
   const locationNote = findLocationNote(locName);
   const weatherCounts = {}, windCounts = {}, hourBuckets = new Array(8).fill(0);
   relevant.forEach(e=>{
@@ -3807,12 +3862,49 @@ window.showLocationConditions = function(locName, rowEl){
   const sampleNote = currentLang === 'en'
     ? `Based on ${relevant.length} trip${relevant.length===1?'':'s'} here${relevant.length < 3 ? ' — still limited data' : ''}`
     : `Βάσει ${relevant.length} εξόρμηση${relevant.length===1?'ς':'σεων'} εδώ${relevant.length < 3 ? ' — ακόμα λίγα δεδομένα' : ''}`;
-  resultEl.innerHTML = `<div class="condition-card">
+  const condHtml = `<div class="condition-card">
     <div class="condition-title">📍 ${esc(locName)}</div>
     ${locationNote ? `<div class="condition-line" style="font-style:italic; opacity:0.85;">📝 ${esc(locationNote)}</div>` : ''}
     ${lines.map(l=>`<div class="condition-line">${l}</div>`).join('')}
     <div class="condition-line" style="opacity:0.7; font-size:0.78rem;">${sampleNote}</div>
   </div>`;
+  const fishCount = e => Object.values(e.fish||{}).reduce((a,b)=>a+(Number(b)||0),0);
+  const years = [...new Set(relevant.map(e=>(e.date||'').slice(0,4)).filter(Boolean))].sort().reverse();
+  const spList = [...new Set(relevant.flatMap(e=>Object.entries(e.fish||{}).filter(([,q])=>q>0).map(([n])=>n)))].sort((a,b)=>a.localeCompare(b,'el'));
+  const baitList = [...new Set(relevant.flatMap(e=>Array.isArray(e.bait)?e.bait:[]))].sort((a,b)=>a.localeCompare(b,'el'));
+  const opt = (v, label, cur) => `<option value="${esc(v)}"${v===cur?' selected':''}>${esc(label)}</option>`;
+  const filtersHtml = `<div class="loc-filters">
+    <select data-tf="sort">${opt('new',tr('Πιο πρόσφατες πρώτα'),tripState.sort)}${opt('fish',tr('Περισσότερα ψάρια'),tripState.sort)}${opt('weight',tr('Μεγαλύτερο βάρος'),tripState.sort)}</select>
+    ${years.length>1 ? `<select data-tf="year">${opt('',tr('Όλες οι χρονιές'),'')}${years.map(y=>opt(y,y,'')).join('')}</select>` : ''}
+    ${spList.length>1 ? `<select data-tf="sp">${opt('',tr('Όλα τα είδη'),'')}${spList.map(n=>opt(n,tr(n),'')).join('')}</select>` : ''}
+    ${baitList.length>1 ? `<select data-tf="bait">${opt('',tr('Όλα τα δολώματα'),'')}${baitList.map(n=>opt(n,tr(n),'')).join('')}</select>` : ''}
+  </div><div class="loc-trips-count"></div><div class="loc-trips-list"></div>`;
+  resultEl.innerHTML = `<div class="loc-tabs"><button type="button" data-ltab="trips" class="on">${tr('Εξορμήσεις')}</button><button type="button" data-ltab="cond">${tr('Συνθήκες')}</button></div><div class="loc-tab-body"></div>`;
+  const body = resultEl.querySelector('.loc-tab-body');
+  const paintTrips = () => {
+    let list = relevant.filter(e =>
+      (!tripState.year || (e.date||'').startsWith(tripState.year)) &&
+      (!tripState.sp || ((e.fish||{})[tripState.sp] > 0)) &&
+      (!tripState.bait || (Array.isArray(e.bait) && e.bait.includes(tripState.bait))));
+    const total = list.length;
+    const byDate = (a,b) => (b.date||'').localeCompare(a.date||'') || (Number(b.id)||0) - (Number(a.id)||0);
+    if(tripState.sort === 'fish') list.sort((a,b)=> fishCount(b)-fishCount(a) || byDate(a,b));
+    else if(tripState.sort === 'weight') list.sort((a,b)=> (parseFloat(String(b.weight).replace(',','.'))||0)-(parseFloat(String(a.weight).replace(',','.'))||0) || byDate(a,b));
+    else list.sort(byDate);
+    body.querySelector('.loc-trips-count').textContent = `${tr('Εμφανίζονται')} ${total} ${tr('από')} ${relevant.length}`;
+    body.querySelector('.loc-trips-list').innerHTML = list.length ? list.map(entryCardHtml).join('') : `<div class="hint">${tr('Δεν υπάρχουν εξορμήσεις με αυτά τα φίλτρα')}</div>`;
+  };
+  const showTab = (name) => {
+    resultEl.querySelectorAll('.loc-tabs button').forEach(b=>b.classList.toggle('on', b.dataset.ltab === name));
+    if(name === 'cond'){ body.innerHTML = condHtml; }
+    else {
+      body.innerHTML = filtersHtml;
+      body.querySelectorAll('select[data-tf]').forEach(sel=>sel.addEventListener('change', ()=>{ tripState[sel.dataset.tf] = sel.value; paintTrips(); }));
+      paintTrips();
+    }
+  };
+  resultEl.querySelectorAll('.loc-tabs button').forEach(b=>b.addEventListener('click', ()=>showTab(b.dataset.ltab)));
+  showTab('trips');
   if(row && row.parentNode) row.parentNode.insertBefore(resultEl, row.nextSibling);
   else { const hold = document.getElementById('location-cond-result'); if(hold) hold.appendChild(resultEl); }
 };
@@ -3825,7 +3917,7 @@ document.getElementById('btn-export').addEventListener('click', async ()=>{
       if(!photos[key]){ try{ const d = await idbGet(key); if(d) photos[key] = d; }catch(err){} }
     }
   }
-  const data = { entries, species, baits, equips, anglers, locations, photos, exportedAt: new Date().toISOString() };
+  const data = { entries, species, baits, equips, anglers, locations, mergeHistory, photos, exportedAt: new Date().toISOString() };
   const fname = 'psarema-backup-' + new Date().toISOString().slice(0,10) + '.json';
   if(IS_NATIVE){
     try{ await saveFileNative(fname, JSON.stringify(data, null, 2), { dialogTitle: tr('Αποθήκευση αντιγράφου') }); }
@@ -4360,6 +4452,8 @@ document.getElementById('btn-clear').addEventListener('click', ()=>{
   LS.set('psarema_entries', entries);
   locations = [];
   LS.set('psarema_locations', locations);
+  mergeHistory = [];
+  LS.set('psarema_merge_history', mergeHistory);
   refreshLocationNamesDatalist();
   toast('Όλα τα δεδομένα διαγράφηκαν');
   renderEntries();
