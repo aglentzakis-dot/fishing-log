@@ -18,7 +18,7 @@ function gaNet(net,fromCache,ev){var p=Promise.resolve(net);try{ev&&ev.waitUntil
   return new Promise(function(ok){var done=false,t;function fin(r){if(!done){done=true;clearTimeout(t);ok(r)}}
     t=setTimeout(function(){fc().then(function(c){if(c){gaSlow=Date.now()+30000;fin(c)}})},GA_MS);
     p.then(function(r){if(r&&r.status>=500)fc().then(function(c){fin(c||r)});else fin(r)},function(){fc().then(function(c){fin(c||Response.error())})});});}
-const VERSION = 'fishiq-v5.28';
+const VERSION = 'fishiq-v5.29';
 const CORE = VERSION + '-core';
 const ASSETS = VERSION + '-assets';
 
@@ -29,7 +29,7 @@ const PRECACHE = [
   './icon-192.png',
   './icon-512.png',
   './favicon-32.png',
-  './apple-touch-icon.png'
+  './apple-touch-icon.png','./header-presets/preset-2.jpg'
 ];
 
 // Τομείς που δεν πρέπει ποτέ να μπουν σε προσωρινή μνήμη

@@ -2,7 +2,7 @@
 <html lang="el">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="5.28">
+<meta name="app-version" content="5.29">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Fish IQ</title>
 <link rel="manifest" href="manifest.json">
@@ -185,6 +185,20 @@
   .star-picker{ font-size:1.8rem; letter-spacing:4px; cursor:pointer; user-select:none; }
   .star-picker span.filled{ color:#f4c542; }
   .star-picker span{ color:#c9c2b0; }
+  .spots-card{ background:linear-gradient(180deg,#fff,#f7f3e8); border:1px solid var(--sand); }
+  .spot-list{ display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+  .spot-row{ display:flex; align-items:center; gap:10px; background:var(--white); border:1px solid var(--line); border-radius:14px; padding:8px 8px 8px 10px; box-shadow:0 1px 3px rgba(11,59,76,0.08); }
+  .spot-main{ display:flex; align-items:center; gap:10px; flex:1; min-width:0; cursor:pointer; }
+  .spot-rank{ font-size:1.5rem; width:34px; text-align:center; flex:none; }
+  .spot-num{ display:inline-block; width:26px; height:26px; line-height:26px; border-radius:50%; background:var(--foam); color:var(--deep); font-size:0.85rem; font-weight:700; }
+  .spot-info{ flex:1; min-width:0; }
+  .spot-name{ font-weight:700; color:var(--deep); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .spot-bar{ height:6px; border-radius:3px; background:var(--foam); margin:5px 0 4px; overflow:hidden; }
+  .spot-bar i{ display:block; height:100%; border-radius:3px; background:linear-gradient(90deg,var(--teal),var(--coral)); }
+  .spot-sub{ font-size:0.76rem; color:#6d8087; }
+  .spot-pin{ flex:none; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.3rem; text-decoration:none; background:var(--coral); box-shadow:0 2px 6px rgba(226,101,63,0.4); }
+  .spot-pin:active{ transform:scale(0.92); }
+  .spot-pin.off{ background:var(--line); box-shadow:none; opacity:0.55; }
   .best-spots-table{ width:100%; border-collapse:collapse; font-size:0.9rem; }
   .best-spots-table th{ text-align:left; font-size:0.75rem; text-transform:uppercase; color:#7c8f95; padding:6px 4px; border-bottom:2px solid var(--line); }
   .best-spots-table td{ padding:9px 4px; border-bottom:1px solid var(--line); }
@@ -540,7 +554,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.28 · 23 Νοε 2026</p>
+      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.29 · 23 Νοε 2026</p>
       <p class="hint" id="update-status" style="margin:6px 0 0;"></p>
       <div class="footer-tools" style="margin-top:8px;">
         <button type="button" id="btn-check-update" class="i18n-plain">🔄 Έλεγχος αναβάθμισης</button>
@@ -827,6 +841,8 @@ const DEFAULTS = {
 let currentLang = LS.get('psarema_lang', 'el');
 /* ---------- literal-text dictionary: bait/species/technique/weather/wind/moon/tide/pressure/toasts/titles ---------- */
 const GR_TO_EN = {
+  "Άνοιγμα στον χάρτη":"Open in maps",
+  "Δεν υπάρχουν συντεταγμένες για αυτό το σημείο":"No coordinates saved for this spot",
   "Αναγνώριση ψαριού":"Fish identification",
   "Η εξαγωγή απέτυχε — δοκίμασε ξανά":"Export failed — try again",
   "Αποθήκευση φωτογραφίας":"Save photo",
@@ -2983,6 +2999,8 @@ function renderStats(){
     const loc = e.locName || 'Άγνωστη τοποθεσία';
     if(!byLocation[loc]) byLocation[loc] = {trips:0, fish:0, hours:0, weight:0, tripsWithFish:0, note: findLocationNote(loc)};
     byLocation[loc].trips++;
+    { const pc = parseCoords(e.coords);
+      if(pc && (!byLocation[loc].coordsDate || String(e.date||'') >= byLocation[loc].coordsDate)){ byLocation[loc].coords = pc; byLocation[loc].coordsDate = String(e.date||''); } }
 
     let entryFish = 0; // whole-trip total (every angler present) — used only for the per-angler comparisons below
     Object.entries(e.fish||{}).forEach(([n,q])=>{ if(q>0){ entryFish += Number(q); } });
@@ -3178,32 +3196,46 @@ function renderStats(){
     });
   const locWeatherHtml = locWeatherRowsArr.length ? collapsibleList(locWeatherRowsArr, 'loc-weather') : `<div class="hint">${tr('Δεν υπάρχουν ακόμα αρκετά δεδομένα καιρού ανά τοποθεσία')}</div>`;
 
-  const bestSpotsRowsArr = Object.entries(byLocation).sort((a,b)=>b[1].fish-a[1].fish).map(([n,d])=>{
-    const kgStr = d.weight ? d.weight.toFixed(1).replace('.',',') + ' kg' : '—';
-    return `<tr data-loc-cond="${esc(n)}" style="cursor:pointer;">
-      <td>${esc(n)}</td><td style="text-align:center;">${esc(d.fish)}</td><td style="text-align:right;">${esc(kgStr)}</td>
-    </tr>`;
+  const spotEntries = Object.entries(byLocation).sort((a,b)=>b[1].fish-a[1].fish);
+  const spotMax = spotEntries.length ? Math.max(1, spotEntries[0][1].fish) : 1;
+  const medals = ['🥇','🥈','🥉'];
+  const bestSpotsRowsArr = spotEntries.map(([n,d],i)=>{
+    const kgStr = d.weight ? d.weight.toFixed(1).replace('.',',') + ' kg' : '';
+    const pct = Math.max(4, Math.round(d.fish / spotMax * 100));
+    const rank = i < 3 ? medals[i] : `<span class="spot-num">${i+1}</span>`;
+    let pin;
+    if(d.coords && isFinite(Number(d.coords.lat)) && isFinite(Number(d.coords.lng))){
+      const url = `https://www.google.com/maps/dir/?api=1&destination=${Number(d.coords.lat)},${Number(d.coords.lng)}`;
+      pin = `<a class="spot-pin" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="${esc(tr('Άνοιγμα στον χάρτη'))}">📍</a>`;
+    } else {
+      pin = `<span class="spot-pin off" title="${esc(tr('Δεν υπάρχουν συντεταγμένες για αυτό το σημείο'))}">📍</span>`;
+    }
+    return `<div class="spot-row">
+      <div class="spot-main" data-loc-cond="${esc(n)}">
+        <div class="spot-rank">${rank}</div>
+        <div class="spot-info">
+          <div class="spot-name">${esc(n)}</div>
+          <div class="spot-bar"><i style="width:${pct}%"></i></div>
+          <div class="spot-sub">${esc(d.fish)} ${tr('ψάρια')}${kgStr ? ' · ' + esc(kgStr) : ''} · ${esc(d.trips)} ${tr('εξορμήσεις')}</div>
+        </div>
+      </div>
+      ${pin}
+    </div>`;
   });
   let bestSpotsHtml;
   if(!bestSpotsRowsArr.length){
     bestSpotsHtml = `<div class="hint">${tr('Δεν υπάρχουν ακόμα καταγεγραμμένες τοποθεσίες')}</div>`;
+  } else if(bestSpotsRowsArr.length <= 5){
+    bestSpotsHtml = `<div class="spot-list">${bestSpotsRowsArr.join('')}</div><div id="location-cond-result" style="margin-top:10px;"></div>`;
   } else {
-    const head = `<thead><tr><th>${tr('Σημείο')}</th><th>${tr('Ψάρια')}</th><th>${tr('Κιλά')}</th></tr></thead>`;
-    if(bestSpotsRowsArr.length <= 4){
-      bestSpotsHtml = `<table class="best-spots-table">${head}<tbody>${bestSpotsRowsArr.join('')}</tbody></table>
-         <div id="location-cond-result" style="margin-top:10px;"></div>`;
-    } else {
-      const visible = bestSpotsRowsArr.slice(0,4).join('');
-      const hidden = bestSpotsRowsArr.slice(4).join('');
-      const moreCount = bestSpotsRowsArr.length - 4;
-      const moreLabel = currentLang === 'en' ? `Show ${moreCount} more` : `Δες ${moreCount} ακόμα`;
-      bestSpotsHtml = `<table class="best-spots-table">${head}<tbody>${visible}</tbody></table>
-         <details class="picker" id="best-spots-more" style="margin-top:6px;">
-           <summary>${moreLabel}</summary>
-           <table class="best-spots-table">${head}<tbody>${hidden}</tbody></table>
-         </details>
-         <div id="location-cond-result" style="margin-top:10px;"></div>`;
-    }
+    const moreCount = bestSpotsRowsArr.length - 5;
+    const moreLabel = currentLang === 'en' ? `Show ${moreCount} more` : `Δες ${moreCount} ακόμα`;
+    bestSpotsHtml = `<div class="spot-list">${bestSpotsRowsArr.slice(0,5).join('')}</div>
+       <details class="picker" id="best-spots-more" style="margin-top:6px;">
+         <summary>${moreLabel}</summary>
+         <div class="spot-list">${bestSpotsRowsArr.slice(5).join('')}</div>
+       </details>
+       <div id="location-cond-result" style="margin-top:10px;"></div>`;
   }
 
   const speciesButtons = Object.keys(bySpecies).length
@@ -3227,7 +3259,7 @@ function renderStats(){
     byWeather: barBlock('Ψάρια ανά καιρική συνθήκη', byWeather),
     byWindDir: barBlock('Ψάρια ανά κατεύθυνση ανέμου', byWindDir),
     byLocation: `<div class="stat-block"><h3 style="display:flex; align-items:center; justify-content:space-between; gap:8px;">${tr("Ανά τοποθεσία")}<button type="button" onclick="openLocationsManager()" style="font-size:0.75rem; padding:4px 8px;">📍 ${tr('Διαχείριση')}</button></h3>${locRows}</div>`,
-    bestSpots: `<div class="stat-block"><h3>${tr("📍 Τα καλύτερα σημεία μου")}</h3>${bestSpotsHtml}</div>`,
+    bestSpots: `<div class="stat-block spots-card"><h3>${tr("📍 Τα καλύτερα σημεία μου")}</h3>${bestSpotsHtml}</div>`,
     byLocationWeather: `<div class="stat-block"><h3>${tr("Τοποθεσίες ανά καιρό")}</h3>${locWeatherHtml}</div>`,
     speciesConditions: `<div class="stat-block"><h3>${tr("🎯 Καλύτερες συνθήκες ανά είδος")}</h3>
       <div class="species-cond-list">${speciesButtons}</div>
@@ -3238,9 +3270,9 @@ function renderStats(){
   const defaultOrder = ['summary','topCatches','bySpecies','byAngler','byAnglerJoint','speciesConditions','byMonth','byMoon','byPressure','byTide','byWindDir','byWeather','byBait','byHour','byLocationWeather','byLocation','bestSpots'];
   let order = LS.get('psarema_stats_order', defaultOrder);
   defaultOrder.forEach(k=>{ if(!order.includes(k)) order.push(k); });
-  order = order.filter(k=>sections[k] !== undefined);
+  order = order.filter(k=>sections[k] !== undefined && k !== 'bestSpots'); // «Τα καλύτερα σημεία μου» μένει πάντα πρώτο
 
-  wrap.innerHTML = order.map((key,i)=>`
+  wrap.innerHTML = sections.bestSpots + order.map((key,i)=>`
     <div class="reorderable">
       <div class="reorder-controls">
         <button type="button" ${i===0?'disabled':''} onclick="moveStatsSection('${key}',-1)">▲</button>
@@ -3253,6 +3285,7 @@ function moveStatsSection(key, direction){
   const defaultOrder = ['summary','topCatches','bySpecies','byAngler','byAnglerJoint','speciesConditions','byMonth','byMoon','byPressure','byTide','byWindDir','byWeather','byBait','byHour','byLocationWeather','byLocation','bestSpots'];
   let order = LS.get('psarema_stats_order', defaultOrder);
   defaultOrder.forEach(k=>{ if(!order.includes(k)) order.push(k); });
+  order = order.filter(k=>k !== 'bestSpots');
   const idx = order.indexOf(key);
   const newIdx = idx + direction;
   if(idx === -1 || newIdx < 0 || newIdx >= order.length) return;
@@ -4357,10 +4390,17 @@ document.getElementById('header-title-input').addEventListener('input', ()=>{
   document.getElementById('app-title').textContent = raw || defaultTitle;
 });
 
+// Αν δεν έχει επιλεγεί δική του φωτογραφία, η κεφαλίδα παίρνει μία από τις έτοιμες (όχι σκέτο μπλε)
+const DEFAULT_HEADER_PRESET = 'header-presets/preset-2.jpg';
+function applyDefaultHeader(){
+  const header = document.getElementById('app-header');
+  document.documentElement.style.setProperty('--header-photo', `url("${DEFAULT_HEADER_PRESET}")`);
+  header.classList.add('has-photo');
+}
 async function applyHeaderPhoto(){
   const has = LS.get('psarema_has_header_photo', false);
   const header = document.getElementById('app-header');
-  if(!has){ header.classList.remove('has-photo'); return; }
+  if(!has){ applyDefaultHeader(); return; }
   try{
     const dataUrl = await idbGet('header-photo');
     if(dataUrl){
@@ -4388,7 +4428,7 @@ async function clearHeaderPhoto(){
   try{ await idbDelete('header-photo'); }catch(e){}
   LS.set('psarema_has_header_photo', false);
   LS.set('psarema_header_preset', '');
-  document.getElementById('app-header').classList.remove('has-photo');
+  applyDefaultHeader();
   highlightSelectedPreset();
   toast('Η φωτογραφία κεφαλίδας αφαιρέθηκε');
 }
