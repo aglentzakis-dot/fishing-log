@@ -2,7 +2,7 @@
 <html lang="el">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="5.31">
+<meta name="app-version" content="5.32">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Fish IQ</title>
 <link rel="manifest" href="manifest.json">
@@ -554,7 +554,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.31 · 23 Νοε 2026</p>
+      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.32 · 23 Νοε 2026</p>
       <p class="hint" id="update-status" style="margin:6px 0 0;"></p>
       <div class="footer-tools" style="margin-top:8px;">
         <button type="button" id="btn-check-update" class="i18n-plain">🔄 Έλεγχος αναβάθμισης</button>
@@ -4409,13 +4409,16 @@ async function applyHeaderPhoto(){
   const has = LS.get('psarema_has_header_photo', false);
   const header = document.getElementById('app-header');
   if(!has){ applyDefaultHeader(); return; }
+  let shown = false;
   try{
     const dataUrl = await idbGet('header-photo');
     if(dataUrl){
       document.documentElement.style.setProperty('--header-photo', `url("${dataUrl}")`);
       header.classList.add('has-photo');
+      shown = true;
     }
   }catch(e){ console.error('header photo load failed', e); }
+  if(!shown) applyDefaultHeader(); // αν η δική του φωτογραφία λείπει ή δεν φορτώνει, μένει η έτοιμη (όχι σκέτο μπλε)
   highlightSelectedPreset();
 }
 async function saveHeaderPhoto(file){
