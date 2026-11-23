@@ -2,7 +2,7 @@
 <html lang="el">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="5.32">
+<meta name="app-version" content="5.33">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Fish IQ</title>
 <link rel="manifest" href="manifest.json">
@@ -216,6 +216,7 @@
   .app-tile span{ font-size:0.75rem; color:#5b6f76; line-height:1.3; }
   .map-picker-overlay{ display:none; position:fixed; inset:0; background:rgba(11,59,76,0.6); z-index:1200; align-items:flex-end; justify-content:center; }
   .map-picker-overlay.show{ display:flex; }
+  .map-picker-sheet{ padding-bottom: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px), var(--native-min-bottom, 0px)); }
   .map-picker-sheet{ background:var(--foam); width:100%; max-width:640px; max-height:92vh; border-radius:18px 18px 0 0; display:flex; flex-direction:column; overflow:hidden; }
   .map-picker-head{ display:flex; justify-content:space-between; align-items:center; padding:14px 16px; }
   .map-picker-head h2{ font-size:1rem; color:var(--deep); }
@@ -554,7 +555,7 @@
     </div>
 
     <div class="card" style="text-align:center;">
-      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.32 · 23 Νοε 2026</p>
+      <p class="hint" id="app-version-line" style="margin:0; color:#a3b0b5;">Fish IQ · έκδοση 5.33 · 23 Νοε 2026</p>
       <p class="hint" id="update-status" style="margin:6px 0 0;"></p>
       <div class="footer-tools" style="margin-top:8px;">
         <button type="button" id="btn-check-update" class="i18n-plain">🔄 Έλεγχος αναβάθμισης</button>
@@ -724,6 +725,7 @@
     </div>
     <div style="padding:0 16px 16px; overflow-y:auto;">
       <p class="hint" id="i18n-fishid-hint" style="margin-top:0;">Τράβα ή επίλεξε φωτογραφία — αποθηκεύεται στο κινητό σου. Το "🔎 AI" δοκιμάζει να ανοίξει κατευθείαν το ChatGPT/Claude (δεν δουλεύει σε όλες τις συσκευές). Αν δεν εμφανιστεί η εφαρμογή στη λίστα, πάτα "💾" για να αποθηκευτεί η φωτογραφία στη Συλλογή σου και επισύναψέ τη εσύ χειροκίνητα στο ChatGPT/Claude.</p>
+      <p class="hint" id="i18n-fishid-warn" style="margin-top:0; color:#a33; font-weight:600;">⚠ Η αναγνώριση από φωτογραφία δεν είναι βέβαιη. Μην την εμπιστεύεσαι για να αποφασίσεις αν ένα ψάρι τρώγεται — στις ελληνικές θάλασσες υπάρχουν επικίνδυνα είδη (π.χ. λαγοκέφαλος).</p>
       <input type="file" id="fishid-photo-input-camera" accept="image/*" capture="environment" style="display:none">
       <input type="file" id="fishid-photo-input-gallery" accept="image/*" style="display:none">
       <div style="display:flex; gap:8px;">
@@ -814,6 +816,7 @@
 <script>
 /* ---------- λειτουργία εφαρμογής Android (Capacitor) ---------- */
 const IS_NATIVE = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
+if(IS_NATIVE){ document.documentElement.style.setProperty('--native-min-bottom', '48px'); } // να μην πέφτουν τα παράθυρα πάνω στα κουμπιά πλοήγησης του Android
 function nativePlugin(name){
   try{ return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins[name]) || null; }catch(e){ return null; }
 }
@@ -841,6 +844,7 @@ const DEFAULTS = {
 let currentLang = LS.get('psarema_lang', 'el');
 /* ---------- literal-text dictionary: bait/species/technique/weather/wind/moon/tide/pressure/toasts/titles ---------- */
 const GR_TO_EN = {
+  "Δεν βρέθηκε το μενού κοινοποίησης της εφαρμογής":"The app's share menu was not found",
   "Άνοιγμα στον χάρτη":"Open in maps",
   "Δεν υπάρχουν συντεταγμένες για αυτό το σημείο":"No coordinates saved for this spot",
   "Αναγνώριση ψαριού":"Fish identification",
@@ -4136,9 +4140,12 @@ async function askAIAboutPhoto(dataUrl){
       const Filesystem = nativePlugin('Filesystem'), Share = nativePlugin('Share');
       if(Filesystem && Share){
         const w = await Filesystem.writeFile({ path: 'psari_' + Date.now() + '.jpg', data: String(dataUrl).split(',')[1] || '', directory: 'CACHE' });
-        await Share.share({ text: promptText, url: w.uri, dialogTitle: tr('Αναγνώριση ψαριού') });
+        try{ if(navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(promptText); }catch(_){}
+        await Share.share({ text: promptText, files: [w.uri], dialogTitle: tr('Αναγνώριση ψαριού') });
         return;
       }
+      toast(tr('Δεν βρέθηκε το μενού κοινοποίησης της εφαρμογής'));
+      return;
     }
     const res = await fetch(dataUrl);
     const blob = await res.blob();
@@ -4152,7 +4159,8 @@ async function askAIAboutPhoto(dataUrl){
       toast(tr('Η κοινοποίηση δεν υποστηρίζεται σε αυτόν τον browser. Δοκίμασε από την εφαρμογή στο κινητό σου.'));
     }
   }catch(e){
-    if(e.name !== 'AbortError'){ console.error(e); toast(tr('Κάτι πήγε στραβά με την κοινοποίηση')); }
+    const em = String((e && e.message) || e || '');
+    if(e.name !== 'AbortError' && !/cancel/i.test(em)){ console.error(e); toast(tr('Κάτι πήγε στραβά με την κοινοποίηση') + (IS_NATIVE && em ? ' (' + em.slice(0,80) + ')' : '')); }
   }
 }
 document.getElementById('btn-open-fishid').addEventListener('click', async ()=>{
@@ -4763,7 +4771,14 @@ function applyLanguage(lang){
   const fishidTitle = document.getElementById('i18n-fishid-header');
   if(fishidTitle) fishidTitle.textContent = lang === 'en' ? 'Fish identification from photo' : 'Αναγνώριση ψαριού από φωτογραφία';
   const fishidHint = document.getElementById('i18n-fishid-hint');
-  if(fishidHint) fishidHint.textContent = lang === 'en'
+  const fishidWarn = document.getElementById('i18n-fishid-warn');
+  if(fishidWarn) fishidWarn.textContent = lang === 'en'
+    ? '⚠ Photo identification is not certain. Do not rely on it to decide whether a fish is safe to eat — Greek seas have dangerous species (e.g. the silver-cheeked toadfish).'
+    : '⚠ Η αναγνώριση από φωτογραφία δεν είναι βέβαιη. Μην την εμπιστεύεσαι για να αποφασίσεις αν ένα ψάρι τρώγεται — στις ελληνικές θάλασσες υπάρχουν επικίνδυνα είδη (π.χ. λαγοκέφαλος).';
+  if(fishidHint) fishidHint.textContent = IS_NATIVE ? (lang === 'en'
+    ? 'Take or choose a photo — it\'s saved on your phone. Tap "🔎 AI": the Android share menu opens — pick ChatGPT or Claude and it receives the photo with the question (the question is also copied to the clipboard in case it does not come through — just paste it). "💾" saves the photo, e.g. to Drive or Downloads.'
+    : 'Τράβα ή επίλεξε φωτογραφία — αποθηκεύεται στο κινητό σου. Πάτα «🔎 AI»: ανοίγει το μενού κοινοποίησης του Android — διάλεξε ChatGPT ή Claude και παίρνει τη φωτογραφία μαζί με την ερώτηση (η ερώτηση αντιγράφεται και στο πρόχειρο, αν δεν περάσει κόλλησέ την). Το «💾» αποθηκεύει τη φωτογραφία, π.χ. στο Drive ή στις Λήψεις.')
+    : lang === 'en'
     ? 'Take or choose a photo — it\'s saved on your phone. "🔎 AI" tries to open ChatGPT/Claude directly (doesn\'t work on every device). If the app doesn\'t show up in the list, tap "💾" to save the photo to your Gallery and attach it manually in ChatGPT/Claude.'
     : 'Τράβα ή επίλεξε φωτογραφία — αποθηκεύεται στο κινητό σου. Το "🔎 AI" δοκιμάζει να ανοίξει κατευθείαν το ChatGPT/Claude (δεν δουλεύει σε όλες τις συσκευές). Αν δεν εμφανιστεί η εφαρμογή στη λίστα, πάτα "💾" για να αποθηκευτεί η φωτογραφία στη Συλλογή σου και επισύναψέ τη εσύ χειροκίνητα στο ChatGPT/Claude.';
   const legalBody = document.getElementById('i18n-legal-body');
